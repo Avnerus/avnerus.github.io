@@ -1,0 +1,52 @@
+{"frames": {
+
+"green_building_wall.png":
+{
+	"frame": {"x":49,"y":42,"w":45,"h":38},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":45,"h":38},
+	"sourceSize": {"w":45,"h":38}
+},
+"green_destroying_wall.png":
+{
+	"frame": {"x":2,"y":82,"w":45,"h":38},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":45,"h":38},
+	"sourceSize": {"w":45,"h":38}
+},
+"green_fighting.png":
+{
+	"frame": {"x":49,"y":2,"w":45,"h":38},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":45,"h":38},
+	"sourceSize": {"w":45,"h":38}
+},
+"green_fighting_wall.png":
+{
+	"frame": {"x":2,"y":42,"w":45,"h":38},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":45,"h":38},
+	"sourceSize": {"w":45,"h":38}
+},
+"green_peacefull.png":
+{
+	"frame": {"x":2,"y":2,"w":45,"h":38},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":45,"h":38},
+	"sourceSize": {"w":45,"h":38}
+}},
+"meta": {
+	"app": "http://www.codeandweb.com/texturepacker ",
+	"version": "1.0",
+	"image": "dudes.png",
+	"format": "RGBA8888",
+	"size": {"w":128,"h":128},
+	"scale": "1",
+	"smartupdate": "$TexturePacker:SmartUpdate:ea6585c75778e8f8470d71f5216b9ce3:f61fe0f0d24f30271c203e1cfabc8a06:426eb7828e1e9f03ef1c97a8bc3f6509$"
+}
+}
