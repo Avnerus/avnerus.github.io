@@ -200,24 +200,9 @@ stage.addChild(bg);
 var wall = require('./wall')(stage, gameOpts);
 var coords = require('./coords')(gameOpts);
 
-
-function stageAvatar(x, y) {
-  var avatar = PIXI.Sprite.fromImage('assets/redOrb.png');
-
-  // track 2D position
-  avatar.location = new PIXI.Point(x, y);
-
-  var pt = coords.ddToAvatar(x, y);
-
-  avatar.position.x = pt.x;
-  avatar.position.y = pt.y;
-  avatar.anchor.x = 0;
-  avatar.anchor.y = 1;
-
-  stage.addChild(avatar);
-  return avatar;
-}
-
+var twist = new PIXI.TwistFilter();
+twist.radius = 0;
+stage.filters = [twist];
 
 loader.onComplete = start;
 loader.load();
@@ -239,6 +224,7 @@ function start() {
     // keyboard handler
     // kd.tick();
     requestAnimationFrame(animate);
+    twist.radius += 0.01;
     TWEEN.update();
     renderer.render(stage);
   }
