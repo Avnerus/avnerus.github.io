@@ -51,6 +51,7 @@ Coordinates.prototype.ddToIso = function(x, y) {
 }
 
 },{}],2:[function(require,module,exports){
+var TWEEN = require('tween');
 var PIXI = require('pixi');
 
 module.exports = function(stage, tribe, opts) {
@@ -96,8 +97,22 @@ Dude.prototype.setState = function(state) {
 Dude.prototype.setPosition = function(position) {
     var coords = require('./coords')(this.opts);
     this.sprite.position = coords.ddToAvatar(position.x, position.y);
-    console.log("Dude position at " + JSON.stringify(this.sprite.position));
 }
+
+Dude.prototype.goToWallPosition = function(i) {
+   var coords = require('./coords')(this.opts);
+   var wall = require('./wall')(this.stage, this.opts);
+   var target = wall.getTilePosition(i);
+   target = coords.ddToAvatar(target.x, target.y);
+   console.log("Dude target: ", target);
+   var tween = new TWEEN.Tween( this.sprite.position )
+      .to(target , 6000 )
+      .easing( TWEEN.Easing.Linear.None )
+      .onUpdate( function () {
+      } )
+      .start();
+}
+
 
 Dude.prototype.move = function () {
     if (this.move_target == null) { return; }
@@ -128,11 +143,12 @@ Dude.prototype.place = function(position) {
    
 }
 
-},{"./coords":1,"pixi":41}],3:[function(require,module,exports){
+},{"./coords":1,"./wall":73,"pixi":41,"tween":72}],3:[function(require,module,exports){
 // account for tile thickness
 /* globals PIXI, kd, requestAnimFrame */
 "use strict";
 var PIXI = require('pixi');
+var TWEEN = require('tween');
 
 // avatar is 32x32 + 6px for shadow
 var AVATAR_X_OFFSET = 32 / 2;
@@ -207,28 +223,29 @@ loader.onComplete = start;
 loader.load();
 
 function start() {
-  var x = 80;
+  var x = 250;
   var y = 100;
   for (var i = 0; i < 7; i++) {
      var dude = require('./dude')(stage, "green",  gameOpts);
      dude.setPosition({x: x, y: y});
      dude.place();
+     dude.goToWallPosition(4);     
+
      y += 100;
   }
   wall.place();
-  avatar = stageAvatar(0, 0);
-  console.log("BOOO");
 
   function animate() {
     // keyboard handler
     // kd.tick();
     requestAnimationFrame(animate);
+    TWEEN.update();
     renderer.render(stage);
   }
   requestAnimationFrame(animate);
 }
 
-},{"./coords":1,"./dude":2,"./wall":72,"pixi":41}],4:[function(require,module,exports){
+},{"./coords":1,"./dude":2,"./wall":73,"pixi":41,"tween":72}],4:[function(require,module,exports){
 /**
  * pixi 0.2.1 (6aa0030)
  * http://drkibitz.github.io/node-pixi/
@@ -1045,6 +1062,664 @@ module.exports={console:global.console,document:global.document,location:global.
  */
 "use strict";var spine=module.exports={};spine.BoneData=function(a,b){this.name=a,this.parent=b},spine.BoneData.prototype={length:0,x:0,y:0,rotation:0,scaleX:1,scaleY:1},spine.SlotData=function(a,b){this.name=a,this.boneData=b},spine.SlotData.prototype={r:1,g:1,b:1,a:1,attachmentName:null},spine.Bone=function(a,b){this.data=a,this.parent=b,this.setToSetupPose()},spine.Bone.yDown=!1,spine.Bone.prototype={x:0,y:0,rotation:0,scaleX:1,scaleY:1,m00:0,m01:0,worldX:0,m10:0,m11:0,worldY:0,worldRotation:0,worldScaleX:1,worldScaleY:1,updateWorldTransform:function(a,b){var c=this.parent;null!=c?(this.worldX=this.x*c.m00+this.y*c.m01+c.worldX,this.worldY=this.x*c.m10+this.y*c.m11+c.worldY,this.worldScaleX=c.worldScaleX*this.scaleX,this.worldScaleY=c.worldScaleY*this.scaleY,this.worldRotation=c.worldRotation+this.rotation):(this.worldX=this.x,this.worldY=this.y,this.worldScaleX=this.scaleX,this.worldScaleY=this.scaleY,this.worldRotation=this.rotation);var d=this.worldRotation*Math.PI/180,e=Math.cos(d),f=Math.sin(d);this.m00=e*this.worldScaleX,this.m10=f*this.worldScaleX,this.m01=-f*this.worldScaleY,this.m11=e*this.worldScaleY,a&&(this.m00=-this.m00,this.m01=-this.m01),b&&(this.m10=-this.m10,this.m11=-this.m11),spine.Bone.yDown&&(this.m10=-this.m10,this.m11=-this.m11)},setToSetupPose:function(){var a=this.data;this.x=a.x,this.y=a.y,this.rotation=a.rotation,this.scaleX=a.scaleX,this.scaleY=a.scaleY}},spine.Slot=function(a,b,c){this.data=a,this.skeleton=b,this.bone=c,this.setToSetupPose()},spine.Slot.prototype={r:1,g:1,b:1,a:1,_attachmentTime:0,attachment:null,setAttachment:function(a){this.attachment=a,this._attachmentTime=this.skeleton.time},setAttachmentTime:function(a){this._attachmentTime=this.skeleton.time-a},getAttachmentTime:function(){return this.skeleton.time-this._attachmentTime},setToSetupPose:function(){var a=this.data;this.r=a.r,this.g=a.g,this.b=a.b,this.a=a.a;for(var b=this.skeleton.data.slots,c=0,d=b.length;d>c;c++)if(b[c]==a){this.setAttachment(a.attachmentName?this.skeleton.getAttachmentBySlotIndex(c,a.attachmentName):null);break}}},spine.Skin=function(a){this.name=a,this.attachments={}},spine.Skin.prototype={addAttachment:function(a,b,c){this.attachments[a+":"+b]=c},getAttachment:function(a,b){return this.attachments[a+":"+b]},_attachAll:function(a,b){for(var c in b.attachments){var d=c.indexOf(":"),e=parseInt(c.substring(0,d),10),f=c.substring(d+1),g=a.slots[e];if(g.attachment&&g.attachment.name==f){var h=this.getAttachment(e,f);h&&g.setAttachment(h)}}}},spine.Animation=function(a,b,c){this.name=a,this.timelines=b,this.duration=c},spine.Animation.prototype={apply:function(a,b,c){c&&this.duration&&(b%=this.duration);for(var d=this.timelines,e=0,f=d.length;f>e;e++)d[e].apply(a,b,1)},mix:function(a,b,c,d){c&&this.duration&&(b%=this.duration);for(var e=this.timelines,f=0,g=e.length;g>f;f++)e[f].apply(a,b,d)}},spine.binarySearch=function(a,b,c){var d=0,e=Math.floor(a.length/c)-2;if(!e)return c;for(var f=e>>>1;;){if(a[(f+1)*c]<=b?d=f+1:e=f,d==e)return(d+1)*c;f=d+e>>>1}},spine.linearSearch=function(a,b,c){for(var d=0,e=a.length-c;e>=d;d+=c)if(a[d]>b)return d;return-1},spine.Curves=function(a){this.curves=[],this.curves.length=6*(a-1)},spine.Curves.prototype={setLinear:function(a){this.curves[6*a]=0},setStepped:function(a){this.curves[6*a]=-1},setCurve:function(a,b,c,d,e){var f=.1,g=f*f,h=g*f,i=3*f,j=3*g,k=6*g,l=6*h,m=2*-b+d,n=2*-c+e,o=3*(b-d)+1,p=3*(c-e)+1,q=6*a,r=this.curves;r[q]=b*i+m*j+o*h,r[q+1]=c*i+n*j+p*h,r[q+2]=m*k+o*l,r[q+3]=n*k+p*l,r[q+4]=o*l,r[q+5]=p*l},getCurvePercent:function(a,b){b=0>b?0:b>1?1:b;var c=6*a,d=this.curves,e=d[c];if(!e)return b;if(-1==e)return 0;for(var f=d[c+1],g=d[c+2],h=d[c+3],i=d[c+4],j=d[c+5],k=e,l=f,m=8;;){if(k>=b){var n=k-e,o=l-f;return o+(l-o)*(b-n)/(k-n)}if(!m)break;m--,e+=g,f+=h,g+=i,h+=j,k+=e,l+=f}return l+(1-l)*(b-k)/(1-k)}},spine.RotateTimeline=function(a){this.curves=new spine.Curves(a),this.frames=[],this.frames.length=2*a},spine.RotateTimeline.prototype={boneIndex:0,getFrameCount:function(){return this.frames.length/2},setFrame:function(a,b,c){a*=2,this.frames[a]=b,this.frames[a+1]=c},apply:function(a,b,c){var d,e=this.frames;if(!(b<e[0])){var f=a.bones[this.boneIndex];if(b>=e[e.length-2]){for(d=f.data.rotation+e[e.length-1]-f.rotation;d>180;)d-=360;for(;-180>d;)d+=360;return f.rotation+=d*c,void 0}var g=spine.binarySearch(e,b,2),h=e[g-1],i=e[g],j=1-(b-i)/(e[g-2]-i);for(j=this.curves.getCurvePercent(g/2-1,j),d=e[g+1]-h;d>180;)d-=360;for(;-180>d;)d+=360;for(d=f.data.rotation+(h+d*j)-f.rotation;d>180;)d-=360;for(;-180>d;)d+=360;f.rotation+=d*c}}},spine.TranslateTimeline=function(a){this.curves=new spine.Curves(a),this.frames=[],this.frames.length=3*a},spine.TranslateTimeline.prototype={boneIndex:0,getFrameCount:function(){return this.frames.length/3},setFrame:function(a,b,c,d){a*=3,this.frames[a]=b,this.frames[a+1]=c,this.frames[a+2]=d},apply:function(a,b,c){var d=this.frames;if(!(b<d[0])){var e=a.bones[this.boneIndex];if(b>=d[d.length-3])return e.x+=(e.data.x+d[d.length-2]-e.x)*c,e.y+=(e.data.y+d[d.length-1]-e.y)*c,void 0;var f=spine.binarySearch(d,b,3),g=d[f-2],h=d[f-1],i=d[f],j=1-(b-i)/(d[f+-3]-i);j=this.curves.getCurvePercent(f/3-1,j),e.x+=(e.data.x+g+(d[f+1]-g)*j-e.x)*c,e.y+=(e.data.y+h+(d[f+2]-h)*j-e.y)*c}}},spine.ScaleTimeline=function(a){this.curves=new spine.Curves(a),this.frames=[],this.frames.length=3*a},spine.ScaleTimeline.prototype={boneIndex:0,getFrameCount:function(){return this.frames.length/3},setFrame:function(a,b,c,d){a*=3,this.frames[a]=b,this.frames[a+1]=c,this.frames[a+2]=d},apply:function(a,b,c){var d=this.frames;if(!(b<d[0])){var e=a.bones[this.boneIndex];if(b>=d[d.length-3])return e.scaleX+=(e.data.scaleX-1+d[d.length-2]-e.scaleX)*c,e.scaleY+=(e.data.scaleY-1+d[d.length-1]-e.scaleY)*c,void 0;var f=spine.binarySearch(d,b,3),g=d[f-2],h=d[f-1],i=d[f],j=1-(b-i)/(d[f+-3]-i);j=this.curves.getCurvePercent(f/3-1,j),e.scaleX+=(e.data.scaleX-1+g+(d[f+1]-g)*j-e.scaleX)*c,e.scaleY+=(e.data.scaleY-1+h+(d[f+2]-h)*j-e.scaleY)*c}}},spine.ColorTimeline=function(a){this.curves=new spine.Curves(a),this.frames=[],this.frames.length=5*a},spine.ColorTimeline.prototype={slotIndex:0,getFrameCount:function(){return this.frames.length/2},setFrame:function(a,b,c,d,e,f){a*=5,this.frames[a]=b,this.frames[a+1]=c,this.frames[a+2]=d,this.frames[a+3]=e,this.frames[a+4]=f},apply:function(a,b,c){var d=this.frames;if(!(b<d[0])){var e=a.slots[this.slotIndex];if(b>=d[d.length-5]){var f=d.length-1;return e.r=d[f-3],e.g=d[f-2],e.b=d[f-1],e.a=d[f],void 0}var g=spine.binarySearch(d,b,5),h=d[g-4],i=d[g-3],j=d[g-2],k=d[g-1],l=d[g],m=1-(b-l)/(d[g-5]-l);m=this.curves.getCurvePercent(g/5-1,m);var n=h+(d[g+1]-h)*m,o=i+(d[g+2]-i)*m,p=j+(d[g+3]-j)*m,q=k+(d[g+4]-k)*m;1>c?(e.r+=(n-e.r)*c,e.g+=(o-e.g)*c,e.b+=(p-e.b)*c,e.a+=(q-e.a)*c):(e.r=n,e.g=o,e.b=p,e.a=q)}}},spine.AttachmentTimeline=function(a){this.curves=new spine.Curves(a),this.frames=[],this.frames.length=a,this.attachmentNames=[],this.attachmentNames.length=a},spine.AttachmentTimeline.prototype={slotIndex:0,getFrameCount:function(){return this.frames.length},setFrame:function(a,b,c){this.frames[a]=b,this.attachmentNames[a]=c},apply:function(a,b){var c=this.frames;if(!(b<c[0])){var d;d=b>=c[c.length-1]?c.length-1:spine.binarySearch(c,b,1)-1;var e=this.attachmentNames[d];a.slots[this.slotIndex].setAttachment(e?a.getAttachmentBySlotIndex(this.slotIndex,e):null)}}},spine.SkeletonData=function(){this.bones=[],this.slots=[],this.skins=[],this.animations=[]},spine.SkeletonData.prototype={defaultSkin:null,findBone:function(a){for(var b=this.bones,c=0,d=b.length;d>c;c++)if(b[c].name==a)return b[c];return null},findBoneIndex:function(a){for(var b=this.bones,c=0,d=b.length;d>c;c++)if(b[c].name==a)return c;return-1},findSlot:function(a){for(var b=this.slots,c=0,d=b.length;d>c;c++)if(b[c].name==a)return b[c];return null},findSlotIndex:function(a){for(var b=this.slots,c=0,d=b.length;d>c;c++)if(b[c].name==a)return c;return-1},findSkin:function(a){for(var b=this.skins,c=0,d=b.length;d>c;c++)if(b[c].name==a)return b[c];return null},findAnimation:function(a){for(var b=this.animations,c=0,d=b.length;d>c;c++)if(b[c].name==a)return b[c];return null}},spine.Skeleton=function(a){this.data=a,this.bones=[];for(var b=0,c=a.bones.length;c>b;b++){var d=a.bones[b],e=d.parent?this.bones[a.bones.indexOf(d.parent)]:null;this.bones.push(new spine.Bone(d,e))}for(this.slots=[],this.drawOrder=[],b=0,c=a.slots.length;c>b;b++){var f=a.slots[b],g=this.bones[a.bones.indexOf(f.boneData)],h=new spine.Slot(f,this,g);this.slots.push(h),this.drawOrder.push(h)}},spine.Skeleton.prototype={x:0,y:0,skin:null,r:1,g:1,b:1,a:1,time:0,flipX:!1,flipY:!1,updateWorldTransform:function(){for(var a=this.flipX,b=this.flipY,c=this.bones,d=0,e=c.length;e>d;d++)c[d].updateWorldTransform(a,b)},setToSetupPose:function(){this.setBonesToSetupPose(),this.setSlotsToSetupPose()},setBonesToSetupPose:function(){for(var a=this.bones,b=0,c=a.length;c>b;b++)a[b].setToSetupPose()},setSlotsToSetupPose:function(){for(var a=this.slots,b=0,c=a.length;c>b;b++)a[b].setToSetupPose(b)},getRootBone:function(){return this.bones.length?this.bones[0]:null},findBone:function(a){for(var b=this.bones,c=0,d=b.length;d>c;c++)if(b[c].data.name==a)return b[c];return null},findBoneIndex:function(a){for(var b=this.bones,c=0,d=b.length;d>c;c++)if(b[c].data.name==a)return c;return-1},findSlot:function(a){for(var b=this.slots,c=0,d=b.length;d>c;c++)if(b[c].data.name==a)return b[c];return null},findSlotIndex:function(a){for(var b=this.slots,c=0,d=b.length;d>c;c++)if(b[c].data.name==a)return c;return-1},setSkinByName:function(a){var b=this.data.findSkin(a);if(!b)throw"Skin not found: "+a;this.setSkin(b)},setSkin:function(a){this.skin&&a&&a._attachAll(this,this.skin),this.skin=a},getAttachmentBySlotName:function(a,b){return this.getAttachmentBySlotIndex(this.data.findSlotIndex(a),b)},getAttachmentBySlotIndex:function(a,b){if(this.skin){var c=this.skin.getAttachment(a,b);if(c)return c}return this.data.defaultSkin?this.data.defaultSkin.getAttachment(a,b):null},setAttachment:function(a,b){for(var c=this.slots,d=0,e=c.size;e>d;d++){var f=c[d];if(f.data.name==a){var g=null;if(b&&(g=this.getAttachment(d,b),null==g))throw"Attachment not found: "+b+", for slot: "+a;return f.setAttachment(g),void 0}}throw"Slot not found: "+a},update:function(a){this.time+=a}},spine.AttachmentType={region:0},spine.RegionAttachment=function(){this.offset=[],this.offset.length=8,this.uvs=[],this.uvs.length=8},spine.RegionAttachment.prototype={x:0,y:0,rotation:0,scaleX:1,scaleY:1,width:0,height:0,rendererObject:null,regionOffsetX:0,regionOffsetY:0,regionWidth:0,regionHeight:0,regionOriginalWidth:0,regionOriginalHeight:0,setUVs:function(a,b,c,d,e){var f=this.uvs;e?(f[2]=a,f[3]=d,f[4]=a,f[5]=b,f[6]=c,f[7]=b,f[0]=c,f[1]=d):(f[0]=a,f[1]=d,f[2]=a,f[3]=b,f[4]=c,f[5]=b,f[6]=c,f[7]=d)},updateOffset:function(){var a=this.width/this.regionOriginalWidth*this.scaleX,b=this.height/this.regionOriginalHeight*this.scaleY,c=-this.width/2*this.scaleX+this.regionOffsetX*a,d=-this.height/2*this.scaleY+this.regionOffsetY*b,e=c+this.regionWidth*a,f=d+this.regionHeight*b,g=this.rotation*Math.PI/180,h=Math.cos(g),i=Math.sin(g),j=c*h+this.x,k=c*i,l=d*h+this.y,m=d*i,n=e*h+this.x,o=e*i,p=f*h+this.y,q=f*i,r=this.offset;r[0]=j-m,r[1]=l+k,r[2]=j-q,r[3]=p+k,r[4]=n-q,r[5]=p+o,r[6]=n-m,r[7]=l+o},computeVertices:function(a,b,c,d){a+=c.worldX,b+=c.worldY;var e=c.m00,f=c.m01,g=c.m10,h=c.m11,i=this.offset;d[0]=i[0]*e+i[1]*f+a,d[1]=i[0]*g+i[1]*h+b,d[2]=i[2]*e+i[3]*f+a,d[3]=i[2]*g+i[3]*h+b,d[4]=i[4]*e+i[5]*f+a,d[5]=i[4]*g+i[5]*h+b,d[6]=i[6]*e+i[7]*f+a,d[7]=i[6]*g+i[7]*h+b}},spine.AnimationStateData=function(a){this.skeletonData=a,this.animationToMixTime={}},spine.AnimationStateData.prototype={defaultMix:0,setMixByName:function(a,b,c){var d=this.skeletonData.findAnimation(a);if(!d)throw"Animation not found: "+a;var e=this.skeletonData.findAnimation(b);if(!e)throw"Animation not found: "+b;this.setMix(d,e,c)},setMix:function(a,b,c){this.animationToMixTime[a.name+":"+b.name]=c},getMix:function(a,b){var c=this.animationToMixTime[a.name+":"+b.name];return c?c:this.defaultMix}},spine.AnimationState=function(a){this.data=a,this.queue=[]},spine.AnimationState.prototype={current:null,previous:null,currentTime:0,previousTime:0,currentLoop:!1,previousLoop:!1,mixTime:0,mixDuration:0,update:function(a){if(this.currentTime+=a,this.previousTime+=a,this.mixTime+=a,this.queue.length>0){var b=this.queue[0];this.currentTime>=b.delay&&(this._setAnimation(b.animation,b.loop),this.queue.shift())}},apply:function(a){if(this.current)if(this.previous){this.previous.apply(a,this.previousTime,this.previousLoop);var b=this.mixTime/this.mixDuration;b>=1&&(b=1,this.previous=null),this.current.mix(a,this.currentTime,this.currentLoop,b)}else this.current.apply(a,this.currentTime,this.currentLoop)},clearAnimation:function(){this.previous=null,this.current=null,this.queue.length=0},_setAnimation:function(a,b){this.previous=null,a&&this.current&&(this.mixDuration=this.data.getMix(this.current,a),this.mixDuration>0&&(this.mixTime=0,this.previous=this.current,this.previousTime=this.currentTime,this.previousLoop=this.currentLoop)),this.current=a,this.currentLoop=b,this.currentTime=0},setAnimationByName:function(a,b){var c=this.data.skeletonData.findAnimation(a);if(!c)throw"Animation not found: "+a;this.setAnimation(c,b)},setAnimation:function(a,b){this.queue.length=0,this._setAnimation(a,b)},addAnimationByName:function(a,b,c){var d=this.data.skeletonData.findAnimation(a);if(!d)throw"Animation not found: "+a;this.addAnimation(d,b,c)},addAnimation:function(a,b,c){var d={};if(d.animation=a,d.loop=b,!c||0>=c){var e=this.queue.length?this.queue[this.queue.length-1].animation:this.current;c=null!=e?e.duration-this.data.getMix(e,a)+(c||0):0}d.delay=c,this.queue.push(d)},isComplete:function(){return!this.current||this.currentTime>=this.current.duration}},spine.SkeletonJson=function(a){this.attachmentLoader=a},spine.SkeletonJson.prototype={scale:1,readSkeletonData:function(a){for(var b,c=new spine.SkeletonData,d=a.bones,e=0,f=d.length;f>e;e++){var g=d[e],h=null;if(g.parent&&(h=c.findBone(g.parent),!h))throw"Parent bone not found: "+g.parent;b=new spine.BoneData(g.name,h),b.length=(g.length||0)*this.scale,b.x=(g.x||0)*this.scale,b.y=(g.y||0)*this.scale,b.rotation=g.rotation||0,b.scaleX=g.scaleX||1,b.scaleY=g.scaleY||1,c.bones.push(b)}var i=a.slots;for(e=0,f=i.length;f>e;e++){var j=i[e];if(b=c.findBone(j.bone),!b)throw"Slot bone not found: "+j.bone;var k=new spine.SlotData(j.name,b),l=j.color;l&&(k.r=spine.SkeletonJson.toColor(l,0),k.g=spine.SkeletonJson.toColor(l,1),k.b=spine.SkeletonJson.toColor(l,2),k.a=spine.SkeletonJson.toColor(l,3)),k.attachmentName=j.attachment,c.slots.push(k)}var m=a.skins;for(var n in m)if(m.hasOwnProperty(n)){var o=m[n],p=new spine.Skin(n);for(var q in o)if(o.hasOwnProperty(q)){var r=c.findSlotIndex(q),s=o[q];for(var t in s)if(s.hasOwnProperty(t)){var u=this.readAttachment(p,t,s[t]);null!=u&&p.addAttachment(r,t,u)}}c.skins.push(p),"default"==p.name&&(c.defaultSkin=p)}var v=a.animations;for(var w in v)v.hasOwnProperty(w)&&this.readAnimation(w,v[w],c);return c},readAttachment:function(a,b,c){b=c.name||b;var d=spine.AttachmentType[c.type||"region"];if(d==spine.AttachmentType.region){var e=new spine.RegionAttachment;return e.x=(c.x||0)*this.scale,e.y=(c.y||0)*this.scale,e.scaleX=c.scaleX||1,e.scaleY=c.scaleY||1,e.rotation=c.rotation||0,e.width=(c.width||32)*this.scale,e.height=(c.height||32)*this.scale,e.updateOffset(),e.rendererObject={},e.rendererObject.name=b,e.rendererObject.scale={},e.rendererObject.scale.x=e.scaleX,e.rendererObject.scale.y=e.scaleY,e.rendererObject.rotation=-e.rotation*Math.PI/180,e}throw"Unknown attachment type: "+d},readAnimation:function(a,b,c){var d,e,f,g,h,i,j,k=[],l=0,m=b.bones;for(var n in m)if(m.hasOwnProperty(n)){var o=c.findBoneIndex(n);if(-1==o)throw"Bone not found: "+n;var p=m[n];for(f in p)if(p.hasOwnProperty(f))if(h=p[f],"rotate"==f){for(e=new spine.RotateTimeline(h.length),e.boneIndex=o,d=0,i=0,j=h.length;j>i;i++)g=h[i],e.setFrame(d,g.time,g.angle),spine.SkeletonJson.readCurve(e,d,g),d++;k.push(e),l=Math.max(l,e.frames[2*e.getFrameCount()-2])}else{if("translate"!=f&&"scale"!=f)throw"Invalid timeline type for a bone: "+f+" ("+n+")";var q=1;for("scale"==f?e=new spine.ScaleTimeline(h.length):(e=new spine.TranslateTimeline(h.length),q=this.scale),e.boneIndex=o,d=0,i=0,j=h.length;j>i;i++){g=h[i];var r=(g.x||0)*q,s=(g.y||0)*q;e.setFrame(d,g.time,r,s),spine.SkeletonJson.readCurve(e,d,g),d++}k.push(e),l=Math.max(l,e.frames[3*e.getFrameCount()-3])}}var t=b.slots;for(var u in t)if(t.hasOwnProperty(u)){var v=t[u],w=c.findSlotIndex(u);for(f in v)if(v.hasOwnProperty(f))if(h=v[f],"color"==f){for(e=new spine.ColorTimeline(h.length),e.slotIndex=w,d=0,i=0,j=h.length;j>i;i++){g=h[i];var x=g.color,y=spine.SkeletonJson.toColor(x,0),z=spine.SkeletonJson.toColor(x,1),A=spine.SkeletonJson.toColor(x,2),B=spine.SkeletonJson.toColor(x,3);e.setFrame(d,g.time,y,z,A,B),spine.SkeletonJson.readCurve(e,d,g),d++}k.push(e),l=Math.max(l,e.frames[5*e.getFrameCount()-5])}else{if("attachment"!=f)throw"Invalid timeline type for a slot: "+f+" ("+u+")";for(e=new spine.AttachmentTimeline(h.length),e.slotIndex=w,d=0,i=0,j=h.length;j>i;i++)g=h[i],e.setFrame(d++,g.time,g.name);k.push(e),l=Math.max(l,e.frames[e.getFrameCount()-1])}}c.animations.push(new spine.Animation(a,k,l))}},spine.SkeletonJson.readCurve=function(a,b,c){var d=c.curve;d&&("stepped"==d?a.curves.setStepped(b):d instanceof Array&&a.curves.setCurve(b,d[0],d[1],d[2],d[3]))},spine.SkeletonJson.toColor=function(a,b){if(8!=a.length)throw"Color hexidecimal length must be 8, recieved: "+a;return parseInt(a.substring(2*b,2),16)/255},spine.Atlas=function(a,b){this.textureLoader=b,this.pages=[],this.regions=[];var c=new spine.AtlasReader(a),d=[];d.length=4;for(var e=null;;){var f=c.readLine();if(null==f)break;if(f=c.trim(f),f.length)if(e){var g=new spine.AtlasRegion;g.name=f,g.page=e,g.rotate="true"==c.readValue(),c.readTuple(d);var h=parseInt(d[0],10),i=parseInt(d[1],10);c.readTuple(d);var j=parseInt(d[0],10),k=parseInt(d[1],10);g.u=h/e.width,g.v=i/e.height,g.rotate?(g.u2=(h+k)/e.width,g.v2=(i+j)/e.height):(g.u2=(h+j)/e.width,g.v2=(i+k)/e.height),g.x=h,g.y=i,g.width=Math.abs(j),g.height=Math.abs(k),4==c.readTuple(d)&&(g.splits=[parseInt(d[0],10),parseInt(d[1],10),parseInt(d[2],10),parseInt(d[3],10)],4==c.readTuple(d)&&(g.pads=[parseInt(d[0],10),parseInt(d[1],10),parseInt(d[2],10),parseInt(d[3],10)],c.readTuple(d))),g.originalWidth=parseInt(d[0],10),g.originalHeight=parseInt(d[1],10),c.readTuple(d),g.offsetX=parseInt(d[0],10),g.offsetY=parseInt(d[1],10),g.index=parseInt(c.readValue(),10),this.regions.push(g)}else{e=new spine.AtlasPage,e.name=f,e.format=spine.Atlas.Format[c.readValue()],c.readTuple(d),e.minFilter=spine.Atlas.TextureFilter[d[0]],e.magFilter=spine.Atlas.TextureFilter[d[1]];var l=c.readValue();e.uWrap=spine.Atlas.TextureWrap.clampToEdge,e.vWrap=spine.Atlas.TextureWrap.clampToEdge,"x"==l?e.uWrap=spine.Atlas.TextureWrap.repeat:"y"==l?e.vWrap=spine.Atlas.TextureWrap.repeat:"xy"==l&&(e.uWrap=e.vWrap=spine.Atlas.TextureWrap.repeat),b.load(e,f),this.pages.push(e)}else e=null}},spine.Atlas.prototype={findRegion:function(a){for(var b=this.regions,c=0,d=b.length;d>c;c++)if(b[c].name==a)return b[c];return null},dispose:function(){for(var a=this.pages,b=0,c=a.length;c>b;b++)this.textureLoader.unload(a[b].rendererObject)},updateUVs:function(a){for(var b=this.regions,c=0,d=b.length;d>c;c++){var e=b[c];e.page==a&&(e.u=e.x/a.width,e.v=e.y/a.height,e.rotate?(e.u2=(e.x+e.height)/a.width,e.v2=(e.y+e.width)/a.height):(e.u2=(e.x+e.width)/a.width,e.v2=(e.y+e.height)/a.height))}}},spine.Atlas.Format={alpha:0,intensity:1,luminanceAlpha:2,rgb565:3,rgba4444:4,rgb888:5,rgba8888:6},spine.Atlas.TextureFilter={nearest:0,linear:1,mipMap:2,mipMapNearestNearest:3,mipMapLinearNearest:4,mipMapNearestLinear:5,mipMapLinearLinear:6},spine.Atlas.TextureWrap={mirroredRepeat:0,clampToEdge:1,repeat:2},spine.AtlasPage=function(){},spine.AtlasPage.prototype={name:null,format:null,minFilter:null,magFilter:null,uWrap:null,vWrap:null,rendererObject:null,width:0,height:0},spine.AtlasRegion=function(){},spine.AtlasRegion.prototype={page:null,name:null,x:0,y:0,width:0,height:0,u:0,v:0,u2:0,v2:0,offsetX:0,offsetY:0,originalWidth:0,originalHeight:0,index:0,rotate:!1,splits:null,pads:null},spine.AtlasReader=function(a){this.lines=a.split(/\r\n|\r|\n/)},spine.AtlasReader.prototype={index:0,trim:function(a){return a.replace(/^\s+|\s+$/g,"")},readLine:function(){return this.index>=this.lines.length?null:this.lines[this.index++]},readValue:function(){var a=this.readLine(),b=a.indexOf(":");if(-1==b)throw"Invalid line: "+a;return this.trim(a.substring(b+1))},readTuple:function(a){var b=this.readLine(),c=b.indexOf(":");if(-1==c)throw"Invalid line: "+b;for(var d=0,e=c+1;3>d;d++){var f=b.indexOf(",",e);if(-1==f){if(!d)throw"Invalid line: "+b;break}a[d]=this.trim(b.substr(e,f-e)),e=f+1}return a[d]=this.trim(b.substring(e)),d+1}},spine.AtlasAttachmentLoader=function(a){this.atlas=a},spine.AtlasAttachmentLoader.prototype={newAttachment:function(a,b,c){switch(b){case spine.AttachmentType.region:var d=this.atlas.findRegion(c);if(!d)throw"Region not found in atlas: "+c+" ("+b+")";var e=new spine.RegionAttachment(c);return e.rendererObject=d,e.setUVs(d.u,d.v,d.u2,d.v2,d.rotate),e.regionOffsetX=d.offsetX,e.regionOffsetY=d.offsetY,e.regionWidth=d.width,e.regionHeight=d.height,e.regionOriginalWidth=d.originalWidth,e.regionOriginalHeight=d.originalHeight,e}throw"Unknown attachment type: "+b}},spine.Bone.yDown=!0;
 },{}],72:[function(require,module,exports){
+/**
+ * @author sole / http://soledadpenades.com
+ * @author mrdoob / http://mrdoob.com
+ * @author Robert Eisele / http://www.xarg.org
+ * @author Philippe / http://philippe.elsass.me
+ * @author Robert Penner / http://www.robertpenner.com/easing_terms_of_use.html
+ * @author Paul Lewis / http://www.aerotwist.com/
+ * @author lechecacharro
+ * @author Josh Faul / http://jocafa.com/
+ * @author egraether / http://egraether.com/
+ */
+
+if ( Date.now === undefined ) {
+
+  Date.now = function () {
+
+    return new Date().valueOf();
+
+  }
+
+}
+
+var TWEEN = TWEEN || ( function () {
+
+  var _tweens = [];
+
+  return {
+
+    REVISION: '8',
+
+    getAll: function () {
+
+      return _tweens;
+
+    },
+
+    removeAll: function () {
+
+      _tweens = [];
+
+    },
+
+    add: function ( tween ) {
+
+      _tweens.push( tween );
+
+    },
+
+    remove: function ( tween ) {
+
+      var i = _tweens.indexOf( tween );
+
+      if ( i !== -1 ) {
+
+        _tweens.splice( i, 1 );
+
+      }
+
+    },
+
+    update: function ( time ) {
+
+      if ( _tweens.length === 0 ) return false;
+
+      var i = 0, numTweens = _tweens.length;
+
+      time = time !== undefined ? time : Date.now();
+
+      while ( i < numTweens ) {
+
+        if ( _tweens[ i ].update( time ) ) {
+
+          i ++;
+
+        } else {
+
+          _tweens.splice( i, 1 );
+
+          numTweens --;
+
+        }
+
+      }
+
+      return true;
+
+    }
+
+  };
+
+} )();
+
+TWEEN.Tween = function ( object ) {
+
+  var _object = object;
+  var _valuesStart = {};
+  var _valuesEnd = {};
+  var _duration = 1000;
+  var _delayTime = 0;
+  var _startTime = null;
+  var _easingFunction = TWEEN.Easing.Linear.None;
+  var _interpolationFunction = TWEEN.Interpolation.Linear;
+  var _chainedTweens = [];
+  var _onStartCallback = null;
+  var _onStartCallbackFired = false;
+  var _onUpdateCallback = null;
+  var _onCompleteCallback = null;
+
+  this.to = function ( properties, duration ) {
+
+    if ( duration !== undefined ) {
+
+      _duration = duration;
+
+    }
+
+    _valuesEnd = properties;
+
+    return this;
+
+  };
+
+  this.start = function ( time ) {
+
+    TWEEN.add( this );
+
+    _onStartCallbackFired = false;
+
+    _startTime = time !== undefined ? time : Date.now();
+    _startTime += _delayTime;
+
+    for ( var property in _valuesEnd ) {
+
+      // This prevents the interpolation of null values or of non-existing properties
+      if( _object[ property ] === null || !(property in _object) ) {
+
+        continue;
+
+      }
+
+      // check if an Array was provided as property value
+      if ( _valuesEnd[ property ] instanceof Array ) {
+
+        if ( _valuesEnd[ property ].length === 0 ) {
+
+          continue;
+
+        }
+
+        // create a local copy of the Array with the start value at the front
+        _valuesEnd[ property ] = [ _object[ property ] ].concat( _valuesEnd[ property ] );
+
+      }
+
+      _valuesStart[ property ] = _object[ property ];
+
+    }
+
+    return this;
+
+  };
+
+  this.stop = function () {
+
+    TWEEN.remove( this );
+    return this;
+
+  };
+
+  this.delay = function ( amount ) {
+
+    _delayTime = amount;
+    return this;
+
+  };
+
+  this.easing = function ( easing ) {
+
+    _easingFunction = easing;
+    return this;
+
+  };
+
+  this.interpolation = function ( interpolation ) {
+
+    _interpolationFunction = interpolation;
+    return this;
+
+  };
+
+  this.chain = function () {
+
+    _chainedTweens = arguments;
+    return this;
+
+  };
+
+  this.onStart = function ( callback ) {
+
+    _onStartCallback = callback;
+    return this;
+
+  };
+
+  this.onUpdate = function ( callback ) {
+
+    _onUpdateCallback = callback;
+    return this;
+
+  };
+
+  this.onComplete = function ( callback ) {
+
+    _onCompleteCallback = callback;
+    return this;
+
+  };
+
+  this.update = function ( time ) {
+
+    if ( time < _startTime ) {
+
+      return true;
+
+    }
+
+    if ( _onStartCallbackFired === false ) {
+
+      if ( _onStartCallback !== null ) {
+
+        _onStartCallback.call( _object );
+
+      }
+
+      _onStartCallbackFired = true;
+
+    }
+
+    var elapsed = ( time - _startTime ) / _duration;
+    elapsed = elapsed > 1 ? 1 : elapsed;
+
+    var value = _easingFunction( elapsed );
+
+    for ( var property in _valuesStart ) {
+
+      var start = _valuesStart[ property ];
+      var end = _valuesEnd[ property ];
+
+      if ( end instanceof Array ) {
+
+        _object[ property ] = _interpolationFunction( end, value );
+
+      } else {
+
+        _object[ property ] = start + ( end - start ) * value;
+
+      }
+
+    }
+
+    if ( _onUpdateCallback !== null ) {
+
+      _onUpdateCallback.call( _object, value );
+
+    }
+
+    if ( elapsed == 1 ) {
+
+      if ( _onCompleteCallback !== null ) {
+
+        _onCompleteCallback.call( _object );
+
+      }
+
+      for ( var i = 0, numChainedTweens = _chainedTweens.length; i < numChainedTweens; i ++ ) {
+
+        _chainedTweens[ i ].start( time );
+
+      }
+
+      return false;
+
+    }
+
+    return true;
+
+  };
+
+};
+
+TWEEN.Easing = {
+
+  Linear: {
+
+    None: function ( k ) {
+
+      return k;
+
+    }
+
+  },
+
+  Quadratic: {
+
+    In: function ( k ) {
+
+      return k * k;
+
+    },
+
+    Out: function ( k ) {
+
+      return k * ( 2 - k );
+
+    },
+
+    InOut: function ( k ) {
+
+      if ( ( k *= 2 ) < 1 ) return 0.5 * k * k;
+      return - 0.5 * ( --k * ( k - 2 ) - 1 );
+
+    }
+
+  },
+
+  Cubic: {
+
+    In: function ( k ) {
+
+      return k * k * k;
+
+    },
+
+    Out: function ( k ) {
+
+      return --k * k * k + 1;
+
+    },
+
+    InOut: function ( k ) {
+
+      if ( ( k *= 2 ) < 1 ) return 0.5 * k * k * k;
+      return 0.5 * ( ( k -= 2 ) * k * k + 2 );
+
+    }
+
+  },
+
+  Quartic: {
+
+    In: function ( k ) {
+
+      return k * k * k * k;
+
+    },
+
+    Out: function ( k ) {
+
+      return 1 - ( --k * k * k * k );
+
+    },
+
+    InOut: function ( k ) {
+
+      if ( ( k *= 2 ) < 1) return 0.5 * k * k * k * k;
+      return - 0.5 * ( ( k -= 2 ) * k * k * k - 2 );
+
+    }
+
+  },
+
+  Quintic: {
+
+    In: function ( k ) {
+
+      return k * k * k * k * k;
+
+    },
+
+    Out: function ( k ) {
+
+      return --k * k * k * k * k + 1;
+
+    },
+
+    InOut: function ( k ) {
+
+      if ( ( k *= 2 ) < 1 ) return 0.5 * k * k * k * k * k;
+      return 0.5 * ( ( k -= 2 ) * k * k * k * k + 2 );
+
+    }
+
+  },
+
+  Sinusoidal: {
+
+    In: function ( k ) {
+
+      return 1 - Math.cos( k * Math.PI / 2 );
+
+    },
+
+    Out: function ( k ) {
+
+      return Math.sin( k * Math.PI / 2 );
+
+    },
+
+    InOut: function ( k ) {
+
+      return 0.5 * ( 1 - Math.cos( Math.PI * k ) );
+
+    }
+
+  },
+
+  Exponential: {
+
+    In: function ( k ) {
+
+      return k === 0 ? 0 : Math.pow( 1024, k - 1 );
+
+    },
+
+    Out: function ( k ) {
+
+      return k === 1 ? 1 : 1 - Math.pow( 2, - 10 * k );
+
+    },
+
+    InOut: function ( k ) {
+
+      if ( k === 0 ) return 0;
+      if ( k === 1 ) return 1;
+      if ( ( k *= 2 ) < 1 ) return 0.5 * Math.pow( 1024, k - 1 );
+      return 0.5 * ( - Math.pow( 2, - 10 * ( k - 1 ) ) + 2 );
+
+    }
+
+  },
+
+  Circular: {
+
+    In: function ( k ) {
+
+      return 1 - Math.sqrt( 1 - k * k );
+
+    },
+
+    Out: function ( k ) {
+
+      return Math.sqrt( 1 - ( --k * k ) );
+
+    },
+
+    InOut: function ( k ) {
+
+      if ( ( k *= 2 ) < 1) return - 0.5 * ( Math.sqrt( 1 - k * k) - 1);
+      return 0.5 * ( Math.sqrt( 1 - ( k -= 2) * k) + 1);
+
+    }
+
+  },
+
+  Elastic: {
+
+    In: function ( k ) {
+
+      var s, a = 0.1, p = 0.4;
+      if ( k === 0 ) return 0;
+      if ( k === 1 ) return 1;
+      if ( !a || a < 1 ) { a = 1; s = p / 4; }
+      else s = p * Math.asin( 1 / a ) / ( 2 * Math.PI );
+      return - ( a * Math.pow( 2, 10 * ( k -= 1 ) ) * Math.sin( ( k - s ) * ( 2 * Math.PI ) / p ) );
+
+    },
+
+    Out: function ( k ) {
+
+      var s, a = 0.1, p = 0.4;
+      if ( k === 0 ) return 0;
+      if ( k === 1 ) return 1;
+      if ( !a || a < 1 ) { a = 1; s = p / 4; }
+      else s = p * Math.asin( 1 / a ) / ( 2 * Math.PI );
+      return ( a * Math.pow( 2, - 10 * k) * Math.sin( ( k - s ) * ( 2 * Math.PI ) / p ) + 1 );
+
+    },
+
+    InOut: function ( k ) {
+
+      var s, a = 0.1, p = 0.4;
+      if ( k === 0 ) return 0;
+      if ( k === 1 ) return 1;
+      if ( !a || a < 1 ) { a = 1; s = p / 4; }
+      else s = p * Math.asin( 1 / a ) / ( 2 * Math.PI );
+      if ( ( k *= 2 ) < 1 ) return - 0.5 * ( a * Math.pow( 2, 10 * ( k -= 1 ) ) * Math.sin( ( k - s ) * ( 2 * Math.PI ) / p ) );
+      return a * Math.pow( 2, -10 * ( k -= 1 ) ) * Math.sin( ( k - s ) * ( 2 * Math.PI ) / p ) * 0.5 + 1;
+
+    }
+
+  },
+
+  Back: {
+
+    In: function ( k ) {
+
+      var s = 1.70158;
+      return k * k * ( ( s + 1 ) * k - s );
+
+    },
+
+    Out: function ( k ) {
+
+      var s = 1.70158;
+      return --k * k * ( ( s + 1 ) * k + s ) + 1;
+
+    },
+
+    InOut: function ( k ) {
+
+      var s = 1.70158 * 1.525;
+      if ( ( k *= 2 ) < 1 ) return 0.5 * ( k * k * ( ( s + 1 ) * k - s ) );
+      return 0.5 * ( ( k -= 2 ) * k * ( ( s + 1 ) * k + s ) + 2 );
+
+    }
+
+  },
+
+  Bounce: {
+
+    In: function ( k ) {
+
+      return 1 - TWEEN.Easing.Bounce.Out( 1 - k );
+
+    },
+
+    Out: function ( k ) {
+
+      if ( k < ( 1 / 2.75 ) ) {
+
+        return 7.5625 * k * k;
+
+      } else if ( k < ( 2 / 2.75 ) ) {
+
+        return 7.5625 * ( k -= ( 1.5 / 2.75 ) ) * k + 0.75;
+
+      } else if ( k < ( 2.5 / 2.75 ) ) {
+
+        return 7.5625 * ( k -= ( 2.25 / 2.75 ) ) * k + 0.9375;
+
+      } else {
+
+        return 7.5625 * ( k -= ( 2.625 / 2.75 ) ) * k + 0.984375;
+
+      }
+
+    },
+
+    InOut: function ( k ) {
+
+      if ( k < 0.5 ) return TWEEN.Easing.Bounce.In( k * 2 ) * 0.5;
+      return TWEEN.Easing.Bounce.Out( k * 2 - 1 ) * 0.5 + 0.5;
+
+    }
+
+  }
+
+};
+
+TWEEN.Interpolation = {
+
+  Linear: function ( v, k ) {
+
+    var m = v.length - 1, f = m * k, i = Math.floor( f ), fn = TWEEN.Interpolation.Utils.Linear;
+
+    if ( k < 0 ) return fn( v[ 0 ], v[ 1 ], f );
+    if ( k > 1 ) return fn( v[ m ], v[ m - 1 ], m - f );
+
+    return fn( v[ i ], v[ i + 1 > m ? m : i + 1 ], f - i );
+
+  },
+
+  Bezier: function ( v, k ) {
+
+    var b = 0, n = v.length - 1, pw = Math.pow, bn = TWEEN.Interpolation.Utils.Bernstein, i;
+
+    for ( i = 0; i <= n; i++ ) {
+      b += pw( 1 - k, n - i ) * pw( k, i ) * v[ i ] * bn( n, i );
+    }
+
+    return b;
+
+  },
+
+  CatmullRom: function ( v, k ) {
+
+    var m = v.length - 1, f = m * k, i = Math.floor( f ), fn = TWEEN.Interpolation.Utils.CatmullRom;
+
+    if ( v[ 0 ] === v[ m ] ) {
+
+      if ( k < 0 ) i = Math.floor( f = m * ( 1 + k ) );
+
+      return fn( v[ ( i - 1 + m ) % m ], v[ i ], v[ ( i + 1 ) % m ], v[ ( i + 2 ) % m ], f - i );
+
+    } else {
+
+      if ( k < 0 ) return v[ 0 ] - ( fn( v[ 0 ], v[ 0 ], v[ 1 ], v[ 1 ], -f ) - v[ 0 ] );
+      if ( k > 1 ) return v[ m ] - ( fn( v[ m ], v[ m ], v[ m - 1 ], v[ m - 1 ], f - m ) - v[ m ] );
+
+      return fn( v[ i ? i - 1 : 0 ], v[ i ], v[ m < i + 1 ? m : i + 1 ], v[ m < i + 2 ? m : i + 2 ], f - i );
+
+    }
+
+  },
+
+  Utils: {
+
+    Linear: function ( p0, p1, t ) {
+
+      return ( p1 - p0 ) * t + p0;
+
+    },
+
+    Bernstein: function ( n , i ) {
+
+      var fc = TWEEN.Interpolation.Utils.Factorial;
+      return fc( n ) / fc( i ) / fc( n - i );
+
+    },
+
+    Factorial: ( function () {
+
+      var a = [ 1 ];
+
+      return function ( n ) {
+
+        var s = 1, i;
+        if ( a[ n ] ) return a[ n ];
+        for ( i = n; i > 1; i-- ) s *= i;
+        return a[ n ] = s;
+
+      };
+
+    } )(),
+
+    CatmullRom: function ( p0, p1, p2, p3, t ) {
+
+      var v0 = ( p2 - p0 ) * 0.5, v1 = ( p3 - p1 ) * 0.5, t2 = t * t, t3 = t * t2;
+      return ( 2 * p1 - 2 * p2 + v0 + v1 ) * t3 + ( - 3 * p1 + 3 * p2 - 2 * v0 - v1 ) * t2 + v0 * t + p1;
+
+    }
+
+  }
+
+};
+
+module.exports = TWEEN;
+},{}],73:[function(require,module,exports){
 var PIXI = require('pixi');
 
 // map
@@ -1104,6 +1779,10 @@ Wall.prototype.stageMap= function(terrain) {
       }
     }
   }
+}
+
+Wall.prototype.getTilePosition = function(i) {
+   return {x: 0, y: i * this.opts.tileHeight }
 }
 
 
