@@ -10,10 +10,11 @@ module.exports.getEmitter = function() {
 }
 
 
-},{"events":4}],2:[function(require,module,exports){
-
+},{"events":5}],2:[function(require,module,exports){
+// VIDEO PART
+//
 var VideoController = require('./video_controller');
-
+var Popper = require('./popper');
 var videoContoller = new VideoController();
 var eventEmitter = require('./event_manager').getEmitter();
 
@@ -22,16 +23,116 @@ window.onload = function() {
     videoContoller.loadVideos($('#video-container'),$('#main-container').height());
 }
 
-window.onscroll = function(event) {
+/*window.onscroll = function(event) {
     videoContoller.pageScroll(window.pageYOffset);
-};
+};*/
+
+var videosLoaded = false
+var assetsLoaded = false;
 
 eventEmitter.on('videos_loaded', function() {
-    $('#loading-container').hide();
-    videoContoller.playWaiting();
+    console.log("Videos loaded!");
+    videosLoaded = true;
+    if (assetsLoaded) {
+        start();
+    }
+
 });
 
-},{"./event_manager":1,"./video_controller":3}],3:[function(require,module,exports){
+
+var loader = new PIXI.AssetLoader(["assets/pops/amit.png"]);
+loader.onComplete = function() {
+    assetsLoaded = true;
+    console.log("Assets loaded!");
+    if (videosLoaded) {
+        start();
+    }
+};
+loader.load();
+
+
+function start() {
+   $('#loading-container').hide();
+   videoContoller.playWaiting();
+}
+
+/*
+function loop() {
+    videoContoller.loop();
+    requestAnimationFrame(loop);
+}
+
+loop();*/
+
+
+// GAME PART
+
+var gameOpts = {
+    stageWidth: 1280,
+    stageHeight: 720,
+}
+var stage = new PIXI.Stage(0xFFFFFF);
+var popper = new Popper(stage, gameOpts);
+var renderer = new PIXI.autoDetectRenderer(gameOpts.stageWidth, gameOpts.stageHeight, null, true);
+document.body.appendChild(renderer.view);
+
+
+function animate() {
+    popper.update();
+    renderer.render(stage);
+    requestAnimationFrame(animate);
+}
+requestAnimationFrame(animate);
+
+},{"./event_manager":1,"./popper":3,"./video_controller":4}],3:[function(require,module,exports){
+"use strict"
+
+module.exports = function(stage, opts) {
+    return new Popper(stage,opts)
+}
+
+module.exports.Popper = Popper;
+
+
+function Popper(stage, opts) {
+    if (!(this instanceof Popper)) return new Popper(stage, opts)
+
+    this.eventEmitter = require('./event_manager').getEmitter();
+    this.stage = stage;
+    this.opts = opts;
+
+    this.pops = [];
+
+    console.log("Popper started", this.opts);
+
+    var self = this;
+
+    this.eventEmitter.on('video_ended', function() {
+        self.pop();
+    });
+}
+
+
+Popper.prototype.pop = function() {
+    console.log("Popper popping!");
+
+    var popper = new PIXI.Sprite(PIXI.Texture.fromFrame("assets/pops/amit.png")); 
+    popper.anchor.x = popper.anchor.y = 0.5;
+    popper.position.x = MathUtil.rndRange(0, this.opts.stageWidth);
+    popper.position.y = MathUtil.rndRange(0, this.opts.stageHeight);
+    this.stage.addChild(popper);
+
+    this.pops.push(popper);
+}
+
+Popper.prototype.update = function() {
+    for (var i = 0; i < this.pops.length; i++) {
+        var pop = this.pops[i];
+        pop.rotation += 0.1;
+    }
+}
+
+},{"./event_manager":1}],4:[function(require,module,exports){
 "use strict"
 
 module.exports = function(opts) {
@@ -51,9 +152,10 @@ VideoController.prototype.loadVideos = function (container, scrollHeight) {
 
     this.VIDEOS = {
         waiting: { 
-            'd': { path :'stubs/d.webm' },
-            'blink': {path: 'stubs/blink.webm'},
-            'e': {path: 'stubs/e.webm'} 
+    //        'd': { path :'stubs/d.webm' },
+      //      'blink': {path: 'stubs/blink.webm'},
+        //    'e': {path: 'stubs/e.webm'} 
+            'facebook' : {path: 'fun/facebook.webm'}
         },
         enter: {path: 'stubs/hat.webm', duration: 6.76 }
     }
@@ -160,6 +262,7 @@ VideoController.prototype.playRandomWaiting = function() {
 
 VideoController.prototype.videoEnded = function(video) {
     if (this.nowPlaying.id != 'enter') {
+        this.eventEmitter.emit('video_ended');
         this.playRandomWaiting();
     }
 }
@@ -169,10 +272,26 @@ VideoController.prototype.pageScroll = function(offset) {
         return;
     }
     if (offset > 0) {
+       console.log(offset, "-->",(offset / this.scrollHeight) * this.VIDEOS.enter.duration)
        this.showEnterAt((offset / this.scrollHeight) * this.VIDEOS.enter.duration); 
     } 
     else {
         this.playRandomWaiting();
+    }
+}
+
+VideoController.prototype.loop = function() {
+    if (!this.VIDEOS) {
+        return;
+    }
+    var offset = window.pageYOffset;
+    if (offset > 0) {
+       this.showEnterAt((offset / this.scrollHeight) * this.VIDEOS.enter.duration); 
+    } 
+    else {
+        if (this.nowPlaying && this.nowPlaying.id == this.VIDEOS.enter.id) {
+            this.playRandomWaiting();
+        }
     }
 }
 
@@ -193,7 +312,7 @@ VideoController.prototype.showVideo = function (video) {
   video.element.style.display = "block";  
 }
 
-},{"./event_manager":1}],4:[function(require,module,exports){
+},{"./event_manager":1}],5:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a

@@ -17,9 +17,10 @@ VideoController.prototype.loadVideos = function (container, scrollHeight) {
 
     this.VIDEOS = {
         waiting: { 
-            'd': { path :'stubs/d.webm' },
-            'blink': {path: 'stubs/blink.webm'},
-            'e': {path: 'stubs/e.webm'} 
+    //        'd': { path :'stubs/d.webm' },
+      //      'blink': {path: 'stubs/blink.webm'},
+        //    'e': {path: 'stubs/e.webm'} 
+            'facebook' : {path: 'fun/facebook.webm'}
         },
         enter: {path: 'stubs/hat.webm', duration: 6.76 }
     }
@@ -126,6 +127,7 @@ VideoController.prototype.playRandomWaiting = function() {
 
 VideoController.prototype.videoEnded = function(video) {
     if (this.nowPlaying.id != 'enter') {
+        this.eventEmitter.emit('video_ended');
         this.playRandomWaiting();
     }
 }
@@ -135,10 +137,26 @@ VideoController.prototype.pageScroll = function(offset) {
         return;
     }
     if (offset > 0) {
+       console.log(offset, "-->",(offset / this.scrollHeight) * this.VIDEOS.enter.duration)
        this.showEnterAt((offset / this.scrollHeight) * this.VIDEOS.enter.duration); 
     } 
     else {
         this.playRandomWaiting();
+    }
+}
+
+VideoController.prototype.loop = function() {
+    if (!this.VIDEOS) {
+        return;
+    }
+    var offset = window.pageYOffset;
+    if (offset > 0) {
+       this.showEnterAt((offset / this.scrollHeight) * this.VIDEOS.enter.duration); 
+    } 
+    else {
+        if (this.nowPlaying && this.nowPlaying.id == this.VIDEOS.enter.id) {
+            this.playRandomWaiting();
+        }
     }
 }
 
