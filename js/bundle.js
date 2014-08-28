@@ -1,4 +1,4 @@
-(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 "use strict"
 
 var events = require('events');
@@ -155,9 +155,9 @@ VideoController.prototype.loadVideos = function (container, scrollHeight) {
     //        'd': { path :'stubs/d.webm' },
       //      'blink': {path: 'stubs/blink.webm'},
         //    'e': {path: 'stubs/e.webm'} 
-            'facebook' : {path: 'fun/facebook.webm'}
+            'facebook' : {paths: ['fun/facebook.mp4', 'fun/facebook.webm']}
         },
-        enter: {path: 'stubs/hat.webm', duration: 6.76 }
+        //enter: {path: 'stubs/hat.webm', duration: 6.76 }
     }
 
     this.eventEmitter = require('./event_manager').getEmitter();
@@ -171,7 +171,7 @@ VideoController.prototype.loadVideos = function (container, scrollHeight) {
         var id = keys[i];
         this.loadVideo(id, this.VIDEOS.waiting[id], container);
     }
-    this.loadVideo('enter', this.VIDEOS.enter, container);
+    //this.loadVideo('enter', this.VIDEOS.enter, container);
 
     this.nowPlaying = null;
 }
@@ -179,30 +179,31 @@ VideoController.prototype.loadVideos = function (container, scrollHeight) {
 VideoController.prototype.loadVideo = function (id, video, container) {
     video.loaded = false;
     video.id = id;
-    console.log("Loading " + video.path);
+    console.log("Loading " + video.id);
 
     var videoElement = document.createElement("VIDEO"); 
-    videoElement.src = 'videos/' + video.path;
     videoElement.id = id;
     videoElement.style.display = "none";
     video.element = videoElement;
 
+    for (var i = 0; i < video.paths.length; i++) {
+        var sourceElement = document.createElement("SOURCE"); 
+        sourceElement.src = 'videos/' + video.paths[i];
+        videoElement.appendChild(sourceElement);
+    }
+
     var self = this;
 
-    videoElement.oncanplaythrough = function(event) {
+    /*videoElement.oncanplaythrough = function(event) {
         self.videoCanPlayThrough(event.target);
-    }
+    }*/
 
-    videoElement.onended = function(event) {
-        self.videoEnded(event.target);
-    }
-
-    videoElement.onloadedmetadata = function(event) {
-        self.videoLoadedMetadata(event.target);
-    }
+    videoElement.addEventListener("canplaythrough",function(event) {self.videoCanPlayThrough(event.target)}, false);
+    videoElement.addEventListener("ended",function(event) {self.videoEnded(event.target)}, false);
 
     container.append(videoElement);
     videoElement.preload = "auto";
+    videoElement.play();
 
 }
 
@@ -222,6 +223,7 @@ VideoController.prototype.videoCanPlayThrough = function(video) {
 
 
 VideoController.prototype.videoLoadedMetadata = function(video) {
+    console.log("Loaded metadata");
 }
 
 VideoController.prototype.checkLoaded = function() {
@@ -232,7 +234,8 @@ VideoController.prototype.checkLoaded = function() {
         var id = keys[i];
         allLoaded = this.VIDEOS.waiting[id].loaded;
     }
-    if (allLoaded && this.VIDEOS.enter.loaded) {
+    //if (allLoaded && this.VIDEOS.enter.loaded) {
+    if (allLoaded) {
         console.log("All videos are loaded!");
         this.eventEmitter.emit('videos_loaded');
     }
@@ -460,10 +463,7 @@ EventEmitter.prototype.addListener = function(type, listener) {
                     'leak detected. %d listeners added. ' +
                     'Use emitter.setMaxListeners() to increase limit.',
                     this._events[type].length);
-      if (typeof console.trace === 'function') {
-        // not supported in IE 10
-        console.trace();
-      }
+      console.trace();
     }
   }
 
@@ -617,4 +617,4 @@ function isUndefined(arg) {
   return arg === void 0;
 }
 
-},{}]},{},[2]);
+},{}]},{},[2])
