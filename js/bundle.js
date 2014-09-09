@@ -140,6 +140,7 @@ loader.load();
 function start() {
    $('#loading-container').hide();
    videoContoller.playWaiting();
+   requestAnimationFrame(animate);
 }
 
 
@@ -149,7 +150,6 @@ function animate() {
     renderer.render(stage);
     requestAnimationFrame(animate);
 }
-requestAnimationFrame(animate);
 
 },{"./brain_controller":1,"./event_manager":2,"./video_controller":4}],4:[function(require,module,exports){
 "use strict"
