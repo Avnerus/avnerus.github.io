@@ -1,6 +1,57 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 "use strict"
 
+module.exports = function(opts) {
+    return new BrainController(opts)
+}
+
+module.exports.BrainController = BrainController;
+
+
+function BrainController(opts) {
+    if (!(this instanceof BrainController)) return new BrainController(opts)
+
+    this.opts = opts;
+
+    console.log("Brain Controller started");
+}
+
+BrainController.prototype.init = function (stage) {
+
+    console.log("Brain Controller initializing");
+
+	var bgContainer = new PIXI.DisplayObjectContainer();
+	stage.addChild(bgContainer);
+
+
+	var bg = PIXI.Sprite.fromFrame("assets/brain/bg.jpg");
+	bgContainer.addChild(bg);
+
+	this.overlay = new PIXI.TilingSprite(PIXI.Texture.fromFrame("assets/brain/tile_neurons.png"), this.opts.stageWidth, this.opts.stageHeight);
+	this.overlay.alpha = 0.15;
+	bgContainer.addChild(this.overlay);
+
+	var displacementTexture = PIXI.Texture.fromFrame("assets/brain/displacement_map.png");
+	this.displacementFilter = new PIXI.DisplacementFilter(displacementTexture);
+    this.displacementFilter.scale.x = 50;
+    this.displacementFilter.scale.y = 50;
+
+    bgContainer.filters = [this.displacementFilter];
+
+    this.counter = 0;
+}
+
+BrainController.prototype.update = function () {
+    this.counter += 0.1;
+    this.overlay.tilePosition.x = this.counter * -5;
+    this.overlay.tilePosition.y = this.counter * -5;
+	this.displacementFilter.offset.x = this.counter * 10;
+	this.displacementFilter.offset.y = this.counter * 10;
+}
+
+},{}],2:[function(require,module,exports){
+"use strict"
+
 var events = require('events');
 var eventEmitter = new events.EventEmitter();
 console.log('Events init');
@@ -10,17 +61,45 @@ module.exports.getEmitter = function() {
 }
 
 
-},{"events":5}],2:[function(require,module,exports){
+},{"events":5}],3:[function(require,module,exports){
+var gameOpts = {
+    stageWidth: 1280,
+    stageHeight: 720,
+    zoomHeight: 1500
+}
+
+gameOpts.scrollHeight = console.log(gameOpts);
+
+
+// GAME PART
+
+
+var BrainController = require('./brain_controller');
+var brainController = new BrainController(gameOpts);
+
+var gameOpts = {
+    stageWidth: 1280,
+    stageHeight: 720,
+}
+var stage = new PIXI.Stage(0xFFFFFF);
+var renderer = new PIXI.autoDetectRenderer(gameOpts.stageWidth, gameOpts.stageHeight, null, true);
+renderer.view.style.position = "absolute"
+renderer.view.style.width = window.innerWidth + "px";
+renderer.view.style.height = window.innerHeight + "px";
+renderer.view.style.display = "block";
+document.body.appendChild(renderer.view);
+
+
+// 
 // VIDEO PART
 //
 var VideoController = require('./video_controller');
-var Popper = require('./popper');
-var videoContoller = new VideoController();
+var videoContoller = new VideoController(gameOpts);
 var eventEmitter = require('./event_manager').getEmitter();
 
 window.onload = function() {
     window.scroll(0, 0);
-    videoContoller.loadVideos($('#video-container'),$('#main-container').height());
+    videoContoller.loadVideos($('#video-container'), $('#main-container').height());
 }
 
 /*window.onscroll = function(event) {
@@ -40,10 +119,17 @@ eventEmitter.on('videos_loaded', function() {
 });
 
 
-var loader = new PIXI.AssetLoader(["assets/pops/amit.png"]);
+var loader = new PIXI.AssetLoader([
+  "assets/brain/bg.jpg",
+  "assets/brain/tile_neurons.png",
+  "assets/brain/displacement_map.png"
+]);
 loader.onComplete = function() {
     assetsLoaded = true;
     console.log("Assets loaded!");
+
+    brainController.init(stage);
+
     if (videosLoaded) {
         start();
     }
@@ -56,83 +142,16 @@ function start() {
    videoContoller.playWaiting();
 }
 
-/*
-function loop() {
-    videoContoller.loop();
-    requestAnimationFrame(loop);
-}
-
-loop();*/
-
-
-// GAME PART
-
-var gameOpts = {
-    stageWidth: 1280,
-    stageHeight: 720,
-}
-var stage = new PIXI.Stage(0xFFFFFF);
-var popper = new Popper(stage, gameOpts);
-var renderer = new PIXI.autoDetectRenderer(gameOpts.stageWidth, gameOpts.stageHeight, null, true);
-document.body.appendChild(renderer.view);
-
 
 function animate() {
-    popper.update();
+    brainController.update();
+    videoContoller.loop();
     renderer.render(stage);
     requestAnimationFrame(animate);
 }
 requestAnimationFrame(animate);
 
-},{"./event_manager":1,"./popper":3,"./video_controller":4}],3:[function(require,module,exports){
-"use strict"
-
-module.exports = function(stage, opts) {
-    return new Popper(stage,opts)
-}
-
-module.exports.Popper = Popper;
-
-
-function Popper(stage, opts) {
-    if (!(this instanceof Popper)) return new Popper(stage, opts)
-
-    this.eventEmitter = require('./event_manager').getEmitter();
-    this.stage = stage;
-    this.opts = opts;
-
-    this.pops = [];
-
-    console.log("Popper started", this.opts);
-
-    var self = this;
-
-    this.eventEmitter.on('video_ended', function() {
-        self.pop();
-    });
-}
-
-
-Popper.prototype.pop = function() {
-    console.log("Popper popping!");
-
-    var popper = new PIXI.Sprite(PIXI.Texture.fromFrame("assets/pops/amit.png")); 
-    popper.anchor.x = popper.anchor.y = 0.5;
-    popper.position.x = MathUtil.rndRange(0, this.opts.stageWidth);
-    popper.position.y = MathUtil.rndRange(0, this.opts.stageHeight);
-    this.stage.addChild(popper);
-
-    this.pops.push(popper);
-}
-
-Popper.prototype.update = function() {
-    for (var i = 0; i < this.pops.length; i++) {
-        var pop = this.pops[i];
-        pop.rotation += 0.1;
-    }
-}
-
-},{"./event_manager":1}],4:[function(require,module,exports){
+},{"./brain_controller":1,"./event_manager":2,"./video_controller":4}],4:[function(require,module,exports){
 "use strict"
 
 module.exports = function(opts) {
@@ -145,6 +164,11 @@ module.exports.VideoController = VideoController;
 function VideoController(opts) {
     if (!(this instanceof VideoController)) return new VideoController(opts)
 
+    this.scrollHeight = opts.scrollHeight;
+    this.zoomHeight = opts.zoomHeight;
+    this.stageWidth = opts.stageWidth;
+    this.stageHeight = opts.stageHeight;
+
     console.log("Video Controller started");
 }
 
@@ -152,19 +176,24 @@ VideoController.prototype.loadVideos = function (container, scrollHeight) {
 
     this.VIDEOS = {
         waiting: { 
-    //        'd': { path :'stubs/d.webm' },
-      //      'blink': {path: 'stubs/blink.webm'},
-        //    'e': {path: 'stubs/e.webm'} 
-            'facebook' : {path: 'fun/facebook.webm'}
+            'd': { paths : ['stubs/d.webm'] },
+            'blink': {paths: ['stubs/blink.webm']},
+            'e': {paths: [ 'stubs/e.webm' ]} 
         },
-        enter: {path: 'stubs/hat.webm', duration: 6.76 }
+        enter: {
+           // paths: ['stubs/hat.webm'], 
+            frames: {
+                path: 'stubs/hat',
+                count: 138
+            },
+            duration: 6.76 
+        }
     }
 
     this.eventEmitter = require('./event_manager').getEmitter();
-
     this.scrollHeight = scrollHeight;
 
-    console.log("Preloading all videos into ", container , " scroll height: " + scrollHeight);
+    console.log("Preloading all videos into ", container , " scroll height: " + this.scrollHeight, " zoom height: " , this.zoomHeight);
     var keys = Object.keys(this.VIDEOS.waiting);
 
     for (var i = 0; i < keys.length; i++) {
@@ -179,31 +208,64 @@ VideoController.prototype.loadVideos = function (container, scrollHeight) {
 VideoController.prototype.loadVideo = function (id, video, container) {
     video.loaded = false;
     video.id = id;
-    console.log("Loading " + video.path);
-
-    var videoElement = document.createElement("VIDEO"); 
-    videoElement.src = 'videos/' + video.path;
-    videoElement.id = id;
-    videoElement.style.display = "none";
-    video.element = videoElement;
 
     var self = this;
 
-    videoElement.oncanplaythrough = function(event) {
-        self.videoCanPlayThrough(event.target);
+    if (video.frames) {
+        console.log("Loading " + video.id + "(Regular video element)");
+        video.frames.images = [];
+        video.frames.loaded = 0;
+        for (var i = 1; i <= video.frames.count; i++) {
+            var image = new Image();
+            image.src = "videos/" + video.frames.path + "/frame_" + MathUtil.pad(i,4) + ".jpg";
+            console.log("Loading image: " + image.src);
+            image.addEventListener("load",function(event) {self.videoFrameLoaded(event.target)}, false);
+            image.name = video.id;
+            video.frames.images.push(image);
+        }
+        // Place holder image
+        var placeholderImage = new Image();
+        placeholderImage.src ="images/blank.jpg";
+        placeholderImage.id = video.id;
+        placeholderImage.style.position = "relative";
+        container.append(placeholderImage);
+        video.element = placeholderImage;
+        video.frames.current = 0;
+    } else {
+        console.log("Loading " + video.id + "(Regular video element)");
+        var videoElement = document.createElement("VIDEO"); 
+        videoElement.id = id;
+        videoElement.style.display = "none";
+        video.element = videoElement;
+
+        for (var i = 0; i < video.paths.length; i++) {
+            var sourceElement = document.createElement("SOURCE"); 
+            sourceElement.src = 'videos/' + video.paths[i];
+            videoElement.appendChild(sourceElement);
+        }
+
+
+        /*videoElement.oncanplaythrough = function(event) {
+            self.videoCanPlayThrough(event.target);
+        }*/
+
+        videoElement.addEventListener("canplaythrough",function(event) {self.videoCanPlayThrough(event.target)}, false);
+        videoElement.addEventListener("ended",function(event) {self.videoEnded(event.target)}, false);
+
+        container.append(videoElement);
+        videoElement.preload = "auto";
+        videoElement.load();
     }
+}
 
-    videoElement.onended = function(event) {
-        self.videoEnded(event.target);
+VideoController.prototype.videoFrameLoaded = function(image) {
+    var video = this.VIDEOS[image.name];
+    video.frames.loaded++;
+    console.log("Video frame loaded!", image, "Now loaded " + video.frames.loaded + " images");
+    if (video.frames.count == video.frames.loaded && !video.loaded) {
+        video.loaded = true;
+        this.checkLoaded();
     }
-
-    videoElement.onloadedmetadata = function(event) {
-        self.videoLoadedMetadata(event.target);
-    }
-
-    container.append(videoElement);
-    videoElement.preload = "auto";
-
 }
 
 VideoController.prototype.videoCanPlayThrough = function(video) {
@@ -222,6 +284,7 @@ VideoController.prototype.videoCanPlayThrough = function(video) {
 
 
 VideoController.prototype.videoLoadedMetadata = function(video) {
+    console.log("Loaded metadata");
 }
 
 VideoController.prototype.checkLoaded = function() {
@@ -267,27 +330,23 @@ VideoController.prototype.videoEnded = function(video) {
     }
 }
 
-VideoController.prototype.pageScroll = function(offset) {
-    if (!this.VIDEOS) {
-        return;
-    }
-    if (offset > 0) {
-       console.log(offset, "-->",(offset / this.scrollHeight) * this.VIDEOS.enter.duration)
-       this.showEnterAt((offset / this.scrollHeight) * this.VIDEOS.enter.duration); 
-    } 
-    else {
-        this.playRandomWaiting();
-    }
-}
-
 VideoController.prototype.loop = function() {
     if (!this.VIDEOS) {
         return;
     }
     var offset = window.pageYOffset;
-    if (offset > 0) {
-       this.showEnterAt((offset / this.scrollHeight) * this.VIDEOS.enter.duration); 
+    var zoomStart = this.scrollHeight - this.zoomHeight;
+
+    if (offset > 0 && offset <= zoomStart) {
+      
+       this.zoomVideo(1);
+       this.showVideoAt(this.VIDEOS.enter, (offset / zoomStart)); 
     } 
+    else if (offset > zoomStart) {
+        // Zoom
+        var zoomMultiplyer = 1 + ((offset - zoomStart) / this.zoomHeight  * 7);
+        this.zoomVideo(zoomMultiplyer);
+    }
     else {
         if (this.nowPlaying && this.nowPlaying.id == this.VIDEOS.enter.id) {
             this.playRandomWaiting();
@@ -295,13 +354,35 @@ VideoController.prototype.loop = function() {
     }
 }
 
-VideoController.prototype.showEnterAt = function(time) {
-    if (this.nowPlaying && this.nowPlaying.id != 'enter') {
+VideoController.prototype.zoomVideo = function(zoomMultiplyer) {
+    var video = this.nowPlaying;
+    video.element.style.height = this.stageHeight * zoomMultiplyer + "px";
+    video.element.style.width  = this.stageWidth * zoomMultiplyer + "px";
+    video.element.style.bottom = (-this.stageHeight / 2 + this.stageHeight * zoomMultiplyer / 2) + "px";
+    video.element.style.right = (-this.stageWidth / 2 + this.stageWidth * zoomMultiplyer / 2) + "px";
+}
+
+VideoController.prototype.showVideoAt = function(video, offsetPercentage) {
+    if (this.nowPlaying && this.nowPlaying.id != video.id) {
         this.hideVideo(this.nowPlaying);
-        this.showVideo(this.VIDEOS.enter);
-        this.nowPlaying = this.VIDEOS.enter;
+        this.showVideo(video);
+        this.nowPlaying = video;
     }
-    this.VIDEOS.enter.element.currentTime = time;
+    var time;
+    if (video.frames) {
+        // It's a frames video - show the appropiate frame
+        var frameNumber =  Math.min(Math.max( Math.round( offsetPercentage * video.frames.count), 1),video.frames.count);
+        if (frameNumber != video.frames.current) {
+            video.element.src = video.frames.images[frameNumber - 1].src;
+            video.element.style.width = this.stageWidth;
+            video.element.style.height = this.stageHeight;
+            video.frames.current = frameNumber;
+        }
+    } else {
+        // It's a real video - set currentTime
+        time = offsetPercentage * this.VIDEOS.enter.duration;
+        this.VIDEOS.enter.element.currentTime = time;
+    }
 }
 
 
@@ -312,7 +393,7 @@ VideoController.prototype.showVideo = function (video) {
   video.element.style.display = "block";  
 }
 
-},{"./event_manager":1}],5:[function(require,module,exports){
+},{"./event_manager":2}],5:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -617,4 +698,4 @@ function isUndefined(arg) {
   return arg === void 0;
 }
 
-},{}]},{},[2]);
+},{}]},{},[3]);
