@@ -23,7 +23,6 @@ renderer.view.style.position = "absolute"
 renderer.view.style.width = window.innerWidth + "px";
 renderer.view.style.height = window.innerHeight + "px";
 renderer.view.style.display = "block";
-document.body.appendChild(renderer.view);
 
 
 // 
@@ -56,9 +55,10 @@ eventEmitter.on('videos_loaded', function() {
 
 
 var loader = new PIXI.AssetLoader([
-  "assets/brain/bg.jpg",
-  "assets/brain/tile_neurons.png",
-  "assets/brain/displacement_map.png"
+    "assets/brain/bg.jpg",
+    "assets/brain/tile_neurons.png",
+    "assets/brain/displacement_map.png",
+    "works/pulse.png"
 ]);
 loader.onComplete = function() {
     assetsLoaded = true;
@@ -75,7 +75,9 @@ loader.load();
 
 function start() {
    $('#loading-container').hide();
+   $('#pixi-container').append(renderer.view);
    videoContoller.playWaiting();
+   requestAnimationFrame(animate);
 }
 
 
@@ -85,4 +87,3 @@ function animate() {
     renderer.render(stage);
     requestAnimationFrame(animate);
 }
-requestAnimationFrame(animate);

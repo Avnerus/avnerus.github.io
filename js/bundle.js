@@ -7,6 +7,8 @@ module.exports = function(opts) {
 
 module.exports.BrainController = BrainController;
 
+var WORKS = require('./works');
+
 
 function BrainController(opts) {
     if (!(this instanceof BrainController)) return new BrainController(opts)
@@ -19,6 +21,8 @@ function BrainController(opts) {
 BrainController.prototype.init = function (stage) {
 
     console.log("Brain Controller initializing");
+
+    this.stage = stage;
 
 	var bgContainer = new PIXI.DisplayObjectContainer();
 	stage.addChild(bgContainer);
@@ -36,9 +40,19 @@ BrainController.prototype.init = function (stage) {
     this.displacementFilter.scale.x = 50;
     this.displacementFilter.scale.y = 50;
 
-    bgContainer.filters = [this.displacementFilter];
+
+	this.twistFilter = new PIXI.TwistFilter();
+    this.twistFilter.angle = 5;
+    this.twistFilter.radius = 0.5;
+    this.twistFilter.offset.x = 0.5;
+    this.twistFilter.offset.y = 0.5;
+
+    bgContainer.filters = [this.twistFilter, this.displacementFilter];
 
     this.counter = 0;
+
+
+    this.spawnWork();
 }
 
 BrainController.prototype.update = function () {
@@ -47,9 +61,25 @@ BrainController.prototype.update = function () {
     this.overlay.tilePosition.y = this.counter * -5;
 	this.displacementFilter.offset.x = this.counter * 10;
 	this.displacementFilter.offset.y = this.counter * 10;
+    this.pulse.rotation += 0.1;
 }
 
-},{}],2:[function(require,module,exports){
+BrainController.prototype.spawnWork = function () {
+    // Choose a work to spawn
+    var work = WORKS[MathUtil.rndIntRange(0, WORKS.length -1)];
+    console.log("Spawning work ", work)
+
+    var sprite = PIXI.Sprite.fromFrame("works/" + work.image);
+    sprite.position.x = this.opts.stageWidth / 2;
+    sprite.position.y = this.opts.stageHeight / 2;
+    sprite.anchor.x = 0.5;
+    sprite.anchor.y = 0.5;
+    this.pulse = sprite;
+    this.stage.addChild(sprite);
+
+}
+
+},{"./works":5}],2:[function(require,module,exports){
 "use strict"
 
 var events = require('events');
@@ -61,7 +91,7 @@ module.exports.getEmitter = function() {
 }
 
 
-},{"events":5}],3:[function(require,module,exports){
+},{"events":6}],3:[function(require,module,exports){
 var gameOpts = {
     stageWidth: 1280,
     stageHeight: 720,
@@ -87,7 +117,6 @@ renderer.view.style.position = "absolute"
 renderer.view.style.width = window.innerWidth + "px";
 renderer.view.style.height = window.innerHeight + "px";
 renderer.view.style.display = "block";
-document.body.appendChild(renderer.view);
 
 
 // 
@@ -120,9 +149,10 @@ eventEmitter.on('videos_loaded', function() {
 
 
 var loader = new PIXI.AssetLoader([
-  "assets/brain/bg.jpg",
-  "assets/brain/tile_neurons.png",
-  "assets/brain/displacement_map.png"
+    "assets/brain/bg.jpg",
+    "assets/brain/tile_neurons.png",
+    "assets/brain/displacement_map.png",
+    "works/pulse.png"
 ]);
 loader.onComplete = function() {
     assetsLoaded = true;
@@ -139,6 +169,7 @@ loader.load();
 
 function start() {
    $('#loading-container').hide();
+   $('#pixi-container').append(renderer.view);
    videoContoller.playWaiting();
    requestAnimationFrame(animate);
 }
@@ -394,6 +425,16 @@ VideoController.prototype.showVideo = function (video) {
 }
 
 },{"./event_manager":2}],5:[function(require,module,exports){
+"use strict"
+
+module.exports = [
+    {
+        name: "Pulse",
+        image: "pulse.png"
+    }
+];
+
+},{}],6:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
