@@ -391,7 +391,7 @@ VideoController.prototype.loadVideo = function (id, video, container) {
         video.frames.loaded = 0;
         for (var i = 0; i < video.frames.count; i++) {
             var image = new Image();
-            image.src = "videos/" + video.frames.path + "/_" + MathUtil.pad(i + 269,5) + ".jpg";
+            image.src = "videos/" + video.frames.path + "/f_" + MathUtil.pad(i + 269,5) + ".jpg";
             console.log("Loading image: " + image.src);
             image.addEventListener("load",function(event) {self.videoFrameLoaded(event.target)}, false);
             image.name = video.id;
