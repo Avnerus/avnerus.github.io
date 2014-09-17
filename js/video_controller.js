@@ -15,22 +15,26 @@ function VideoController(opts) {
     this.stageWidth = opts.stageWidth;
     this.stageHeight = opts.stageHeight;
 
-    console.log("Video Controller started");
+    console.log("Video Controller started", opts);
 }
 
 VideoController.prototype.loadVideos = function (container, scrollHeight) {
 
     this.VIDEOS = {
         waiting: { 
-            'd': { paths : ['stubs/d.webm'] },
-            'blink': {paths: ['stubs/blink.webm']},
-            'e': {paths: [ 'stubs/e.webm' ]} 
+            'tired_blink': { paths : ['final/tired_blink.webm'] },
+            'shrink_lip': {paths: ['final/shrink_lip.webm']},
+            'rollingEyes_openMouth': {paths: [ 'final/rollingEyes_openMouth.webm' ]},
+            'rollingEyes_blink': {paths: [ 'final/rollingEyes_blink.webm' ]},
+            'open_mouth': {paths: [ 'final/open_mouth.webm' ]},
+            'neutral': {paths: [ 'final/neutral.webm' ]},
+            'blink02': {paths: [ 'final/blink02.webm' ]},
+            'blink01': {paths: [ 'final/blink01.webm' ]},
         },
         enter: {
-           // paths: ['stubs/hat.webm'], 
             frames: {
-                path: 'stubs/hat',
-                count: 138
+                path: 'final/enter',
+                count: 82
             },
             duration: 6.76 
         }
@@ -61,9 +65,9 @@ VideoController.prototype.loadVideo = function (id, video, container) {
         console.log("Loading " + video.id + "(Regular video element)");
         video.frames.images = [];
         video.frames.loaded = 0;
-        for (var i = 1; i <= video.frames.count; i++) {
+        for (var i = 0; i < video.frames.count; i++) {
             var image = new Image();
-            image.src = "videos/" + video.frames.path + "/frame_" + MathUtil.pad(i,4) + ".jpg";
+            image.src = "videos/" + video.frames.path + "/_" + MathUtil.pad(i + 269,5) + ".jpg";
             console.log("Loading image: " + image.src);
             image.addEventListener("load",function(event) {self.videoFrameLoaded(event.target)}, false);
             image.name = video.id;
@@ -197,6 +201,7 @@ VideoController.prototype.loop = function() {
         if (this.nowPlaying && this.nowPlaying.id == this.VIDEOS.enter.id) {
             this.playRandomWaiting();
         }
+        this.VIDEOS.enter.frames.current = 0;
     }
 }
 
@@ -204,8 +209,13 @@ VideoController.prototype.zoomVideo = function(zoomMultiplyer) {
     var video = this.nowPlaying;
     video.element.style.height = this.stageHeight * zoomMultiplyer + "px";
     video.element.style.width  = this.stageWidth * zoomMultiplyer + "px";
-    video.element.style.bottom = (-this.stageHeight / 2 + this.stageHeight * zoomMultiplyer / 2) + "px";
-    video.element.style.right = (-this.stageWidth / 2 + this.stageWidth * zoomMultiplyer / 2) + "px";
+    if (zoomMultiplyer != 1) {
+        video.element.style.bottom = (-this.stageHeight / 2 + (this.stageHeight + 210) * zoomMultiplyer / 2) + "px";
+        video.element.style.right = (-this.stageWidth / 2 + this.stageWidth * zoomMultiplyer / 2) + "px";
+    } else {
+        video.element.style.bottom = (-this.stageHeight / 2 + this.stageHeight * zoomMultiplyer / 2) + "px";
+        video.element.style.right = (-this.stageWidth / 2 + this.stageWidth * zoomMultiplyer / 2) + "px";
+    }
 }
 
 VideoController.prototype.showVideoAt = function(video, offsetPercentage) {
