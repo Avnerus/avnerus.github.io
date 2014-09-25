@@ -1,7 +1,7 @@
 var gameOpts = {
     stageWidth: 1280,
     stageHeight: 720,
-    zoomHeight: 1500
+    zoomHeight: 2500
 }
 
 
@@ -63,8 +63,6 @@ loader.onComplete = function() {
     assetsLoaded = true;
     console.log("Assets loaded!");
 
-    brainController.init(container, ratio);
-
     if (videosLoaded) {
         start();
     }
@@ -73,6 +71,7 @@ loader.load();
 
 
 function start() {
+   brainController.init(container, ratio);
    $('#loading-container').hide();
    $('#pixi-container').append(renderer.view);
    videoContoller.playWaiting();

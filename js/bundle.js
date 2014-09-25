@@ -1,8 +1,8 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 "use strict"
 
-module.exports = function(opts, videoContoller) {
-    return new BrainController(opts, videoContoller)
+module.exports = function(opts, videoController) {
+    return new BrainController(opts, videoController)
 }
 
 module.exports.BrainController = BrainController;
@@ -10,86 +10,11 @@ module.exports.BrainController = BrainController;
 var WORKS = require('./works');
 var TWEEN = require('tween.js');
 
-
-// MASK VALUES
-// **********
-
-
-var MASK_VALUES = [];
-for (var i = 0; i < 25; i++) {
-    MASK_VALUES.push([905, 261, 111, 44]);
-}
-
-MASK_VALUES.push([905, 260, 113, 44]);
-MASK_VALUES.push([905, 261, 113, 44]);
-MASK_VALUES.push([905, 262, 113, 45]);
-MASK_VALUES.push([905, 263, 113, 45]);
-MASK_VALUES.push([905, 264, 113, 45]); //30
-MASK_VALUES.push([905, 265, 113, 45]);
-MASK_VALUES.push([905, 267, 113, 45]);
-MASK_VALUES.push([905, 269, 113, 46]);
-MASK_VALUES.push([905, 273, 113, 47]); // 34
-MASK_VALUES.push([905, 273, 113, 49]);
-MASK_VALUES.push([905, 275, 113, 51]);
-MASK_VALUES.push([905, 277, 113, 53]);
-MASK_VALUES.push([905, 280, 113, 55]);
-MASK_VALUES.push([905, 283, 113, 57]);
-MASK_VALUES.push([905, 288, 113, 59]); //40
-MASK_VALUES.push([905, 295, 113, 63]);
-MASK_VALUES.push([905, 302, 113, 65]);
-MASK_VALUES.push([905, 312, 113, 70]);
-MASK_VALUES.push([905, 312, 113, 70]);
-MASK_VALUES.push([905, 320, 113, 75]);
-MASK_VALUES.push([905, 325, 113, 85]);
-MASK_VALUES.push([905, 328, 113, 94]); // 47
-MASK_VALUES.push([905, 348, 113, 95]);
-MASK_VALUES.push([905, 348, 113, 95]);
-MASK_VALUES.push([905, 370, 113, 95]); // 50
-MASK_VALUES.push([905, 370, 113, 95]); // 51
-MASK_VALUES.push([905, 383, 113, 115]);
-MASK_VALUES.push([905, 390, 113, 115]);
-MASK_VALUES.push([905, 410, 113, 115]);
-MASK_VALUES.push([905, 415, 113, 115]);
-MASK_VALUES.push([905, 420, 113, 115]);
-MASK_VALUES.push([905, 425, 113, 115]);
-MASK_VALUES.push([905, 425, 113, 115]);
-MASK_VALUES.push([905, 445, 113, 115]);
-MASK_VALUES.push([905, 460, 113, 120]); //60
-MASK_VALUES.push([905, 460, 113, 130]); 
-MASK_VALUES.push([905, 468, 113, 130]);
-MASK_VALUES.push([905, 480, 113, 140]);
-MASK_VALUES.push([905, 480, 113, 140]);
-MASK_VALUES.push([908, 490, 130, 140]); //65
-MASK_VALUES.push([908, 490, 130, 140]); 
-MASK_VALUES.push([908, 495, 120, 140]); 
-MASK_VALUES.push([908, 500, 120, 140]); 
-MASK_VALUES.push([915, 513, 122, 141]);  
-MASK_VALUES.push([915, 513, 122, 141]);  // 70
-MASK_VALUES.push([915, 513, 122, 141]);  
-MASK_VALUES.push([915, 513, 122, 141]);  // 70
-MASK_VALUES.push([915, 513, 122, 141]);  // 70
-MASK_VALUES.push([915, 513, 122, 141]);  // 70
-MASK_VALUES.push([915, 513, 122, 141]);  // 70
-MASK_VALUES.push([915, 513, 122, 141]);  // 70
-MASK_VALUES.push([915, 513, 122, 141]);  // 70
-MASK_VALUES.push([915, 513, 122, 141]);  // 70
-MASK_VALUES.push([915, 513, 122, 141]);  // 70
-MASK_VALUES.push([915, 513, 122, 141]);  // 70
-MASK_VALUES.push([915, 513, 122, 141]);  // 70
-MASK_VALUES.push([915, 513, 122, 141]);  // 70
-MASK_VALUES.push([915, 513, 122, 141]);  // 70
-MASK_VALUES.push([915, 513, 122, 141]);  // 70
-MASK_VALUES.push([915, 513, 122, 141]);  // 70
-MASK_VALUES.push([915, 513, 122, 141]);  // 70
-
-//
-
-
-function BrainController(opts, videoContoller) {
-    if (!(this instanceof BrainController)) return new BrainController(opts, videoContoller)
+function BrainController(opts, videoController) {
+    if (!(this instanceof BrainController)) return new BrainController(opts, videoController)
 
     this.opts = opts;
-    this.videoContoller = videoContoller;
+    this.videoController = videoController;
 
     console.log("Brain Controller started");
 }
@@ -128,16 +53,14 @@ BrainController.prototype.init = function (stage, ratio) {
     this.twistFilter.offset.y = 0.5;
 
 
+
+
     this.mask = new PIXI.Graphics();
-    this.mask.cacheAsBitmap = true;
-    this.mask.beginFill();
-    this.mask.drawEllipse(606, 208, 70, 30);
-    this.mask.endFill();
-
-
+    this.updateMaskbyVideoSize(1);
     this.maskContainer.mask = this.mask;
+    this.maskUpdated = true;
 
-    this.bgContainer.visible = false;
+    this.bgContainer.visible = true;
 
     this.bgContainer.filters = [
         this.twistFilter
@@ -158,7 +81,6 @@ BrainController.prototype.init = function (stage, ratio) {
 BrainController.prototype.update = function () {
     if (this.loaded) {
 
-
         this.setMaskByOffset();
 
         this.counter += 0.1;
@@ -172,19 +94,30 @@ BrainController.prototype.update = function () {
     }
 }
 
+BrainController.prototype.updateMaskbyVideoSize = function(multi) {
+    var ratioWidth = this.videoController.VIDEOS.enter.rect.width * (1 / this.ratio.x) - 100;
+    var ratioHeight = this.videoController.VIDEOS.enter.rect.height * (1 / this.ratio.y);
+    this.mask.clear();
+    this.mask.beginFill();
+    this.mask.drawRect(
+        Math.max(0, (this.opts.stageWidth - ratioWidth) / 2),
+        Math.max(0, (this.opts.stageHeight - ratioHeight) + 100 * multi),
+        Math.min(this.opts.stageWidth, ratioWidth),
+        Math.min(this.opts.stageHeight, ratioHeight)
+    );
+    this.mask.endFill();
+}
+
 BrainController.prototype.setMaskByOffset = function() {
     var offset = window.pageYOffset;
-    var currentFrame = this.videoContoller.VIDEOS.enter.frames.current;
-    console.log(currentFrame)
-    if (currentFrame == 0) {
-        this.bgContainer.visible = false;
-    } else {
-        this.bgContainer.visible = true;
-        var values = MASK_VALUES[currentFrame - 1];
-        this.mask.clear();
-        this.mask.beginFill();
-        this.mask.drawEllipse(values[0] * 1/this.ratio.x, values[1] * 1 / this.ratio.y, values[2] * 1/this.ratio.x, values[3] * 1/this.ratio.y);
-        this.mask.endFill();
+    var currentFrame = this.videoController.VIDEOS.enter.frames.current;
+    var multi = this.videoController.zoomMultiplyer;
+    if (multi > 1) {
+        this.maskUpdated = true;
+        this.updateMaskbyVideoSize(multi);      
+    } else if (this.maskUpdated) {
+        this.updateMaskbyVideoSize(1);
+        this.maskUpdated = false;
     }
 }
 
@@ -215,7 +148,6 @@ BrainController.prototype.spawnWork = function () {
 
     this.stage.addChild(sprite);
 
-
 }
 
 },{"./works":5,"tween.js":6}],2:[function(require,module,exports){
@@ -234,7 +166,7 @@ module.exports.getEmitter = function() {
 var gameOpts = {
     stageWidth: 1280,
     stageHeight: 720,
-    zoomHeight: 1500
+    zoomHeight: 2500
 }
 
 
@@ -296,8 +228,6 @@ loader.onComplete = function() {
     assetsLoaded = true;
     console.log("Assets loaded!");
 
-    brainController.init(container, ratio);
-
     if (videosLoaded) {
         start();
     }
@@ -306,6 +236,7 @@ loader.load();
 
 
 function start() {
+   brainController.init(container, ratio);
    $('#loading-container').hide();
    $('#pixi-container').append(renderer.view);
    videoContoller.playWaiting();
@@ -338,6 +269,7 @@ function VideoController(opts) {
     this.zoomHeight = opts.zoomHeight;
     this.stageWidth = opts.stageWidth;
     this.stageHeight = opts.stageHeight;
+    this.zoomMultiplyer = 1;
 
     console.log("Video Controller started", opts);
 }
@@ -353,12 +285,12 @@ VideoController.prototype.loadVideos = function (container, scrollHeight) {
             'open_mouth': {paths: [ 'final/open_mouth.webm' ]},
             'neutral': {paths: [ 'final/neutral.webm' ]},
             'blink02': {paths: [ 'final/blink02.webm' ]},
-            'blink01': {paths: [ 'final/blink01.webm' ]},
+            'blink01': {paths: [ 'final/blink01.webm' ]}
         },
         enter: {
             frames: {
                 path: 'final/enter',
-                count: 82
+                count: 43
             },
             duration: 6.76 
         }
@@ -391,7 +323,7 @@ VideoController.prototype.loadVideo = function (id, video, container) {
         video.frames.loaded = 0;
         for (var i = 0; i < video.frames.count; i++) {
             var image = new Image();
-            image.src = "videos/" + video.frames.path + "/f_" + MathUtil.pad(i + 269,5) + ".jpg";
+            image.src = "./videos/" + video.frames.path + "/avner_bevel_" + MathUtil.pad(i + 268,5) + "-fs8.png";
             console.log("Loading image: " + image.src);
             image.addEventListener("load",function(event) {self.videoFrameLoaded(event.target)}, false);
             image.name = video.id;
@@ -400,11 +332,18 @@ VideoController.prototype.loadVideo = function (id, video, container) {
         // Place holder image
         var placeholderImage = new Image();
         placeholderImage.src ="images/blank.jpg";
+        placeholderImage.alt = "";
         placeholderImage.id = video.id;
         placeholderImage.style.position = "relative";
+//        placeholderImage.style.top = "0px";
+  //      placeholderImage.style.bottom = "0px";
         container.append(placeholderImage);
         video.element = placeholderImage;
         video.frames.current = 0;
+        video.rect = {
+            width: this.stageWidth,
+            height: this.stageHeight
+        }
     } else {
         console.log("Loading " + video.id + "(Regular video element)");
         var videoElement = document.createElement("VIDEO"); 
@@ -518,28 +457,36 @@ VideoController.prototype.loop = function() {
     } 
     else if (offset > zoomStart) {
         // Zoom
-        var zoomMultiplyer = 1 + ((offset - zoomStart) / this.zoomHeight  * 7);
-        this.zoomVideo(zoomMultiplyer);
+        this.zoomMultiplyer = 1 + ((offset - zoomStart) / this.zoomHeight  * 15);
+        this.zoomVideo(this.zoomMultiplyer);
     }
     else {
         if (this.nowPlaying && this.nowPlaying.id == this.VIDEOS.enter.id) {
             this.playRandomWaiting();
         }
+        this.zoomMultiplyer = 1;
         this.VIDEOS.enter.frames.current = 0;
     }
 }
 
 VideoController.prototype.zoomVideo = function(zoomMultiplyer) {
     var video = this.nowPlaying;
-    video.element.style.height = this.stageHeight * zoomMultiplyer + "px";
-    video.element.style.width  = this.stageWidth * zoomMultiplyer + "px";
-    if (zoomMultiplyer != 1) {
-        video.element.style.bottom = (-this.stageHeight / 2 + (this.stageHeight + 210) * zoomMultiplyer / 2) + "px";
-        video.element.style.right = (-this.stageWidth / 2 + this.stageWidth * zoomMultiplyer / 2) + "px";
-    } else {
-        video.element.style.bottom = (-this.stageHeight / 2 + this.stageHeight * zoomMultiplyer / 2) + "px";
-        video.element.style.right = (-this.stageWidth / 2 + this.stageWidth * zoomMultiplyer / 2) + "px";
+    video.rect = {
+        width: this.stageWidth * zoomMultiplyer ,
+        height: this.stageHeight * zoomMultiplyer
     }
+    if (zoomMultiplyer != 1) {
+        video.rect.bottom = ((this.stageHeight / 2 - (this.stageHeight) * zoomMultiplyer / 2) + 15 *  zoomMultiplyer * zoomMultiplyer - 20);
+        video.rect.left = (this.stageWidth / 2 - this.stageWidth * zoomMultiplyer / 2);
+    } else {
+        video.rect.bottom = 0;
+        video.rect.left = 0;
+    }
+
+    video.element.style.height = video.rect.height + "px";
+    video.element.style.width = video.rect.width + "px";
+    video.element.style.left = video.rect.left + "px";
+    video.element.style.bottom = video.rect.bottom + "px";
 }
 
 VideoController.prototype.showVideoAt = function(video, offsetPercentage) {

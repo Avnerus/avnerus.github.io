@@ -14,6 +14,7 @@ function VideoController(opts) {
     this.zoomHeight = opts.zoomHeight;
     this.stageWidth = opts.stageWidth;
     this.stageHeight = opts.stageHeight;
+    this.zoomMultiplyer = 1;
 
     console.log("Video Controller started", opts);
 }
@@ -29,12 +30,12 @@ VideoController.prototype.loadVideos = function (container, scrollHeight) {
             'open_mouth': {paths: [ 'final/open_mouth.webm' ]},
             'neutral': {paths: [ 'final/neutral.webm' ]},
             'blink02': {paths: [ 'final/blink02.webm' ]},
-            'blink01': {paths: [ 'final/blink01.webm' ]},
+            'blink01': {paths: [ 'final/blink01.webm' ]}
         },
         enter: {
             frames: {
                 path: 'final/enter',
-                count: 82
+                count: 43
             },
             duration: 6.76 
         }
@@ -67,7 +68,7 @@ VideoController.prototype.loadVideo = function (id, video, container) {
         video.frames.loaded = 0;
         for (var i = 0; i < video.frames.count; i++) {
             var image = new Image();
-            image.src = "videos/" + video.frames.path + "/_" + MathUtil.pad(i + 269,5) + ".jpg";
+            image.src = "./videos/" + video.frames.path + "/avner_bevel_" + MathUtil.pad(i + 268,5) + "-fs8.png";
             console.log("Loading image: " + image.src);
             image.addEventListener("load",function(event) {self.videoFrameLoaded(event.target)}, false);
             image.name = video.id;
@@ -76,11 +77,18 @@ VideoController.prototype.loadVideo = function (id, video, container) {
         // Place holder image
         var placeholderImage = new Image();
         placeholderImage.src ="images/blank.jpg";
+        placeholderImage.alt = "";
         placeholderImage.id = video.id;
         placeholderImage.style.position = "relative";
+//        placeholderImage.style.top = "0px";
+  //      placeholderImage.style.bottom = "0px";
         container.append(placeholderImage);
         video.element = placeholderImage;
         video.frames.current = 0;
+        video.rect = {
+            width: this.stageWidth,
+            height: this.stageHeight
+        }
     } else {
         console.log("Loading " + video.id + "(Regular video element)");
         var videoElement = document.createElement("VIDEO"); 
@@ -194,28 +202,36 @@ VideoController.prototype.loop = function() {
     } 
     else if (offset > zoomStart) {
         // Zoom
-        var zoomMultiplyer = 1 + ((offset - zoomStart) / this.zoomHeight  * 7);
-        this.zoomVideo(zoomMultiplyer);
+        this.zoomMultiplyer = 1 + ((offset - zoomStart) / this.zoomHeight  * 15);
+        this.zoomVideo(this.zoomMultiplyer);
     }
     else {
         if (this.nowPlaying && this.nowPlaying.id == this.VIDEOS.enter.id) {
             this.playRandomWaiting();
         }
+        this.zoomMultiplyer = 1;
         this.VIDEOS.enter.frames.current = 0;
     }
 }
 
 VideoController.prototype.zoomVideo = function(zoomMultiplyer) {
     var video = this.nowPlaying;
-    video.element.style.height = this.stageHeight * zoomMultiplyer + "px";
-    video.element.style.width  = this.stageWidth * zoomMultiplyer + "px";
-    if (zoomMultiplyer != 1) {
-        video.element.style.bottom = (-this.stageHeight / 2 + (this.stageHeight + 210) * zoomMultiplyer / 2) + "px";
-        video.element.style.right = (-this.stageWidth / 2 + this.stageWidth * zoomMultiplyer / 2) + "px";
-    } else {
-        video.element.style.bottom = (-this.stageHeight / 2 + this.stageHeight * zoomMultiplyer / 2) + "px";
-        video.element.style.right = (-this.stageWidth / 2 + this.stageWidth * zoomMultiplyer / 2) + "px";
+    video.rect = {
+        width: this.stageWidth * zoomMultiplyer ,
+        height: this.stageHeight * zoomMultiplyer
     }
+    if (zoomMultiplyer != 1) {
+        video.rect.bottom = ((this.stageHeight / 2 - (this.stageHeight) * zoomMultiplyer / 2) + 15 *  zoomMultiplyer * zoomMultiplyer - 20);
+        video.rect.left = (this.stageWidth / 2 - this.stageWidth * zoomMultiplyer / 2);
+    } else {
+        video.rect.bottom = 0;
+        video.rect.left = 0;
+    }
+
+    video.element.style.height = video.rect.height + "px";
+    video.element.style.width = video.rect.width + "px";
+    video.element.style.left = video.rect.left + "px";
+    video.element.style.bottom = video.rect.bottom + "px";
 }
 
 VideoController.prototype.showVideoAt = function(video, offsetPercentage) {
