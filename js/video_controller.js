@@ -71,14 +71,24 @@ VideoController.prototype.loadVideo = function (id, video, container) {
             image.src = "./videos/" + video.frames.path + "/avner_bevel_" + MathUtil.pad(i + 268,5) + "-fs8.png";
             console.log("Loading image: " + image.src);
             image.addEventListener("load",function(event) {self.videoFrameLoaded(event.target)}, false);
-            image.name = video.id;
+            image.name = video.id + "_" + i;
+            image.id = video.id + "_" + i;
+            image.style.position = "fixed";
+            image.style.left = "-75em";
+            //image.style.left = "-9999em";
+            image.style.display = "block !important";
+            image.style.zIndex = 0;
             video.frames.images.push(image);
+            container.parent().append(image);
         }
+
+
         // Place holder image
         var placeholderImage = new Image();
         placeholderImage.src ="images/blank.jpg";
         placeholderImage.alt = "";
         placeholderImage.id = video.id;
+        placeholderImage.name = video.id;
         placeholderImage.style.position = "relative";
 //        placeholderImage.style.top = "0px";
   //      placeholderImage.style.bottom = "0px";
@@ -117,7 +127,7 @@ VideoController.prototype.loadVideo = function (id, video, container) {
 }
 
 VideoController.prototype.videoFrameLoaded = function(image) {
-    var video = this.VIDEOS[image.name];
+    var video = this.VIDEOS.enter; //hack
     video.frames.loaded++;
     console.log("Video frame loaded!", image, "Now loaded " + video.frames.loaded + " images");
     if (video.frames.count == video.frames.loaded && !video.loaded) {
@@ -197,13 +207,12 @@ VideoController.prototype.loop = function() {
 
     if (offset > 0 && offset <= zoomStart) {
       
-       this.zoomVideo(1);
+       this.zoomMultiplyer = 1;
        this.showVideoAt(this.VIDEOS.enter, (offset / zoomStart)); 
     } 
     else if (offset > zoomStart) {
         // Zoom
         this.zoomMultiplyer = 1 + ((offset - zoomStart) / this.zoomHeight  * 15);
-        this.zoomVideo(this.zoomMultiplyer);
     }
     else {
         if (this.nowPlaying && this.nowPlaying.id == this.VIDEOS.enter.id) {
@@ -212,6 +221,7 @@ VideoController.prototype.loop = function() {
         this.zoomMultiplyer = 1;
         this.VIDEOS.enter.frames.current = 0;
     }
+    this.zoomVideo(this.zoomMultiplyer);
 }
 
 VideoController.prototype.zoomVideo = function(zoomMultiplyer) {
@@ -220,7 +230,7 @@ VideoController.prototype.zoomVideo = function(zoomMultiplyer) {
         width: this.stageWidth * zoomMultiplyer ,
         height: this.stageHeight * zoomMultiplyer
     }
-    if (zoomMultiplyer != 1) {
+    if (zoomMultiplyer > 1) {
         video.rect.bottom = ((this.stageHeight / 2 - (this.stageHeight) * zoomMultiplyer / 2) + 15 *  zoomMultiplyer * zoomMultiplyer - 20);
         video.rect.left = (this.stageWidth / 2 - this.stageWidth * zoomMultiplyer / 2);
     } else {

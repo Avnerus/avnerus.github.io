@@ -1,8 +1,8 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 "use strict"
 
-module.exports = function(opts, videoController) {
-    return new BrainController(opts, videoController)
+module.exports = function(videoController) {
+    return new BrainController(videoController)
 }
 
 module.exports.BrainController = BrainController;
@@ -10,25 +10,27 @@ module.exports.BrainController = BrainController;
 var WORKS = require('./works');
 var TWEEN = require('tween.js');
 
-function BrainController(opts, videoController) {
-    if (!(this instanceof BrainController)) return new BrainController(opts, videoController)
+function BrainController(videoController) {
+    if (!(this instanceof BrainController)) return new BrainController(videoController)
 
-    this.opts = opts;
     this.videoController = videoController;
 
     console.log("Brain Controller started");
 }
 
-BrainController.prototype.init = function (stage, ratio) {
+BrainController.prototype.init = function (opts, stage, ratio, renderer) {
 
-    console.log("Brain Controller initializing");
+    console.log("Brain Controller initializing with opts", opts);
 
     this.stage = stage;
-    this.ratio = ratio;
+    this.ratio = ratio; 
+    this.opts = opts;
 
 	this.bgContainer = new PIXI.DisplayObjectContainer();
     this.maskContainer = new PIXI.DisplayObjectContainer();
     this.maskContainer.addChild(this.bgContainer);
+
+    this.renderer = renderer;
 
 	stage.addChild(this.maskContainer);
 
@@ -36,9 +38,9 @@ BrainController.prototype.init = function (stage, ratio) {
 	var bg = PIXI.Sprite.fromFrame("assets/brain/bg.jpg");
 	this.bgContainer.addChild(bg);
 
-	this.overlay = new PIXI.TilingSprite(PIXI.Texture.fromFrame("assets/brain/tile_neurons.png"), this.opts.stageWidth, this.opts.stageHeight);
-	this.overlay.alpha = 0.15;
-	this.bgContainer.addChild(this.overlay);
+	this.overlay = new PIXI.TilingSprite(PIXI.Texture.fromFrame("assets/brain/neurons_tile.png"), this.opts.stageWidth, this.opts.stageHeight);
+	this.overlay.alpha = 0.1;
+//	this.bgContainer.addChild(this.overlay);
 
 	var displacementTexture = PIXI.Texture.fromFrame("assets/brain/displacement_map.png");
 	this.displacementFilter = new PIXI.DisplacementFilter(displacementTexture);
@@ -47,24 +49,24 @@ BrainController.prototype.init = function (stage, ratio) {
 
 
 	this.twistFilter = new PIXI.TwistFilter();
-    this.twistFilter.angle = 5;
+    this.twistFilter.angle = 10; 
     this.twistFilter.radius = 0.5;
     this.twistFilter.offset.x = 0.5;
-    this.twistFilter.offset.y = 0.5;
+    this.twistFilter.offset.y = 0.25;
 
 
 
 
     this.mask = new PIXI.Graphics();
     this.updateMaskbyVideoSize(1);
-    this.maskContainer.mask = this.mask;
+//    this.maskContainer.mask = this.mask;
     this.maskUpdated = true;
 
     this.bgContainer.visible = true;
 
     this.bgContainer.filters = [
-        this.twistFilter
-     //   this.displacementFilter
+       this.twistFilter
+       //this.displacementFilter
     ];
 
     this.counter = 0;
@@ -94,18 +96,22 @@ BrainController.prototype.update = function () {
     }
 }
 
+
+BrainController.prototype.pageScroll = function (offset) {
+    if (!this.opts) {
+        return;
+    }
+    if (offset >= this.opts.scrollHeight - window.innerHeight) {
+        this.spawnWork();
+    }
+}
+
 BrainController.prototype.updateMaskbyVideoSize = function(multi) {
-    var ratioWidth = this.videoController.VIDEOS.enter.rect.width * (1 / this.ratio.x) - 100;
-    var ratioHeight = this.videoController.VIDEOS.enter.rect.height * (1 / this.ratio.y);
-    this.mask.clear();
-    this.mask.beginFill();
-    this.mask.drawRect(
-        Math.max(0, (this.opts.stageWidth - ratioWidth) / 2),
-        Math.max(0, (this.opts.stageHeight - ratioHeight) + 100 * multi),
-        Math.min(this.opts.stageWidth, ratioWidth),
-        Math.min(this.opts.stageHeight, ratioHeight)
-    );
-    this.mask.endFill();
+    var width = Math.min(window.innerWidth, this.opts.stageWidth * multi * 0.7);
+    this.renderer.view.style.width = width + "px";
+    this.renderer.view.style.marginLeft = (width / -2) + "px";
+    var height = Math.min(window.innerHeight, this.opts.stageHeight * multi * 0.7);
+    this.renderer.view.style.height = height + "px";
 }
 
 BrainController.prototype.setMaskByOffset = function() {
@@ -115,11 +121,19 @@ BrainController.prototype.setMaskByOffset = function() {
     if (multi > 1) {
         this.maskUpdated = true;
         this.updateMaskbyVideoSize(multi);      
+        this.setTwist(multi);
     } else if (this.maskUpdated) {
         this.updateMaskbyVideoSize(1);
+        this.setTwist(1);
         this.maskUpdated = false;
     }
 }
+
+
+BrainController.prototype.setTwist = function(multi) {
+    this.twistFilter.angle = Math.max(0,10 - multi  * 2 );
+}
+    
 
 
 BrainController.prototype.spawnWork = function () {
@@ -147,7 +161,6 @@ BrainController.prototype.spawnWork = function () {
     this.spawningSprite = sprite;
 
     this.stage.addChild(sprite);
-
 }
 
 },{"./works":5,"tween.js":6}],2:[function(require,module,exports){
@@ -179,20 +192,21 @@ var eventEmitter = require('./event_manager').getEmitter();
 
 window.onload = function() {
     window.scroll(0, 0);
-    videoContoller.loadVideos($('#video-container'), $('#main-container').height());
+    gameOpts.scrollHeight = $('#main-container').height();
+    videoContoller.loadVideos($('#video-container'), gameOpts.scrollHeight);
 }
 
 // GAME PART
 
 var TWEEN = require('tween.js');
 var BrainController = require('./brain_controller');
-var brainController = new BrainController(gameOpts, videoContoller);
+var brainController = new BrainController(videoContoller);
 
 var stage = new PIXI.Stage(0xFFFFFF);
 var renderer = new PIXI.autoDetectRenderer(gameOpts.stageWidth, gameOpts.stageHeight, null, true);
 //renderer.resize(window.innerWidth, window.innerHeight)
-renderer.view.style.width = window.innerWidth + "px";
-renderer.view.style.height = window.innerHeight + "px";
+//renderer.view.style.width = window.innerWidth + "px";
+//renderer.view.style.height = window.innerHeight + "px";
 
 var container = new PIXI.DisplayObjectContainer();
 
@@ -201,9 +215,9 @@ var ratio = { x: window.innerWidth / gameOpts.stageWidth, y : window.innerHeight
 stage.addChild(container);
 
 
-/*window.onscroll = function(event) {
-    videoContoller.pageScroll(window.pageYOffset);
-};*/
+window.onscroll = function(event) {
+    brainController.pageScroll(window.pageYOffset);
+}
 
 var videosLoaded = false
 var assetsLoaded = false;
@@ -220,7 +234,7 @@ eventEmitter.on('videos_loaded', function() {
 
 var loader = new PIXI.AssetLoader([
     "assets/brain/bg.jpg",
-    "assets/brain/tile_neurons.png",
+    "assets/brain/neurons_tile.png",
     "assets/brain/displacement_map.png",
     "works/pulse.png"
 ]);
@@ -236,7 +250,7 @@ loader.load();
 
 
 function start() {
-   brainController.init(container, ratio);
+   brainController.init(gameOpts,container, ratio, renderer);
    $('#loading-container').hide();
    $('#pixi-container').append(renderer.view);
    videoContoller.playWaiting();
@@ -326,14 +340,24 @@ VideoController.prototype.loadVideo = function (id, video, container) {
             image.src = "./videos/" + video.frames.path + "/avner_bevel_" + MathUtil.pad(i + 268,5) + "-fs8.png";
             console.log("Loading image: " + image.src);
             image.addEventListener("load",function(event) {self.videoFrameLoaded(event.target)}, false);
-            image.name = video.id;
+            image.name = video.id + "_" + i;
+            image.id = video.id + "_" + i;
+            image.style.position = "fixed";
+            image.style.left = "-75em";
+            //image.style.left = "-9999em";
+            image.style.display = "block !important";
+            image.style.zIndex = 0;
             video.frames.images.push(image);
+            container.parent().append(image);
         }
+
+
         // Place holder image
         var placeholderImage = new Image();
         placeholderImage.src ="images/blank.jpg";
         placeholderImage.alt = "";
         placeholderImage.id = video.id;
+        placeholderImage.name = video.id;
         placeholderImage.style.position = "relative";
 //        placeholderImage.style.top = "0px";
   //      placeholderImage.style.bottom = "0px";
@@ -372,7 +396,7 @@ VideoController.prototype.loadVideo = function (id, video, container) {
 }
 
 VideoController.prototype.videoFrameLoaded = function(image) {
-    var video = this.VIDEOS[image.name];
+    var video = this.VIDEOS.enter; //hack
     video.frames.loaded++;
     console.log("Video frame loaded!", image, "Now loaded " + video.frames.loaded + " images");
     if (video.frames.count == video.frames.loaded && !video.loaded) {
@@ -452,13 +476,12 @@ VideoController.prototype.loop = function() {
 
     if (offset > 0 && offset <= zoomStart) {
       
-       this.zoomVideo(1);
+       this.zoomMultiplyer = 1;
        this.showVideoAt(this.VIDEOS.enter, (offset / zoomStart)); 
     } 
     else if (offset > zoomStart) {
         // Zoom
         this.zoomMultiplyer = 1 + ((offset - zoomStart) / this.zoomHeight  * 15);
-        this.zoomVideo(this.zoomMultiplyer);
     }
     else {
         if (this.nowPlaying && this.nowPlaying.id == this.VIDEOS.enter.id) {
@@ -467,6 +490,7 @@ VideoController.prototype.loop = function() {
         this.zoomMultiplyer = 1;
         this.VIDEOS.enter.frames.current = 0;
     }
+    this.zoomVideo(this.zoomMultiplyer);
 }
 
 VideoController.prototype.zoomVideo = function(zoomMultiplyer) {
@@ -475,7 +499,7 @@ VideoController.prototype.zoomVideo = function(zoomMultiplyer) {
         width: this.stageWidth * zoomMultiplyer ,
         height: this.stageHeight * zoomMultiplyer
     }
-    if (zoomMultiplyer != 1) {
+    if (zoomMultiplyer > 1) {
         video.rect.bottom = ((this.stageHeight / 2 - (this.stageHeight) * zoomMultiplyer / 2) + 15 *  zoomMultiplyer * zoomMultiplyer - 20);
         video.rect.left = (this.stageWidth / 2 - this.stageWidth * zoomMultiplyer / 2);
     } else {
