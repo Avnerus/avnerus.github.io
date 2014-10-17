@@ -1,18 +1,50 @@
+var gameOpts = {
+    stageWidth: 1280,
+    stageHeight: 720,
+    zoomHeight: 2500
+}
+
+
+// 
 // VIDEO PART
 //
 var VideoController = require('./video_controller');
-var Popper = require('./popper');
-var videoContoller = new VideoController();
+var videoContoller = new VideoController(gameOpts);
 var eventEmitter = require('./event_manager').getEmitter();
 
 window.onload = function() {
     window.scroll(0, 0);
-    videoContoller.loadVideos($('#video-container'),$('#main-container').height());
+    gameOpts.scrollHeight = $('#main-container').height();
+    videoContoller.loadVideos($('#video-container'), gameOpts.scrollHeight);
 }
 
-/*window.onscroll = function(event) {
-    videoContoller.pageScroll(window.pageYOffset);
-};*/
+// GAME PART
+
+var TWEEN = require('tween.js');
+var BrainController = require('./brain_controller');
+var brainController = new BrainController(videoContoller);
+
+var stage = new PIXI.Stage(0xFFFFFF, true);
+var renderer = new PIXI.autoDetectRenderer(gameOpts.stageWidth, gameOpts.stageHeight, null, true);
+//renderer.resize(window.innerWidth, window.innerHeight)
+//renderer.view.style.width = window.innerWidth + "px";
+//renderer.view.style.height = window.innerHeight + "px";
+
+var container = new PIXI.DisplayObjectContainer();
+
+var ratio = { x: window.innerWidth / gameOpts.stageWidth, y : window.innerHeight / gameOpts.stageHeight};
+var wasScrolled = false;
+
+stage.addChild(container);
+
+
+window.onscroll = function(event) {
+    brainController.pageScroll(window.pageYOffset);
+    if (window.pageYOffset > 0 && !wasScrolled) {
+        wasScrolled = true;
+        hideDownArrow();
+    }
+}
 
 var videosLoaded = false
 var assetsLoaded = false;
@@ -27,10 +59,19 @@ eventEmitter.on('videos_loaded', function() {
 });
 
 
-var loader = new PIXI.AssetLoader(["assets/pops/amit.json"]);
+var loader = new PIXI.AssetLoader([
+    "assets/brain/bg.jpg",
+    "assets/brain/tile_neurons.png",
+    "assets/brain/displacement_map.png",
+    "assets/works/pulse.png",
+    "assets/works/gamad.json",
+    "assets/works/gamad2.json",
+    "assets/works/train.png"
+]);
 loader.onComplete = function() {
     assetsLoaded = true;
     console.log("Assets loaded!");
+
     if (videosLoaded) {
         start();
     }
@@ -39,35 +80,30 @@ loader.load();
 
 
 function start() {
+   brainController.init(gameOpts, container, ratio, renderer, $('#work-container'));
    $('#loading-container').hide();
-   popper.init();
    videoContoller.playWaiting();
+   $('#pixi-container').append(renderer.view);
+   setTimeout(showDownArrow, 5000);
+
+   requestAnimationFrame(animate);
 }
 
-/*
-function loop() {
-    videoContoller.loop();
-    requestAnimationFrame(loop);
+function showDownArrow() {
+    if (!wasScrolled) {
+        $('#arrow-container').css('opacity', 1);
+    }
 }
 
-loop();*/
-
-
-// GAME PART
-
-var gameOpts = {
-    stageWidth: 1280,
-    stageHeight: 720,
+function hideDownArrow() {
+    console.log("Hide down arrow!");
+    $('#arrow-container').hide();
 }
-var stage = new PIXI.Stage(0xFFFFFF);
-var popper = new Popper(stage, gameOpts);
-var renderer = new PIXI.autoDetectRenderer(gameOpts.stageWidth, gameOpts.stageHeight, null, true);
-document.body.appendChild(renderer.view);
 
 
 function animate() {
-    popper.update();
+    videoContoller.loop();
+    brainController.update();
     renderer.render(stage);
     requestAnimationFrame(animate);
 }
-requestAnimationFrame(animate);
