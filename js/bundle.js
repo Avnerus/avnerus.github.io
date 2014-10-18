@@ -233,7 +233,6 @@ var eventEmitter = require('./event_manager').getEmitter();
 window.onload = function() {
     window.scroll(0, 0);
     gameOpts.scrollHeight = $('#main-container').height();
-    videoContoller.loadVideos($('#video-container'), gameOpts.scrollHeight);
 }
 
 // GAME PART
@@ -291,8 +290,9 @@ loader.onComplete = function() {
     console.log("Assets loaded!");
 
     if (videosLoaded) {
-        start();
+       start();
     }
+    videoContoller.loadVideos($('#video-container'), gameOpts.scrollHeight);
 };
 loader.load();
 
