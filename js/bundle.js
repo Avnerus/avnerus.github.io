@@ -21,7 +21,7 @@ function BrainController(videoController) {
     console.log("Brain Controller started");
 }
 
-BrainController.prototype.init = function (opts, stage, ratio, renderer, workContainer) {
+BrainController.prototype.init = function (opts, stage, ratio, renderer, workContainer, infoContainer) {
 
     console.log("Brain Controller initializing with opts", opts);
 
@@ -29,9 +29,11 @@ BrainController.prototype.init = function (opts, stage, ratio, renderer, workCon
     this.ratio = ratio; 
     this.opts = opts;
     this.workContainer = workContainer;
+    this.infoContainer = infoContainer;
 
 	this.bgContainer = new PIXI.DisplayObjectContainer();
     this.showingWork = false;
+    this.showingInfo = false;
 
     this.renderer = renderer;
 
@@ -80,6 +82,10 @@ BrainController.prototype.init = function (opts, stage, ratio, renderer, workCon
     eventEmitter.on('work_clicked', function(work) {
         self.workClicked(work);
     });
+
+    eventEmitter.on('info_clicked', function() {
+        self.infoClicked();
+    });
 }
 
 
@@ -101,39 +107,67 @@ BrainController.prototype.hideWork = function() {
     this.showingWork = false;
 }
 
+BrainController.prototype.infoClicked = function() {
+    console.log("Info clicked!");
+    this.showInfo();
+}
+
+
+BrainController.prototype.showInfo = function() {
+    this.infoContainer.css("height", "600px");
+    this.infoContainer.css("opacity", 1);
+    this.showingInfo = true;
+}
+
+BrainController.prototype.hideInfo = function() {
+    this.infoContainer.css("opacity", 0);
+    this.showingInfo = false;
+}
+
+
 BrainController.prototype.initWorks = function() {
     
     var self = this;
 
     this.vm = new Vue({
-        el: '#work-container',
+        el: '#main-container',
         data: {},
         methods: {
             closeWork: function(e) {
                 self.hideWork();
+            },
+            closeInfo: function(e) {
+                self.hideInfo();
             }
         }
     });
 
     $("#work-container").on($.support.transition.end,
     function() {
-        console.log("Transition done!", self.workContainer.css("opacity"))
         if (self.workContainer.css("opacity") == 0) {
             self.workContainer.css("height", "0px");
+        }
+    });
+
+    $("#info-container").on($.support.transition.end,
+    function() {
+        if (self.infoContainer.css("opacity") == 0) {
+            self.infoContainer.css("height", "0px");
         }
     });
 
     this.works = [
         new (require('./works/pulse'))(),
         new (require('./works/gamad'))(),
-        new (require('./works/train'))()
+        new (require('./works/train'))(),
+        new (require('./works/info'))()
     ]
 
      $('.flexslider').flexslider();
 
     for (var i = 0; i < this.works.length; i++) {
         var work = this.works[i];
-        work.init(this.opts, this.bgContainer, this.workClicked);
+        work.init(this.opts, this.bgContainer);
     }
 }
 
@@ -190,6 +224,9 @@ BrainController.prototype.setMaskByOffset = function() {
     if (multi < 8 && this.showingWork) {
         this.hideWork();
     }
+    if (multi < 8 && this.showingInfo) {
+        this.hideInfo();
+    }
 }
 
 
@@ -203,7 +240,7 @@ BrainController.prototype.spawnWork = function () {
     
 }
 
-},{"./event_manager":2,"./works/gamad":5,"./works/pulse":6,"./works/train":7,"tween.js":8,"vue":29}],2:[function(require,module,exports){
+},{"./event_manager":2,"./works/gamad":5,"./works/info":6,"./works/pulse":7,"./works/train":8,"tween.js":9,"vue":30}],2:[function(require,module,exports){
 "use strict"
 
 var events = require('events');
@@ -215,7 +252,7 @@ module.exports.getEmitter = function() {
 }
 
 
-},{"events":36}],3:[function(require,module,exports){
+},{"events":37}],3:[function(require,module,exports){
 var gameOpts = {
     stageWidth: 1280,
     stageHeight: 720,
@@ -256,7 +293,7 @@ stage.addChild(container);
 
 window.onscroll = function(event) {
     brainController.pageScroll(window.pageYOffset);
-    if (window.pageYOffset > 0 && !wasScrolled) {
+    if (window.pageYOffset > 200 && !wasScrolled) {
         wasScrolled = true;
         hideDownArrow();
     }
@@ -282,7 +319,8 @@ var loader = new PIXI.AssetLoader([
     "assets/works/pulse.png",
     "assets/works/gamad.json",
     "assets/works/gamad2.json",
-    "assets/works/train.png"
+    "assets/works/train.png",
+    "assets/works/question_block.png"
 ]);
 loader.onComplete = function() {
     assetsLoaded = true;
@@ -298,7 +336,7 @@ loader.load();
 
 
 function start() {
-   brainController.init(gameOpts, container, ratio, renderer, $('#work-container'));
+   brainController.init(gameOpts, container, ratio, renderer, $('#work-container'), $('#info-container'));
    $('#loading-container').hide();
    videoContoller.playWaiting();
    $('#pixi-container').append(renderer.view);
@@ -326,7 +364,7 @@ function animate() {
     requestAnimationFrame(animate);
 }
 
-},{"./brain_controller":1,"./event_manager":2,"./video_controller":4,"tween.js":8}],4:[function(require,module,exports){
+},{"./brain_controller":1,"./event_manager":2,"./video_controller":4,"tween.js":9}],4:[function(require,module,exports){
 "use strict"
 
 module.exports = function(opts) {
@@ -702,6 +740,65 @@ Gamad.prototype.getData = function() {
 "use strict"
 
 module.exports = function() {
+    return new Info()
+}
+
+module.exports.Info = Info;
+
+function Info() {
+    if (!(this instanceof Info)) return new Info()
+
+    this.loaded = false;
+    console.log("Info work constructed");
+}
+
+Info.prototype.init = function (opts, stage, clickHandler) {
+
+    var self = this;
+
+    console.log("Info work initializing with opts", opts);
+    this.stage = stage;
+    this.opts = opts;
+    this.eventEmitter = require('../event_manager').getEmitter();
+
+    this.questionBlock = PIXI.Sprite.fromFrame("assets/works/question_block.png");
+    this.questionBlock.position.x = 120
+    this.questionBlock.position.y = 544 
+    this.questionBlock.anchor.x = 0.5;
+    this.questionBlock.anchor.y = 0.5;
+    this.questionBlock.scale.x = 0.5;
+    this.questionBlock.scale.y = 0.5;
+    this.questionBlock.buttonMode = true;
+    this.questionBlock.setInteractive(true);
+
+    this.questionBlock.click = function(mouseData){
+      console.log("INFO CLICK");
+      self.eventEmitter.emit('info_clicked', self);
+    }
+
+    this.stage.addChild(this.questionBlock);
+
+}
+
+
+Info.prototype.update = function() {
+    
+}
+
+
+Info.prototype.getData = function() {
+    return {
+        name: "Info",
+        description: ""
+    }
+}
+
+
+
+},{"../event_manager":2}],7:[function(require,module,exports){
+"use strict"
+
+module.exports = function() {
     return new Pulse()
 }
 
@@ -786,7 +883,7 @@ Pulse.prototype.getData = function() {
 }
 
 
-},{"../event_manager":2}],7:[function(require,module,exports){
+},{"../event_manager":2}],8:[function(require,module,exports){
 "use strict"
 
 module.exports = function() {
@@ -896,7 +993,7 @@ Train.prototype.getData = function() {
 }
 
 
-},{"../event_manager":2}],8:[function(require,module,exports){
+},{"../event_manager":2}],9:[function(require,module,exports){
 /**
  * Tween.js - Licensed under the MIT license
  * https://github.com/sole/tween.js
@@ -1654,7 +1751,7 @@ TWEEN.Interpolation = {
 };
 
 module.exports=TWEEN;
-},{}],9:[function(require,module,exports){
+},{}],10:[function(require,module,exports){
 var utils = require('./utils')
 
 function Batcher () {
@@ -1700,7 +1797,7 @@ BatcherProto.reset = function () {
 }
 
 module.exports = Batcher
-},{"./utils":34}],10:[function(require,module,exports){
+},{"./utils":35}],11:[function(require,module,exports){
 var Batcher        = require('./batcher'),
     bindingBatcher = new Batcher(),
     bindingId      = 1
@@ -1804,7 +1901,7 @@ BindingProto.unbind = function () {
 }
 
 module.exports = Binding
-},{"./batcher":9}],11:[function(require,module,exports){
+},{"./batcher":10}],12:[function(require,module,exports){
 var Emitter     = require('./emitter'),
     Observer    = require('./observer'),
     config      = require('./config'),
@@ -2842,7 +2939,7 @@ function getRoot (compiler) {
 }
 
 module.exports = Compiler
-},{"./binding":10,"./config":12,"./deps-parser":13,"./directive":14,"./emitter":25,"./exp-parser":26,"./observer":30,"./text-parser":32,"./utils":34,"./viewmodel":35}],12:[function(require,module,exports){
+},{"./binding":11,"./config":13,"./deps-parser":14,"./directive":15,"./emitter":26,"./exp-parser":27,"./observer":31,"./text-parser":33,"./utils":35,"./viewmodel":36}],13:[function(require,module,exports){
 var TextParser = require('./text-parser')
 
 module.exports = {
@@ -2862,7 +2959,7 @@ Object.defineProperty(module.exports, 'delimiters', {
         TextParser.setDelimiters(delimiters)
     }
 })
-},{"./text-parser":32}],13:[function(require,module,exports){
+},{"./text-parser":33}],14:[function(require,module,exports){
 var Emitter  = require('./emitter'),
     utils    = require('./utils'),
     Observer = require('./observer'),
@@ -2928,7 +3025,7 @@ module.exports = {
     }
     
 }
-},{"./emitter":25,"./observer":30,"./utils":34}],14:[function(require,module,exports){
+},{"./emitter":26,"./observer":31,"./utils":35}],15:[function(require,module,exports){
 var dirId           = 1,
     ARG_RE          = /^[\w\$-]+$/,
     FILTER_TOKEN_RE = /[^\s'"]+|'[^']+'|"[^"]+"/g,
@@ -3187,7 +3284,7 @@ function escapeQuote (v) {
 }
 
 module.exports = Directive
-},{"./text-parser":32}],15:[function(require,module,exports){
+},{"./text-parser":33}],16:[function(require,module,exports){
 var utils = require('../utils'),
     slice = [].slice
 
@@ -3229,7 +3326,7 @@ module.exports = {
         parent.insertBefore(frag, this.el)
     }
 }
-},{"../utils":34}],16:[function(require,module,exports){
+},{"../utils":35}],17:[function(require,module,exports){
 var utils    = require('../utils')
 
 /**
@@ -3286,7 +3383,7 @@ module.exports = {
         }
     }
 }
-},{"../utils":34}],17:[function(require,module,exports){
+},{"../utils":35}],18:[function(require,module,exports){
 var utils      = require('../utils'),
     config     = require('../config'),
     transition = require('../transition'),
@@ -3416,7 +3513,7 @@ directives.html    = require('./html')
 directives.style   = require('./style')
 directives.partial = require('./partial')
 directives.view    = require('./view')
-},{"../config":12,"../transition":33,"../utils":34,"./html":15,"./if":16,"./model":18,"./on":19,"./partial":20,"./repeat":21,"./style":22,"./view":23,"./with":24}],18:[function(require,module,exports){
+},{"../config":13,"../transition":34,"../utils":35,"./html":16,"./if":17,"./model":19,"./on":20,"./partial":21,"./repeat":22,"./style":23,"./view":24,"./with":25}],19:[function(require,module,exports){
 var utils = require('../utils'),
     isIE9 = navigator.userAgent.indexOf('MSIE 9.0') > 0,
     filter = [].filter
@@ -3591,7 +3688,7 @@ module.exports = {
         }
     }
 }
-},{"../utils":34}],19:[function(require,module,exports){
+},{"../utils":35}],20:[function(require,module,exports){
 var utils    = require('../utils')
 
 /**
@@ -3650,7 +3747,7 @@ module.exports = {
         this.el.removeEventListener('load', this.iframeBind)
     }
 }
-},{"../utils":34}],20:[function(require,module,exports){
+},{"../utils":35}],21:[function(require,module,exports){
 var utils = require('../utils')
 
 /**
@@ -3701,7 +3798,7 @@ module.exports = {
     }
 
 }
-},{"../utils":34}],21:[function(require,module,exports){
+},{"../utils":35}],22:[function(require,module,exports){
 var utils      = require('../utils'),
     config     = require('../config')
 
@@ -3948,7 +4045,7 @@ function indexOf (vms, obj) {
     }
     return -1
 }
-},{"../config":12,"../utils":34}],22:[function(require,module,exports){
+},{"../config":13,"../utils":35}],23:[function(require,module,exports){
 var prefixes = ['-webkit-', '-moz-', '-ms-']
 
 /**
@@ -3995,7 +4092,7 @@ module.exports = {
     }
 
 }
-},{}],23:[function(require,module,exports){
+},{}],24:[function(require,module,exports){
 /**
  *  Manages a conditional child VM using the
  *  binding's value as the component ID.
@@ -4052,7 +4149,7 @@ module.exports = {
     }
 
 }
-},{}],24:[function(require,module,exports){
+},{}],25:[function(require,module,exports){
 var utils = require('../utils')
 
 /**
@@ -4103,7 +4200,7 @@ module.exports = {
     }
 
 }
-},{"../utils":34}],25:[function(require,module,exports){
+},{"../utils":35}],26:[function(require,module,exports){
 var slice = [].slice
 
 function Emitter (ctx) {
@@ -4201,7 +4298,7 @@ EmitterProto.applyEmit = function (event) {
 }
 
 module.exports = Emitter
-},{}],26:[function(require,module,exports){
+},{}],27:[function(require,module,exports){
 var utils           = require('./utils'),
     STR_SAVE_RE     = /"(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'/g,
     STR_RESTORE_RE  = /"(\d+)"/g,
@@ -4392,7 +4489,7 @@ exports.eval = function (exp, compiler, data) {
     }
     return res
 }
-},{"./utils":34}],27:[function(require,module,exports){
+},{"./utils":35}],28:[function(require,module,exports){
 var utils    = require('./utils'),
     get      = utils.get,
     slice    = [].slice,
@@ -4584,7 +4681,7 @@ function stripQuotes (str) {
         return str.slice(1, -1)
     }
 }
-},{"./utils":34}],28:[function(require,module,exports){
+},{"./utils":35}],29:[function(require,module,exports){
 // string -> DOM conversion
 // wrappers originally from jQuery, scooped from component/domify
 var map = {
@@ -4652,7 +4749,7 @@ module.exports = function (templateString) {
     }
     return frag
 }
-},{}],29:[function(require,module,exports){
+},{}],30:[function(require,module,exports){
 var config      = require('./config'),
     ViewModel   = require('./viewmodel'),
     utils       = require('./utils'),
@@ -4841,7 +4938,7 @@ function inheritOptions (child, parent, topLevel) {
 }
 
 module.exports = ViewModel
-},{"./config":12,"./directives":17,"./filters":27,"./observer":30,"./transition":33,"./utils":34,"./viewmodel":35}],30:[function(require,module,exports){
+},{"./config":13,"./directives":18,"./filters":28,"./observer":31,"./transition":34,"./utils":35,"./viewmodel":36}],31:[function(require,module,exports){
 /* jshint proto:true */
 
 var Emitter  = require('./emitter'),
@@ -5288,7 +5385,7 @@ var pub = module.exports = {
     convert     : convert,
     convertKey  : convertKey
 }
-},{"./emitter":25,"./utils":34}],31:[function(require,module,exports){
+},{"./emitter":26,"./utils":35}],32:[function(require,module,exports){
 var toFragment = require('./fragment');
 
 /**
@@ -5336,7 +5433,7 @@ module.exports = function(template) {
     return toFragment(templateNode.outerHTML);
 }
 
-},{"./fragment":28}],32:[function(require,module,exports){
+},{"./fragment":29}],33:[function(require,module,exports){
 var openChar        = '{',
     endChar         = '}',
     ESCAPE_RE       = /[-.*+?^${}()|[\]\/\\]/g,
@@ -5433,7 +5530,7 @@ exports.parse         = parse
 exports.parseAttr     = parseAttr
 exports.setDelimiters = setDelimiters
 exports.delimiters    = [openChar, endChar]
-},{"./directive":14}],33:[function(require,module,exports){
+},{"./directive":15}],34:[function(require,module,exports){
 var endEvents  = sniffEndEvents(),
     config     = require('./config'),
     // batch enter animations so we only force the layout once
@@ -5662,7 +5759,7 @@ function sniffEndEvents () {
 // Expose some stuff for testing purposes
 transition.codes = codes
 transition.sniff = sniffEndEvents
-},{"./batcher":9,"./config":12}],34:[function(require,module,exports){
+},{"./batcher":10,"./config":13}],35:[function(require,module,exports){
 var config       = require('./config'),
     toString     = ({}).toString,
     win          = window,
@@ -5989,7 +6086,7 @@ function enableDebug () {
         }
     }
 }
-},{"./config":12,"./fragment":28,"./template-parser.js":31,"./viewmodel":35}],35:[function(require,module,exports){
+},{"./config":13,"./fragment":29,"./template-parser.js":32,"./viewmodel":36}],36:[function(require,module,exports){
 var Compiler   = require('./compiler'),
     utils      = require('./utils'),
     transition = require('./transition'),
@@ -6181,7 +6278,7 @@ function query (el) {
 
 module.exports = ViewModel
 
-},{"./batcher":9,"./compiler":11,"./transition":33,"./utils":34}],36:[function(require,module,exports){
+},{"./batcher":10,"./compiler":12,"./transition":34,"./utils":35}],37:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
