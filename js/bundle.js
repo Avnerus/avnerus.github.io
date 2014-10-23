@@ -160,7 +160,8 @@ BrainController.prototype.initWorks = function() {
         new (require('./works/pulse'))(),
         new (require('./works/gamad'))(),
         new (require('./works/train'))(),
-        new (require('./works/info'))()
+        new (require('./works/info'))(),
+        new (require('./works/koala'))()
     ]
 
      $('.flexslider').flexslider();
@@ -240,7 +241,7 @@ BrainController.prototype.spawnWork = function () {
     
 }
 
-},{"./event_manager":2,"./works/gamad":5,"./works/info":6,"./works/pulse":7,"./works/train":8,"tween.js":9,"vue":30}],2:[function(require,module,exports){
+},{"./event_manager":2,"./works/gamad":5,"./works/info":6,"./works/koala":7,"./works/pulse":8,"./works/train":9,"tween.js":10,"vue":31}],2:[function(require,module,exports){
 "use strict"
 
 var events = require('events');
@@ -252,7 +253,7 @@ module.exports.getEmitter = function() {
 }
 
 
-},{"events":37}],3:[function(require,module,exports){
+},{"events":38}],3:[function(require,module,exports){
 var gameOpts = {
     stageWidth: 1280,
     stageHeight: 720,
@@ -320,7 +321,8 @@ var loader = new PIXI.AssetLoader([
     "assets/works/gamad.json",
     "assets/works/gamad2.json",
     "assets/works/train.png",
-    "assets/works/question_block.png"
+    "assets/works/question_block.png",
+    "assets/works/Koala.json"
 ]);
 loader.onComplete = function() {
     assetsLoaded = true;
@@ -364,7 +366,7 @@ function animate() {
     requestAnimationFrame(animate);
 }
 
-},{"./brain_controller":1,"./event_manager":2,"./video_controller":4,"tween.js":9}],4:[function(require,module,exports){
+},{"./brain_controller":1,"./event_manager":2,"./video_controller":4,"tween.js":10}],4:[function(require,module,exports){
 "use strict"
 
 module.exports = function(opts) {
@@ -776,6 +778,8 @@ Info.prototype.init = function (opts, stage, clickHandler) {
       self.eventEmitter.emit('info_clicked', self);
     }
 
+    TweenMax.to(this.questionBlock.position , 1, {ease: Power2.easeIn, repeat: -1, yoyo: true, y: 504});
+
     this.stage.addChild(this.questionBlock);
 
 }
@@ -796,6 +800,171 @@ Info.prototype.getData = function() {
 
 
 },{"../event_manager":2}],7:[function(require,module,exports){
+"use strict"
+
+module.exports = function() {
+    return new Koala()
+}
+
+module.exports.Koala = Koala;
+
+function Koala() {
+    if (!(this instanceof Koala)) return new Koala()
+
+    this.loaded = false;
+    console.log("Koala work constructed");
+}
+
+Koala.prototype.init = function (opts, stage, clickHandler) {
+
+    console.log("Koala work initializing with opts", opts);
+    this.stage = stage;
+    this.opts = opts;
+    this.eventEmitter = require('../event_manager').getEmitter();
+
+    this.loadAnimations();
+    this.routine();
+}
+
+
+Koala.prototype.loadAnimations = function(name, frames) {
+    var frameSequence = [];
+
+    // Walk left
+    for (var i = 0; i < 12; i++) {
+        var num = MathUtil.pad(i,2);
+        var texture = new PIXI.Texture.fromFrame("KoalaLeft" + num + ".png");
+        frameSequence.push(texture);
+    }
+    this.walkLeft = new PIXI.MovieClip(frameSequence);
+    this.walkLeft.anchor.x = 0.5;
+    this.walkLeft.anchor.y = 0.5;
+    this.walkLeft.position.x =  1200;
+    this.walkLeft.position.y = 570;
+    //dance.scale = {x: 0.25, y: 0.25};
+    this.walkLeft.loop = true;
+    this.walkLeft.animationSpeed = 0.25;
+
+    this.walkLeft.buttonMode = true;
+    this.walkLeft.setInteractive(true);
+    
+    // Turn from left to write
+    frameSequence = [];
+    for (var i = 5; i >= 0; i--) {
+        var num = MathUtil.pad(i,2);
+        var texture = new PIXI.Texture.fromFrame("KoalaO2L" + num + ".png");
+        frameSequence.push(texture);
+    }
+    for (var i = 0; i <= 5; i++) {
+        var num = MathUtil.pad(i,2);
+        var texture = new PIXI.Texture.fromFrame("KoalaO2R" + num + ".png");
+        frameSequence.push(texture);
+    }
+    this.turnRight = new PIXI.MovieClip(frameSequence);
+    this.turnRight.anchor.x = 0.5;
+    this.turnRight.anchor.y = 0.5;
+    this.turnRight.position.x =  900;
+    this.turnRight.position.y = 570;
+    this.turnRight.animationSpeed = 0.25;
+    this.turnRight.buttonMode = true;
+    this.turnRight.setInteractive(true);
+    this.turnRight.loop = false;
+    
+    frameSequence = [];
+    // Walk right
+    for (var i = 0; i < 12; i++) {
+        var num = MathUtil.pad(i,2);
+        var texture = new PIXI.Texture.fromFrame("KoalaRight" + num + ".png");
+        frameSequence.push(texture);
+    }
+    this.walkRight = new PIXI.MovieClip(frameSequence);
+    this.walkRight.anchor.x = 0.5;
+    this.walkRight.anchor.y = 0.5;
+    this.walkRight.position.x =  900;
+    this.walkRight.position.y = 570;
+    this.walkRight.loop = true;
+    this.walkRight.animationSpeed = 0.25;
+
+    this.walkRight.buttonMode = true;
+    this.walkRight.setInteractive(true);
+
+    // Turn from right to left
+    frameSequence = [];
+    for (var i = 5; i >= 0; i--) {
+        var num = MathUtil.pad(i,2);
+        var texture = new PIXI.Texture.fromFrame("KoalaO2R" + num + ".png");
+        frameSequence.push(texture);
+    }
+    for (var i = 0; i <= 5; i++) {
+        var num = MathUtil.pad(i,2);
+        var texture = new PIXI.Texture.fromFrame("KoalaO2L" + num + ".png");
+        frameSequence.push(texture);
+    }
+    this.turnLeft = new PIXI.MovieClip(frameSequence);
+    this.turnLeft.anchor.x = 0.5;
+    this.turnLeft.anchor.y = 0.5;
+    this.turnLeft.position.x =  1200;
+    this.turnLeft.position.y = 570;
+    this.turnLeft.animationSpeed = 0.25;
+    this.turnLeft.buttonMode = true;
+    this.turnLeft.setInteractive(true);
+    this.turnLeft.loop = false;
+
+
+    this.walkLeft.click = this.turnRight.click = this.walkRight.click = this.turnLeft.click = function(mouseData){
+      console.log("KOALA CLICK");
+      self.eventEmitter.emit('work_clicked', self);
+    }
+
+    var self = this;
+
+}
+
+
+Koala.prototype.routine = function() {
+    var self = this;
+    var t1 = new TimelineMax({repeat: -1});
+    // Walk left
+    t1.call(function() {
+        self.stage.addChild(self.walkLeft);
+        self.walkLeft.play();
+    });
+    t1.to(this.walkLeft.position, 5, {ease: Linear.easeNone, x:900});
+    t1.call(function() {
+        self.stage.removeChild(self.walkLeft);
+        self.stage.addChild(self.turnRight);
+        self.turnRight.gotoAndPlay(0);
+    });
+    t1.to(this.walkLeft.position, 1.5, {ease: Linear.easeNone}); // Do nothing for 1.5 seconds
+    t1.call(function() {
+        self.stage.removeChild(self.turnRight);        
+        self.stage.addChild(self.walkRight);
+        self.walkRight.play();
+    });
+    t1.to(this.walkRight.position, 5, {ease: Linear.easeNone, x:1200});
+    t1.call(function() {
+        self.stage.removeChild(self.walkRight);        
+        self.stage.addChild(self.turnLeft);
+        self.turnLeft.gotoAndPlay(0);
+    });
+    t1.to(this.walkRight.position, 1.5, {ease: Linear.easeNone}); // Do nothing for 1.5 seconds
+    t1.call(function() {
+       self.stage.removeChild(self.turnLeft); 
+    });
+}
+Koala.prototype.update = function() {
+    
+}
+
+Koala.prototype.getData = function() {
+    return {
+        name: "Koala",
+        description: "This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project.  "
+    }
+}
+
+
+},{"../event_manager":2}],8:[function(require,module,exports){
 "use strict"
 
 module.exports = function() {
@@ -883,7 +1052,7 @@ Pulse.prototype.getData = function() {
 }
 
 
-},{"../event_manager":2}],8:[function(require,module,exports){
+},{"../event_manager":2}],9:[function(require,module,exports){
 "use strict"
 
 module.exports = function() {
@@ -993,7 +1162,7 @@ Train.prototype.getData = function() {
 }
 
 
-},{"../event_manager":2}],9:[function(require,module,exports){
+},{"../event_manager":2}],10:[function(require,module,exports){
 /**
  * Tween.js - Licensed under the MIT license
  * https://github.com/sole/tween.js
@@ -1751,7 +1920,7 @@ TWEEN.Interpolation = {
 };
 
 module.exports=TWEEN;
-},{}],10:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
 var utils = require('./utils')
 
 function Batcher () {
@@ -1797,7 +1966,7 @@ BatcherProto.reset = function () {
 }
 
 module.exports = Batcher
-},{"./utils":35}],11:[function(require,module,exports){
+},{"./utils":36}],12:[function(require,module,exports){
 var Batcher        = require('./batcher'),
     bindingBatcher = new Batcher(),
     bindingId      = 1
@@ -1901,7 +2070,7 @@ BindingProto.unbind = function () {
 }
 
 module.exports = Binding
-},{"./batcher":10}],12:[function(require,module,exports){
+},{"./batcher":11}],13:[function(require,module,exports){
 var Emitter     = require('./emitter'),
     Observer    = require('./observer'),
     config      = require('./config'),
@@ -2939,7 +3108,7 @@ function getRoot (compiler) {
 }
 
 module.exports = Compiler
-},{"./binding":11,"./config":13,"./deps-parser":14,"./directive":15,"./emitter":26,"./exp-parser":27,"./observer":31,"./text-parser":33,"./utils":35,"./viewmodel":36}],13:[function(require,module,exports){
+},{"./binding":12,"./config":14,"./deps-parser":15,"./directive":16,"./emitter":27,"./exp-parser":28,"./observer":32,"./text-parser":34,"./utils":36,"./viewmodel":37}],14:[function(require,module,exports){
 var TextParser = require('./text-parser')
 
 module.exports = {
@@ -2959,7 +3128,7 @@ Object.defineProperty(module.exports, 'delimiters', {
         TextParser.setDelimiters(delimiters)
     }
 })
-},{"./text-parser":33}],14:[function(require,module,exports){
+},{"./text-parser":34}],15:[function(require,module,exports){
 var Emitter  = require('./emitter'),
     utils    = require('./utils'),
     Observer = require('./observer'),
@@ -3025,7 +3194,7 @@ module.exports = {
     }
     
 }
-},{"./emitter":26,"./observer":31,"./utils":35}],15:[function(require,module,exports){
+},{"./emitter":27,"./observer":32,"./utils":36}],16:[function(require,module,exports){
 var dirId           = 1,
     ARG_RE          = /^[\w\$-]+$/,
     FILTER_TOKEN_RE = /[^\s'"]+|'[^']+'|"[^"]+"/g,
@@ -3284,7 +3453,7 @@ function escapeQuote (v) {
 }
 
 module.exports = Directive
-},{"./text-parser":33}],16:[function(require,module,exports){
+},{"./text-parser":34}],17:[function(require,module,exports){
 var utils = require('../utils'),
     slice = [].slice
 
@@ -3326,7 +3495,7 @@ module.exports = {
         parent.insertBefore(frag, this.el)
     }
 }
-},{"../utils":35}],17:[function(require,module,exports){
+},{"../utils":36}],18:[function(require,module,exports){
 var utils    = require('../utils')
 
 /**
@@ -3383,7 +3552,7 @@ module.exports = {
         }
     }
 }
-},{"../utils":35}],18:[function(require,module,exports){
+},{"../utils":36}],19:[function(require,module,exports){
 var utils      = require('../utils'),
     config     = require('../config'),
     transition = require('../transition'),
@@ -3513,7 +3682,7 @@ directives.html    = require('./html')
 directives.style   = require('./style')
 directives.partial = require('./partial')
 directives.view    = require('./view')
-},{"../config":13,"../transition":34,"../utils":35,"./html":16,"./if":17,"./model":19,"./on":20,"./partial":21,"./repeat":22,"./style":23,"./view":24,"./with":25}],19:[function(require,module,exports){
+},{"../config":14,"../transition":35,"../utils":36,"./html":17,"./if":18,"./model":20,"./on":21,"./partial":22,"./repeat":23,"./style":24,"./view":25,"./with":26}],20:[function(require,module,exports){
 var utils = require('../utils'),
     isIE9 = navigator.userAgent.indexOf('MSIE 9.0') > 0,
     filter = [].filter
@@ -3688,7 +3857,7 @@ module.exports = {
         }
     }
 }
-},{"../utils":35}],20:[function(require,module,exports){
+},{"../utils":36}],21:[function(require,module,exports){
 var utils    = require('../utils')
 
 /**
@@ -3747,7 +3916,7 @@ module.exports = {
         this.el.removeEventListener('load', this.iframeBind)
     }
 }
-},{"../utils":35}],21:[function(require,module,exports){
+},{"../utils":36}],22:[function(require,module,exports){
 var utils = require('../utils')
 
 /**
@@ -3798,7 +3967,7 @@ module.exports = {
     }
 
 }
-},{"../utils":35}],22:[function(require,module,exports){
+},{"../utils":36}],23:[function(require,module,exports){
 var utils      = require('../utils'),
     config     = require('../config')
 
@@ -4045,7 +4214,7 @@ function indexOf (vms, obj) {
     }
     return -1
 }
-},{"../config":13,"../utils":35}],23:[function(require,module,exports){
+},{"../config":14,"../utils":36}],24:[function(require,module,exports){
 var prefixes = ['-webkit-', '-moz-', '-ms-']
 
 /**
@@ -4092,7 +4261,7 @@ module.exports = {
     }
 
 }
-},{}],24:[function(require,module,exports){
+},{}],25:[function(require,module,exports){
 /**
  *  Manages a conditional child VM using the
  *  binding's value as the component ID.
@@ -4149,7 +4318,7 @@ module.exports = {
     }
 
 }
-},{}],25:[function(require,module,exports){
+},{}],26:[function(require,module,exports){
 var utils = require('../utils')
 
 /**
@@ -4200,7 +4369,7 @@ module.exports = {
     }
 
 }
-},{"../utils":35}],26:[function(require,module,exports){
+},{"../utils":36}],27:[function(require,module,exports){
 var slice = [].slice
 
 function Emitter (ctx) {
@@ -4298,7 +4467,7 @@ EmitterProto.applyEmit = function (event) {
 }
 
 module.exports = Emitter
-},{}],27:[function(require,module,exports){
+},{}],28:[function(require,module,exports){
 var utils           = require('./utils'),
     STR_SAVE_RE     = /"(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'/g,
     STR_RESTORE_RE  = /"(\d+)"/g,
@@ -4489,7 +4658,7 @@ exports.eval = function (exp, compiler, data) {
     }
     return res
 }
-},{"./utils":35}],28:[function(require,module,exports){
+},{"./utils":36}],29:[function(require,module,exports){
 var utils    = require('./utils'),
     get      = utils.get,
     slice    = [].slice,
@@ -4681,7 +4850,7 @@ function stripQuotes (str) {
         return str.slice(1, -1)
     }
 }
-},{"./utils":35}],29:[function(require,module,exports){
+},{"./utils":36}],30:[function(require,module,exports){
 // string -> DOM conversion
 // wrappers originally from jQuery, scooped from component/domify
 var map = {
@@ -4749,7 +4918,7 @@ module.exports = function (templateString) {
     }
     return frag
 }
-},{}],30:[function(require,module,exports){
+},{}],31:[function(require,module,exports){
 var config      = require('./config'),
     ViewModel   = require('./viewmodel'),
     utils       = require('./utils'),
@@ -4938,7 +5107,7 @@ function inheritOptions (child, parent, topLevel) {
 }
 
 module.exports = ViewModel
-},{"./config":13,"./directives":18,"./filters":28,"./observer":31,"./transition":34,"./utils":35,"./viewmodel":36}],31:[function(require,module,exports){
+},{"./config":14,"./directives":19,"./filters":29,"./observer":32,"./transition":35,"./utils":36,"./viewmodel":37}],32:[function(require,module,exports){
 /* jshint proto:true */
 
 var Emitter  = require('./emitter'),
@@ -5385,7 +5554,7 @@ var pub = module.exports = {
     convert     : convert,
     convertKey  : convertKey
 }
-},{"./emitter":26,"./utils":35}],32:[function(require,module,exports){
+},{"./emitter":27,"./utils":36}],33:[function(require,module,exports){
 var toFragment = require('./fragment');
 
 /**
@@ -5433,7 +5602,7 @@ module.exports = function(template) {
     return toFragment(templateNode.outerHTML);
 }
 
-},{"./fragment":29}],33:[function(require,module,exports){
+},{"./fragment":30}],34:[function(require,module,exports){
 var openChar        = '{',
     endChar         = '}',
     ESCAPE_RE       = /[-.*+?^${}()|[\]\/\\]/g,
@@ -5530,7 +5699,7 @@ exports.parse         = parse
 exports.parseAttr     = parseAttr
 exports.setDelimiters = setDelimiters
 exports.delimiters    = [openChar, endChar]
-},{"./directive":15}],34:[function(require,module,exports){
+},{"./directive":16}],35:[function(require,module,exports){
 var endEvents  = sniffEndEvents(),
     config     = require('./config'),
     // batch enter animations so we only force the layout once
@@ -5759,7 +5928,7 @@ function sniffEndEvents () {
 // Expose some stuff for testing purposes
 transition.codes = codes
 transition.sniff = sniffEndEvents
-},{"./batcher":10,"./config":13}],35:[function(require,module,exports){
+},{"./batcher":11,"./config":14}],36:[function(require,module,exports){
 var config       = require('./config'),
     toString     = ({}).toString,
     win          = window,
@@ -6086,7 +6255,7 @@ function enableDebug () {
         }
     }
 }
-},{"./config":13,"./fragment":29,"./template-parser.js":32,"./viewmodel":36}],36:[function(require,module,exports){
+},{"./config":14,"./fragment":30,"./template-parser.js":33,"./viewmodel":37}],37:[function(require,module,exports){
 var Compiler   = require('./compiler'),
     utils      = require('./utils'),
     transition = require('./transition'),
@@ -6278,7 +6447,7 @@ function query (el) {
 
 module.exports = ViewModel
 
-},{"./batcher":10,"./compiler":12,"./transition":34,"./utils":35}],37:[function(require,module,exports){
+},{"./batcher":11,"./compiler":13,"./transition":35,"./utils":36}],38:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
