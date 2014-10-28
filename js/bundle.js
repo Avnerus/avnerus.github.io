@@ -162,7 +162,8 @@ BrainController.prototype.initWorks = function() {
         new (require('./works/train'))(),
         new (require('./works/info'))(),
         new (require('./works/koala'))(),
-        new (require('./works/equala'))()
+        new (require('./works/equala'))(),
+        new (require('./works/peace'))()
     ]
 
      $('.flexslider').flexslider({slideshow: false});
@@ -242,7 +243,7 @@ BrainController.prototype.spawnWork = function () {
     
 }
 
-},{"./event_manager":2,"./works/equala":5,"./works/gamad":6,"./works/info":7,"./works/koala":8,"./works/pulse":9,"./works/train":10,"tween.js":11,"vue":32}],2:[function(require,module,exports){
+},{"./event_manager":2,"./works/equala":5,"./works/gamad":6,"./works/info":7,"./works/koala":8,"./works/peace":9,"./works/pulse":10,"./works/train":11,"tween.js":12,"vue":33}],2:[function(require,module,exports){
 "use strict"
 
 var events = require('events');
@@ -254,7 +255,7 @@ module.exports.getEmitter = function() {
 }
 
 
-},{"events":39}],3:[function(require,module,exports){
+},{"events":40}],3:[function(require,module,exports){
 var gameOpts = {
     stageWidth: 1280,
     stageHeight: 720,
@@ -326,7 +327,8 @@ var loader = new PIXI.AssetLoader([
     "assets/works/Koala.json",
     "assets/works/headphones.png",
     "assets/works/lightning.png",
-    "assets/works/lightning_f.png"
+    "assets/works/lightning_f.png",
+    "assets/works/dove.png"
 ]);
 loader.onComplete = function() {
     assetsLoaded = true;
@@ -370,7 +372,7 @@ function animate() {
     requestAnimationFrame(animate);
 }
 
-},{"./brain_controller":1,"./event_manager":2,"./video_controller":4,"tween.js":11}],4:[function(require,module,exports){
+},{"./brain_controller":1,"./event_manager":2,"./video_controller":4,"tween.js":12}],4:[function(require,module,exports){
 "use strict"
 
 module.exports = function(opts) {
@@ -1055,6 +1057,78 @@ Koala.prototype.getData = function() {
 "use strict"
 
 module.exports = function() {
+    return new Peace()
+}
+
+module.exports.Peace = Peace;
+
+function Peace() {
+    if (!(this instanceof Peace)) return new Peace()
+
+    this.loaded = false;
+    console.log("Peace work constructed");
+}
+
+Peace.prototype.init = function (opts, stage, clickHandler) {
+
+    console.log("Peace work initializing with opts", opts);
+    this.stage = stage;
+    this.opts = opts;
+    this.eventEmitter = require('../event_manager').getEmitter();
+
+    this.loadSprite();
+}
+
+
+Peace.prototype.loadSprite = function() {
+    var self = this;
+
+
+    var graphics = new PIXI.Graphics();
+    graphics.beginFill(0xFFFFFF);
+    graphics.lineStyle(2, 0xFFFFFF);
+    graphics.moveTo(905, 0);
+    graphics.lineTo(905, 145);
+    graphics.endFill();
+   
+    this.stage.addChild(graphics);
+
+    var dove = new PIXI.Sprite.fromFrame("assets/works/dove.png");
+    dove.anchor.x = 0.5;
+    dove.anchor.y = 0.5;
+    dove.position.x =  905;
+    dove.position.y = 125;
+    dove.scale = {x: 0.8, y: 0.8};
+
+    dove.buttonMode = true;
+    dove.setInteractive(true);
+
+    TweenMax.to(dove.position , 2, {ease: Linear.easeNone, repeat: -1, yoyo: true, y: 100});
+    TweenMax.to(graphics.position , 2, {ease: Linear.easeNone, repeat: -1, yoyo: true, y: -20});
+    
+    dove.click  = function(mouseData){
+      console.log("Peace CLICK");
+      self.eventEmitter.emit('work_clicked', self);
+    }
+
+    this.stage.addChild(dove);
+}
+Peace.prototype.update = function() {
+    
+}
+
+Peace.prototype.getData = function() {
+    return {
+        name: "The Conflict",
+        description: "This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project.  "
+    }
+}
+
+
+},{"../event_manager":2}],10:[function(require,module,exports){
+"use strict"
+
+module.exports = function() {
     return new Pulse()
 }
 
@@ -1139,7 +1213,7 @@ Pulse.prototype.getData = function() {
 }
 
 
-},{"../event_manager":2}],10:[function(require,module,exports){
+},{"../event_manager":2}],11:[function(require,module,exports){
 "use strict"
 
 module.exports = function() {
@@ -1249,7 +1323,7 @@ Train.prototype.getData = function() {
 }
 
 
-},{"../event_manager":2}],11:[function(require,module,exports){
+},{"../event_manager":2}],12:[function(require,module,exports){
 /**
  * Tween.js - Licensed under the MIT license
  * https://github.com/sole/tween.js
@@ -2007,7 +2081,7 @@ TWEEN.Interpolation = {
 };
 
 module.exports=TWEEN;
-},{}],12:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
 var utils = require('./utils')
 
 function Batcher () {
@@ -2053,7 +2127,7 @@ BatcherProto.reset = function () {
 }
 
 module.exports = Batcher
-},{"./utils":37}],13:[function(require,module,exports){
+},{"./utils":38}],14:[function(require,module,exports){
 var Batcher        = require('./batcher'),
     bindingBatcher = new Batcher(),
     bindingId      = 1
@@ -2157,7 +2231,7 @@ BindingProto.unbind = function () {
 }
 
 module.exports = Binding
-},{"./batcher":12}],14:[function(require,module,exports){
+},{"./batcher":13}],15:[function(require,module,exports){
 var Emitter     = require('./emitter'),
     Observer    = require('./observer'),
     config      = require('./config'),
@@ -3195,7 +3269,7 @@ function getRoot (compiler) {
 }
 
 module.exports = Compiler
-},{"./binding":13,"./config":15,"./deps-parser":16,"./directive":17,"./emitter":28,"./exp-parser":29,"./observer":33,"./text-parser":35,"./utils":37,"./viewmodel":38}],15:[function(require,module,exports){
+},{"./binding":14,"./config":16,"./deps-parser":17,"./directive":18,"./emitter":29,"./exp-parser":30,"./observer":34,"./text-parser":36,"./utils":38,"./viewmodel":39}],16:[function(require,module,exports){
 var TextParser = require('./text-parser')
 
 module.exports = {
@@ -3215,7 +3289,7 @@ Object.defineProperty(module.exports, 'delimiters', {
         TextParser.setDelimiters(delimiters)
     }
 })
-},{"./text-parser":35}],16:[function(require,module,exports){
+},{"./text-parser":36}],17:[function(require,module,exports){
 var Emitter  = require('./emitter'),
     utils    = require('./utils'),
     Observer = require('./observer'),
@@ -3281,7 +3355,7 @@ module.exports = {
     }
     
 }
-},{"./emitter":28,"./observer":33,"./utils":37}],17:[function(require,module,exports){
+},{"./emitter":29,"./observer":34,"./utils":38}],18:[function(require,module,exports){
 var dirId           = 1,
     ARG_RE          = /^[\w\$-]+$/,
     FILTER_TOKEN_RE = /[^\s'"]+|'[^']+'|"[^"]+"/g,
@@ -3540,7 +3614,7 @@ function escapeQuote (v) {
 }
 
 module.exports = Directive
-},{"./text-parser":35}],18:[function(require,module,exports){
+},{"./text-parser":36}],19:[function(require,module,exports){
 var utils = require('../utils'),
     slice = [].slice
 
@@ -3582,7 +3656,7 @@ module.exports = {
         parent.insertBefore(frag, this.el)
     }
 }
-},{"../utils":37}],19:[function(require,module,exports){
+},{"../utils":38}],20:[function(require,module,exports){
 var utils    = require('../utils')
 
 /**
@@ -3639,7 +3713,7 @@ module.exports = {
         }
     }
 }
-},{"../utils":37}],20:[function(require,module,exports){
+},{"../utils":38}],21:[function(require,module,exports){
 var utils      = require('../utils'),
     config     = require('../config'),
     transition = require('../transition'),
@@ -3769,7 +3843,7 @@ directives.html    = require('./html')
 directives.style   = require('./style')
 directives.partial = require('./partial')
 directives.view    = require('./view')
-},{"../config":15,"../transition":36,"../utils":37,"./html":18,"./if":19,"./model":21,"./on":22,"./partial":23,"./repeat":24,"./style":25,"./view":26,"./with":27}],21:[function(require,module,exports){
+},{"../config":16,"../transition":37,"../utils":38,"./html":19,"./if":20,"./model":22,"./on":23,"./partial":24,"./repeat":25,"./style":26,"./view":27,"./with":28}],22:[function(require,module,exports){
 var utils = require('../utils'),
     isIE9 = navigator.userAgent.indexOf('MSIE 9.0') > 0,
     filter = [].filter
@@ -3944,7 +4018,7 @@ module.exports = {
         }
     }
 }
-},{"../utils":37}],22:[function(require,module,exports){
+},{"../utils":38}],23:[function(require,module,exports){
 var utils    = require('../utils')
 
 /**
@@ -4003,7 +4077,7 @@ module.exports = {
         this.el.removeEventListener('load', this.iframeBind)
     }
 }
-},{"../utils":37}],23:[function(require,module,exports){
+},{"../utils":38}],24:[function(require,module,exports){
 var utils = require('../utils')
 
 /**
@@ -4054,7 +4128,7 @@ module.exports = {
     }
 
 }
-},{"../utils":37}],24:[function(require,module,exports){
+},{"../utils":38}],25:[function(require,module,exports){
 var utils      = require('../utils'),
     config     = require('../config')
 
@@ -4301,7 +4375,7 @@ function indexOf (vms, obj) {
     }
     return -1
 }
-},{"../config":15,"../utils":37}],25:[function(require,module,exports){
+},{"../config":16,"../utils":38}],26:[function(require,module,exports){
 var prefixes = ['-webkit-', '-moz-', '-ms-']
 
 /**
@@ -4348,7 +4422,7 @@ module.exports = {
     }
 
 }
-},{}],26:[function(require,module,exports){
+},{}],27:[function(require,module,exports){
 /**
  *  Manages a conditional child VM using the
  *  binding's value as the component ID.
@@ -4405,7 +4479,7 @@ module.exports = {
     }
 
 }
-},{}],27:[function(require,module,exports){
+},{}],28:[function(require,module,exports){
 var utils = require('../utils')
 
 /**
@@ -4456,7 +4530,7 @@ module.exports = {
     }
 
 }
-},{"../utils":37}],28:[function(require,module,exports){
+},{"../utils":38}],29:[function(require,module,exports){
 var slice = [].slice
 
 function Emitter (ctx) {
@@ -4554,7 +4628,7 @@ EmitterProto.applyEmit = function (event) {
 }
 
 module.exports = Emitter
-},{}],29:[function(require,module,exports){
+},{}],30:[function(require,module,exports){
 var utils           = require('./utils'),
     STR_SAVE_RE     = /"(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'/g,
     STR_RESTORE_RE  = /"(\d+)"/g,
@@ -4745,7 +4819,7 @@ exports.eval = function (exp, compiler, data) {
     }
     return res
 }
-},{"./utils":37}],30:[function(require,module,exports){
+},{"./utils":38}],31:[function(require,module,exports){
 var utils    = require('./utils'),
     get      = utils.get,
     slice    = [].slice,
@@ -4937,7 +5011,7 @@ function stripQuotes (str) {
         return str.slice(1, -1)
     }
 }
-},{"./utils":37}],31:[function(require,module,exports){
+},{"./utils":38}],32:[function(require,module,exports){
 // string -> DOM conversion
 // wrappers originally from jQuery, scooped from component/domify
 var map = {
@@ -5005,7 +5079,7 @@ module.exports = function (templateString) {
     }
     return frag
 }
-},{}],32:[function(require,module,exports){
+},{}],33:[function(require,module,exports){
 var config      = require('./config'),
     ViewModel   = require('./viewmodel'),
     utils       = require('./utils'),
@@ -5194,7 +5268,7 @@ function inheritOptions (child, parent, topLevel) {
 }
 
 module.exports = ViewModel
-},{"./config":15,"./directives":20,"./filters":30,"./observer":33,"./transition":36,"./utils":37,"./viewmodel":38}],33:[function(require,module,exports){
+},{"./config":16,"./directives":21,"./filters":31,"./observer":34,"./transition":37,"./utils":38,"./viewmodel":39}],34:[function(require,module,exports){
 /* jshint proto:true */
 
 var Emitter  = require('./emitter'),
@@ -5641,7 +5715,7 @@ var pub = module.exports = {
     convert     : convert,
     convertKey  : convertKey
 }
-},{"./emitter":28,"./utils":37}],34:[function(require,module,exports){
+},{"./emitter":29,"./utils":38}],35:[function(require,module,exports){
 var toFragment = require('./fragment');
 
 /**
@@ -5689,7 +5763,7 @@ module.exports = function(template) {
     return toFragment(templateNode.outerHTML);
 }
 
-},{"./fragment":31}],35:[function(require,module,exports){
+},{"./fragment":32}],36:[function(require,module,exports){
 var openChar        = '{',
     endChar         = '}',
     ESCAPE_RE       = /[-.*+?^${}()|[\]\/\\]/g,
@@ -5786,7 +5860,7 @@ exports.parse         = parse
 exports.parseAttr     = parseAttr
 exports.setDelimiters = setDelimiters
 exports.delimiters    = [openChar, endChar]
-},{"./directive":17}],36:[function(require,module,exports){
+},{"./directive":18}],37:[function(require,module,exports){
 var endEvents  = sniffEndEvents(),
     config     = require('./config'),
     // batch enter animations so we only force the layout once
@@ -6015,7 +6089,7 @@ function sniffEndEvents () {
 // Expose some stuff for testing purposes
 transition.codes = codes
 transition.sniff = sniffEndEvents
-},{"./batcher":12,"./config":15}],37:[function(require,module,exports){
+},{"./batcher":13,"./config":16}],38:[function(require,module,exports){
 var config       = require('./config'),
     toString     = ({}).toString,
     win          = window,
@@ -6342,7 +6416,7 @@ function enableDebug () {
         }
     }
 }
-},{"./config":15,"./fragment":31,"./template-parser.js":34,"./viewmodel":38}],38:[function(require,module,exports){
+},{"./config":16,"./fragment":32,"./template-parser.js":35,"./viewmodel":39}],39:[function(require,module,exports){
 var Compiler   = require('./compiler'),
     utils      = require('./utils'),
     transition = require('./transition'),
@@ -6534,7 +6608,7 @@ function query (el) {
 
 module.exports = ViewModel
 
-},{"./batcher":12,"./compiler":14,"./transition":36,"./utils":37}],39:[function(require,module,exports){
+},{"./batcher":13,"./compiler":15,"./transition":37,"./utils":38}],40:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
