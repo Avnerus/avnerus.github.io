@@ -163,7 +163,10 @@ BrainController.prototype.initWorks = function() {
         new (require('./works/info'))(),
         new (require('./works/koala'))(),
         new (require('./works/equala'))(),
-        new (require('./works/peace'))()
+        new (require('./works/peace'))(),
+        new (require('./works/brain'))(),
+        new (require('./works/security'))(),
+        new (require('./works/cantenna'))()
     ]
 
      $('.flexslider').flexslider({slideshow: false});
@@ -185,10 +188,12 @@ BrainController.prototype.update = function () {
     /*	this.displacementFilter.offset.x = this.counter * 10;
         this.displacementFilter.offset.y = this.counter * 10;*/
 
-        for (var i = 0; i < this.works.length; i++) {
+      /*  for (var i = 0; i < this.works.length; i++) {
             var work = this.works[i];
             work.update();
-        }
+        }*/
+    
+       this.works[8].update(); // Security
 
     }
 }
@@ -243,7 +248,7 @@ BrainController.prototype.spawnWork = function () {
     
 }
 
-},{"./event_manager":2,"./works/equala":5,"./works/gamad":6,"./works/info":7,"./works/koala":8,"./works/peace":9,"./works/pulse":10,"./works/train":11,"tween.js":12,"vue":33}],2:[function(require,module,exports){
+},{"./event_manager":2,"./works/brain":5,"./works/cantenna":6,"./works/equala":7,"./works/gamad":8,"./works/info":9,"./works/koala":10,"./works/peace":11,"./works/pulse":12,"./works/security":13,"./works/train":14,"tween.js":15,"vue":36}],2:[function(require,module,exports){
 "use strict"
 
 var events = require('events');
@@ -255,7 +260,7 @@ module.exports.getEmitter = function() {
 }
 
 
-},{"events":40}],3:[function(require,module,exports){
+},{"events":43}],3:[function(require,module,exports){
 var gameOpts = {
     stageWidth: 1280,
     stageHeight: 720,
@@ -328,8 +333,14 @@ var loader = new PIXI.AssetLoader([
     "assets/works/headphones.png",
     "assets/works/lightning.png",
     "assets/works/lightning_f.png",
-    "assets/works/dove.png"
+    "assets/works/dove.png",
+    "assets/works/face.png",
+    "assets/works/cog.png",
+    "assets/works/keyhole.png",
+    "assets/works/can.png",
+    "assets/works/tripod.png"
 ]);
+
 loader.onComplete = function() {
     assetsLoaded = true;
     console.log("Assets loaded!");
@@ -372,7 +383,7 @@ function animate() {
     requestAnimationFrame(animate);
 }
 
-},{"./brain_controller":1,"./event_manager":2,"./video_controller":4,"tween.js":12}],4:[function(require,module,exports){
+},{"./brain_controller":1,"./event_manager":2,"./video_controller":4,"tween.js":15}],4:[function(require,module,exports){
 "use strict"
 
 module.exports = function(opts) {
@@ -675,6 +686,161 @@ VideoController.prototype.showVideo = function (video) {
 "use strict"
 
 module.exports = function() {
+    return new Brain()
+}
+
+module.exports.Brain = Brain;
+
+function Brain() {
+    if (!(this instanceof Brain)) return new Brain()
+
+    this.loaded = false;
+    console.log("Brain work constructed");
+}
+
+Brain.prototype.init = function (opts, stage, clickHandler) {
+
+    console.log("Brain work initializing with opts", opts);
+    this.stage = stage;
+    this.opts = opts;
+    this.eventEmitter = require('../event_manager').getEmitter();
+
+    this.loadSprite();
+}
+
+
+Brain.prototype.loadSprite = function() {
+    var self = this;
+
+
+    var face = new PIXI.Sprite.fromFrame("assets/works/face.png");
+    face.anchor.x = 0.5;
+    face.anchor.y = 0.5;
+    face.position.x = 1185;
+    face.position.y = 228;
+    face.scale = {x: 0.5, y: 0.5};
+
+    face.buttonMode = true;
+    face.setInteractive(true);
+
+    
+    var cog = new PIXI.Sprite.fromFrame("assets/works/cog.png");
+    cog.anchor.x = 0.5;
+    cog.anchor.y = 0.5;
+    cog.position.x = 30;
+    cog.position.y = -12;
+    cog.scale = {x: 0.9, y: 0.9};
+
+    var cog2 = new PIXI.Sprite.fromFrame("assets/works/cog.png");
+    cog2.anchor.x = 0.5;
+    cog2.anchor.y = 0.5;
+    cog2.position.x = -17;
+    cog2.position.y = -33;
+    cog2.scale = {x: 0.9, y: 0.9};
+
+    TweenMax.to(cog , 3, {ease: Linear.easeNone, repeat: -1, rotation: MathUtil.toRadians(360)});
+    TweenMax.to(cog2 , 3, {ease: Linear.easeNone, repeat: -1, rotation: MathUtil.toRadians(360)});
+
+    face.click  = function(mouseData){
+      console.log("Brain CLICK");
+      self.eventEmitter.emit('work_clicked', self);
+    }
+
+    this.stage.addChild(face);
+    face.addChild(cog);
+    face.addChild(cog2);
+}
+Brain.prototype.update = function() {
+    
+}
+
+Brain.prototype.getData = function() {
+    return {
+        name: "The Problem of Consciousness",
+        description: "This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project.  "
+    }
+}
+
+
+},{"../event_manager":2}],6:[function(require,module,exports){
+"use strict"
+
+module.exports = function() {
+    return new Cantenna()
+}
+
+module.exports.Cantenna = Cantenna;
+
+function Cantenna() {
+    if (!(this instanceof Cantenna)) return new Cantenna()
+
+    this.loaded = false;
+    console.log("Cantenna work constructed");
+}
+
+Cantenna.prototype.init = function (opts, stage, clickHandler) {
+
+    console.log("Cantenna work initializing with opts", opts);
+    this.stage = stage;
+    this.opts = opts;
+    this.eventEmitter = require('../event_manager').getEmitter();
+
+    this.loadSprite();
+}
+
+
+Cantenna.prototype.loadSprite = function() {
+    var self = this;
+
+
+    var tripod = new PIXI.Sprite.fromFrame("assets/works/tripod.png");
+    tripod.anchor.x = 0.5;
+    tripod.anchor.y = 0.5;
+    tripod.position.x = 50;
+    tripod.position.y = 355;
+    tripod.rotation = MathUtil.toRadians(18);
+    tripod.scale = {x: 0.3, y: 0.3};
+
+    tripod.buttonMode = true;
+    tripod.setInteractive(true);
+
+    var can = new PIXI.Sprite.fromFrame("assets/works/can.png");
+    can.anchor.x = 0.5;
+    can.anchor.y = 0.5;
+    can.position.x = 65;
+    can.position.y = 285;
+    can.rotation = MathUtil.toRadians(-115);
+    can.scale = {x: 0.5, y: 0.5};
+
+    can.buttonMode = true;
+    can.setInteractive(true);
+
+    TweenMax.to(can, 3, {ease: Linear.easeNone, repeat: -1, yoyo: true, rotation: MathUtil.toRadians(-90)});
+
+    tripod.click  = can.click = function(mouseData){
+      console.log("Cantenna CLICK");
+      self.eventEmitter.emit('work_clicked', self);
+    }
+
+    this.stage.addChild(tripod);
+    this.stage.addChild(can);
+}
+Cantenna.prototype.update = function() {
+    
+}
+
+Cantenna.prototype.getData = function() {
+    return {
+        name: "Cantenna Mesh",
+        description: "This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project.  "
+    }
+}
+
+
+},{"../event_manager":2}],7:[function(require,module,exports){
+"use strict"
+
+module.exports = function() {
     return new EQuala()
 }
 
@@ -754,7 +920,7 @@ EQuala.prototype.getData = function() {
 }
 
 
-},{"../event_manager":2}],6:[function(require,module,exports){
+},{"../event_manager":2}],8:[function(require,module,exports){
 "use strict"
 
 module.exports = function() {
@@ -827,7 +993,7 @@ Gamad.prototype.getData = function() {
 }
 
 
-},{"../event_manager":2}],7:[function(require,module,exports){
+},{"../event_manager":2}],9:[function(require,module,exports){
 "use strict"
 
 module.exports = function() {
@@ -888,7 +1054,7 @@ Info.prototype.getData = function() {
 
 
 
-},{"../event_manager":2}],8:[function(require,module,exports){
+},{"../event_manager":2}],10:[function(require,module,exports){
 "use strict"
 
 module.exports = function() {
@@ -1053,7 +1219,7 @@ Koala.prototype.getData = function() {
 }
 
 
-},{"../event_manager":2}],9:[function(require,module,exports){
+},{"../event_manager":2}],11:[function(require,module,exports){
 "use strict"
 
 module.exports = function() {
@@ -1125,7 +1291,7 @@ Peace.prototype.getData = function() {
 }
 
 
-},{"../event_manager":2}],10:[function(require,module,exports){
+},{"../event_manager":2}],12:[function(require,module,exports){
 "use strict"
 
 module.exports = function() {
@@ -1191,18 +1357,14 @@ Pulse.prototype.init = function (opts, stage, clickHandler) {
 Pulse.prototype.fly = function() {
     var self = this;
 
-//    TweenMax.to(this.sprite1.position, 20, {repeat: -1, yoyo: true, x:(this.opts.stageWidth + this.sprite1.width), ease:Power0.easeInOut});
-  //  TweenMax.to(this.sprite2.position, 20, {repeat: -1, yoyo: true, x:(-this.sprite2.width), ease:Power0.easeInOut});
     TweenMax.to(this.sprite1.position , 9, {ease: Linear.easeNone, repeat: -1, bezier:{curviness:1.5, values:[{x:750, y:200}, {x:650, y:300}, {x:550, y:100}, {x:650, y: 100}]}});
     TweenMax.to(this.sprite2.position , 9, {ease: Linear.easeNone, repeat: -1, bezier:{curviness:1.5, values:[{x:550, y:200}, {x:650, y:300}, {x:750, y:100}, {x:650, y: 100}]}});
-//TweenMax.to([div1,div2,div3], 2, {bezier:{curviness:1.5, values:[{x:100, y:100}, {x:0, y:200}, {x:-100, y:100}, {x:0, y:0}]}
+
+    TweenMax.to(this.sprite1 , 3, {ease: Linear.easeNone, repeat: -1, rotation: MathUtil.toRadians(360)});
+    TweenMax.to(this.sprite2 , 3, {ease: Linear.easeNone, repeat: -1, rotation: MathUtil.toRadians(360)});
 }
 
 Pulse.prototype.update = function () {
-    if (this.loaded) {
-        this.sprite1.rotation += 0.05;
-        this.sprite2.rotation += 0.05;
-    }
 }
 
 Pulse.prototype.getData = function() {
@@ -1213,7 +1375,81 @@ Pulse.prototype.getData = function() {
 }
 
 
-},{"../event_manager":2}],11:[function(require,module,exports){
+},{"../event_manager":2}],13:[function(require,module,exports){
+"use strict"
+
+module.exports = function() {
+    return new Security()
+}
+
+module.exports.Security = Security;
+
+function Security() {
+    if (!(this instanceof Security)) return new Security()
+
+    this.loaded = false;
+    console.log("Security work constructed");
+}
+
+Security.prototype.init = function (opts, stage, clickHandler) {
+
+    console.log("Security work initializing with opts", opts);
+    this.stage = stage;
+    this.opts = opts;
+    this.eventEmitter = require('../event_manager').getEmitter();
+
+    this.loadSprite();
+}
+
+
+Security.prototype.loadSprite = function() {
+    var self = this;
+
+
+    var keyhole = new PIXI.Sprite.fromFrame("assets/works/keyhole.png");
+    keyhole.anchor.x = 0.5;
+    keyhole.anchor.y = 0.5;
+    keyhole.position.x = 555;
+    keyhole.position.y = 575;
+    //keyhole.scale = {x: 0.5, y: 0.5};
+
+    keyhole.buttonMode = true;
+    keyhole.setInteractive(true);
+
+
+    keyhole.click  = function(mouseData){
+      console.log("Security CLICK");
+      self.eventEmitter.emit('work_clicked', self);
+    }
+
+    this.colorMatrix =
+    [1,0,0,0,
+    0,1,0,0,
+    0,0,1,0,
+    0,0,0,1];
+    this.filter = new PIXI.ColorMatrixFilter();
+    this.filter.matrix = this.colorMatrix;
+    this.counter = 0;
+    keyhole.filters = [this.filter];
+
+    this.stage.addChild(keyhole);
+}
+Security.prototype.update = function() {
+    this.counter += 0.01
+    this.colorMatrix[3] = Math.min(0.8,Math.sin(this.counter * 2));
+    this.colorMatrix[7] = Math.min(0.8,Math.sin(this.counter * 2));
+    this.filter.matrix = this.colorMatrix;
+}
+
+Security.prototype.getData = function() {
+    return {
+        name: "IT Security",
+        description: "This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project.  "
+    }
+}
+
+
+},{"../event_manager":2}],14:[function(require,module,exports){
 "use strict"
 
 module.exports = function() {
@@ -1323,7 +1559,7 @@ Train.prototype.getData = function() {
 }
 
 
-},{"../event_manager":2}],12:[function(require,module,exports){
+},{"../event_manager":2}],15:[function(require,module,exports){
 /**
  * Tween.js - Licensed under the MIT license
  * https://github.com/sole/tween.js
@@ -2081,7 +2317,7 @@ TWEEN.Interpolation = {
 };
 
 module.exports=TWEEN;
-},{}],13:[function(require,module,exports){
+},{}],16:[function(require,module,exports){
 var utils = require('./utils')
 
 function Batcher () {
@@ -2127,7 +2363,7 @@ BatcherProto.reset = function () {
 }
 
 module.exports = Batcher
-},{"./utils":38}],14:[function(require,module,exports){
+},{"./utils":41}],17:[function(require,module,exports){
 var Batcher        = require('./batcher'),
     bindingBatcher = new Batcher(),
     bindingId      = 1
@@ -2231,7 +2467,7 @@ BindingProto.unbind = function () {
 }
 
 module.exports = Binding
-},{"./batcher":13}],15:[function(require,module,exports){
+},{"./batcher":16}],18:[function(require,module,exports){
 var Emitter     = require('./emitter'),
     Observer    = require('./observer'),
     config      = require('./config'),
@@ -3269,7 +3505,7 @@ function getRoot (compiler) {
 }
 
 module.exports = Compiler
-},{"./binding":14,"./config":16,"./deps-parser":17,"./directive":18,"./emitter":29,"./exp-parser":30,"./observer":34,"./text-parser":36,"./utils":38,"./viewmodel":39}],16:[function(require,module,exports){
+},{"./binding":17,"./config":19,"./deps-parser":20,"./directive":21,"./emitter":32,"./exp-parser":33,"./observer":37,"./text-parser":39,"./utils":41,"./viewmodel":42}],19:[function(require,module,exports){
 var TextParser = require('./text-parser')
 
 module.exports = {
@@ -3289,7 +3525,7 @@ Object.defineProperty(module.exports, 'delimiters', {
         TextParser.setDelimiters(delimiters)
     }
 })
-},{"./text-parser":36}],17:[function(require,module,exports){
+},{"./text-parser":39}],20:[function(require,module,exports){
 var Emitter  = require('./emitter'),
     utils    = require('./utils'),
     Observer = require('./observer'),
@@ -3355,7 +3591,7 @@ module.exports = {
     }
     
 }
-},{"./emitter":29,"./observer":34,"./utils":38}],18:[function(require,module,exports){
+},{"./emitter":32,"./observer":37,"./utils":41}],21:[function(require,module,exports){
 var dirId           = 1,
     ARG_RE          = /^[\w\$-]+$/,
     FILTER_TOKEN_RE = /[^\s'"]+|'[^']+'|"[^"]+"/g,
@@ -3614,7 +3850,7 @@ function escapeQuote (v) {
 }
 
 module.exports = Directive
-},{"./text-parser":36}],19:[function(require,module,exports){
+},{"./text-parser":39}],22:[function(require,module,exports){
 var utils = require('../utils'),
     slice = [].slice
 
@@ -3656,7 +3892,7 @@ module.exports = {
         parent.insertBefore(frag, this.el)
     }
 }
-},{"../utils":38}],20:[function(require,module,exports){
+},{"../utils":41}],23:[function(require,module,exports){
 var utils    = require('../utils')
 
 /**
@@ -3713,7 +3949,7 @@ module.exports = {
         }
     }
 }
-},{"../utils":38}],21:[function(require,module,exports){
+},{"../utils":41}],24:[function(require,module,exports){
 var utils      = require('../utils'),
     config     = require('../config'),
     transition = require('../transition'),
@@ -3843,7 +4079,7 @@ directives.html    = require('./html')
 directives.style   = require('./style')
 directives.partial = require('./partial')
 directives.view    = require('./view')
-},{"../config":16,"../transition":37,"../utils":38,"./html":19,"./if":20,"./model":22,"./on":23,"./partial":24,"./repeat":25,"./style":26,"./view":27,"./with":28}],22:[function(require,module,exports){
+},{"../config":19,"../transition":40,"../utils":41,"./html":22,"./if":23,"./model":25,"./on":26,"./partial":27,"./repeat":28,"./style":29,"./view":30,"./with":31}],25:[function(require,module,exports){
 var utils = require('../utils'),
     isIE9 = navigator.userAgent.indexOf('MSIE 9.0') > 0,
     filter = [].filter
@@ -4018,7 +4254,7 @@ module.exports = {
         }
     }
 }
-},{"../utils":38}],23:[function(require,module,exports){
+},{"../utils":41}],26:[function(require,module,exports){
 var utils    = require('../utils')
 
 /**
@@ -4077,7 +4313,7 @@ module.exports = {
         this.el.removeEventListener('load', this.iframeBind)
     }
 }
-},{"../utils":38}],24:[function(require,module,exports){
+},{"../utils":41}],27:[function(require,module,exports){
 var utils = require('../utils')
 
 /**
@@ -4128,7 +4364,7 @@ module.exports = {
     }
 
 }
-},{"../utils":38}],25:[function(require,module,exports){
+},{"../utils":41}],28:[function(require,module,exports){
 var utils      = require('../utils'),
     config     = require('../config')
 
@@ -4375,7 +4611,7 @@ function indexOf (vms, obj) {
     }
     return -1
 }
-},{"../config":16,"../utils":38}],26:[function(require,module,exports){
+},{"../config":19,"../utils":41}],29:[function(require,module,exports){
 var prefixes = ['-webkit-', '-moz-', '-ms-']
 
 /**
@@ -4422,7 +4658,7 @@ module.exports = {
     }
 
 }
-},{}],27:[function(require,module,exports){
+},{}],30:[function(require,module,exports){
 /**
  *  Manages a conditional child VM using the
  *  binding's value as the component ID.
@@ -4479,7 +4715,7 @@ module.exports = {
     }
 
 }
-},{}],28:[function(require,module,exports){
+},{}],31:[function(require,module,exports){
 var utils = require('../utils')
 
 /**
@@ -4530,7 +4766,7 @@ module.exports = {
     }
 
 }
-},{"../utils":38}],29:[function(require,module,exports){
+},{"../utils":41}],32:[function(require,module,exports){
 var slice = [].slice
 
 function Emitter (ctx) {
@@ -4628,7 +4864,7 @@ EmitterProto.applyEmit = function (event) {
 }
 
 module.exports = Emitter
-},{}],30:[function(require,module,exports){
+},{}],33:[function(require,module,exports){
 var utils           = require('./utils'),
     STR_SAVE_RE     = /"(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'/g,
     STR_RESTORE_RE  = /"(\d+)"/g,
@@ -4819,7 +5055,7 @@ exports.eval = function (exp, compiler, data) {
     }
     return res
 }
-},{"./utils":38}],31:[function(require,module,exports){
+},{"./utils":41}],34:[function(require,module,exports){
 var utils    = require('./utils'),
     get      = utils.get,
     slice    = [].slice,
@@ -5011,7 +5247,7 @@ function stripQuotes (str) {
         return str.slice(1, -1)
     }
 }
-},{"./utils":38}],32:[function(require,module,exports){
+},{"./utils":41}],35:[function(require,module,exports){
 // string -> DOM conversion
 // wrappers originally from jQuery, scooped from component/domify
 var map = {
@@ -5079,7 +5315,7 @@ module.exports = function (templateString) {
     }
     return frag
 }
-},{}],33:[function(require,module,exports){
+},{}],36:[function(require,module,exports){
 var config      = require('./config'),
     ViewModel   = require('./viewmodel'),
     utils       = require('./utils'),
@@ -5268,7 +5504,7 @@ function inheritOptions (child, parent, topLevel) {
 }
 
 module.exports = ViewModel
-},{"./config":16,"./directives":21,"./filters":31,"./observer":34,"./transition":37,"./utils":38,"./viewmodel":39}],34:[function(require,module,exports){
+},{"./config":19,"./directives":24,"./filters":34,"./observer":37,"./transition":40,"./utils":41,"./viewmodel":42}],37:[function(require,module,exports){
 /* jshint proto:true */
 
 var Emitter  = require('./emitter'),
@@ -5715,7 +5951,7 @@ var pub = module.exports = {
     convert     : convert,
     convertKey  : convertKey
 }
-},{"./emitter":29,"./utils":38}],35:[function(require,module,exports){
+},{"./emitter":32,"./utils":41}],38:[function(require,module,exports){
 var toFragment = require('./fragment');
 
 /**
@@ -5763,7 +5999,7 @@ module.exports = function(template) {
     return toFragment(templateNode.outerHTML);
 }
 
-},{"./fragment":32}],36:[function(require,module,exports){
+},{"./fragment":35}],39:[function(require,module,exports){
 var openChar        = '{',
     endChar         = '}',
     ESCAPE_RE       = /[-.*+?^${}()|[\]\/\\]/g,
@@ -5860,7 +6096,7 @@ exports.parse         = parse
 exports.parseAttr     = parseAttr
 exports.setDelimiters = setDelimiters
 exports.delimiters    = [openChar, endChar]
-},{"./directive":18}],37:[function(require,module,exports){
+},{"./directive":21}],40:[function(require,module,exports){
 var endEvents  = sniffEndEvents(),
     config     = require('./config'),
     // batch enter animations so we only force the layout once
@@ -6089,7 +6325,7 @@ function sniffEndEvents () {
 // Expose some stuff for testing purposes
 transition.codes = codes
 transition.sniff = sniffEndEvents
-},{"./batcher":13,"./config":16}],38:[function(require,module,exports){
+},{"./batcher":16,"./config":19}],41:[function(require,module,exports){
 var config       = require('./config'),
     toString     = ({}).toString,
     win          = window,
@@ -6416,7 +6652,7 @@ function enableDebug () {
         }
     }
 }
-},{"./config":16,"./fragment":32,"./template-parser.js":35,"./viewmodel":39}],39:[function(require,module,exports){
+},{"./config":19,"./fragment":35,"./template-parser.js":38,"./viewmodel":42}],42:[function(require,module,exports){
 var Compiler   = require('./compiler'),
     utils      = require('./utils'),
     transition = require('./transition'),
@@ -6608,7 +6844,7 @@ function query (el) {
 
 module.exports = ViewModel
 
-},{"./batcher":13,"./compiler":15,"./transition":37,"./utils":38}],40:[function(require,module,exports){
+},{"./batcher":16,"./compiler":18,"./transition":40,"./utils":41}],43:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
