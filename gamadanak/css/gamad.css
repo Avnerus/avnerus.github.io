@@ -1,0 +1,33 @@
+body {
+    background-color: #101010;
+}
+
+
+#mixtape {
+    color: white;
+    position: absolute;
+    left: 300px;
+    top: 400px;
+    width: 820px;
+}
+
+#heading {
+    font: normal 72px JustAnotherHandRegular, helvetica, sans-serif;
+    text-align: center;
+    /*font-size: 48px;*/
+    margin-top: 50px;
+    margin-left: 15px;
+}
+#instructions {
+    text-align: center;
+    font-size: 20px;
+    margin-top: 20px;
+    margin-left: 20px;
+}
+
+#now_playing {
+    width: 470px;
+    margin-right: auto;
+    margin-left: auto;
+    margin-top: 50px;
+}

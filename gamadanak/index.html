@@ -1,0 +1,80 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <link type="text/css" href="css/reset.css" rel="stylesheet">
+        <link type="text/css" href="css/gamad.css" rel="stylesheet">
+        <link type="text/css" href="css/cassette-tape-ui.css" rel="stylesheet">
+    </head>
+    <body>
+        <script src="lib/jquery-2.1.0.min.js"></script>
+        <script src="lib/Box2D.js"></script>
+        <script src="lib/MathUtil.js"></script>
+        <script src="lib/pixi.js"></script>
+        <script src="bundle.js"></script>
+        <script src="lib/soundmanager2.js"></script>
+        <script src="lib/cassette-tape-ui.js"></script>
+        <div id="mixtape">
+            <!--h1 id="heading">The Mixtape Game</h1-->
+            <div id ="now_playing">
+                <div class="clear blue color texture tape">
+                   <div class="window"></div>
+                   <div class="rail-left"></div>
+                   <div class="rail-right"></div>
+                   <div class="rail-middle">
+                    <div class="rail-middle-outline">
+                     <div class="hole-1"></div>
+                     <div class="hole-2"></div>
+                     <div class="hole-3"></div>
+                     <div class="hole-4"></div>
+                     <div class="tape-pad-holder">
+                     <div class="tape-pad"></div>
+                     <div class="tape-pad-line"></div>
+                    </div>
+                   </div>
+                   <div class="screw-bm"></div>
+                   </div>
+                   <div class="screw-tl"></div>
+                   <div class="screw-tr"></div>
+                   <div class="screw-bl"></div>
+                   <div class="screw-br"></div>
+                   <div style="border-width: 10px; margin-left: -55px; margin-top: -55px;" class="left reel"></div>
+                   <div class="left spokes">
+                   </div>
+                   <div style="border-width: 65px; margin-left: -110px; margin-top: -110px;" class="right reel"></div>
+                   <div class="right spokes">
+                   </div>
+                   <canvas height="300" width="480" class="connecting-tape"></canvas>
+                   <div class="left tape-guide"></div>
+                   <div class="right tape-guide"></div>
+                   <div class="progress-notches">
+                    <div class="n1"></div>
+                    <div class="n2"></div>
+                    <div class="n3"></div>
+                    <div class="n4"></div>
+                    <div class="n5"></div>
+                    <div class="n6"></div>
+                    <div class="n7"></div>
+                    <div class="n8"></div>
+                    <div class="n9"></div>
+                   </div>
+                   <div id="song-label" class="label">Ayala's Mixtape - Press Play :)</div>
+                   <div class="controls">
+                    <div class="bd">
+                     <ul>
+                      <li><a href="#" title="play/pause" class="play">▶</a></li>
+                      <li><a href="#" title="rewind" class="rew">«</a></li>
+                      <li><a href="#" title="fast-forward" class="ffwd">»</a></li>
+                      <li><a href="#" title="stop" class="stop">■</a></li>
+                     </ul>
+                    </div>
+                   </div>
+                </div>
+                <!--audio id="player" controls>
+                  <source src="mixtape/deep_is_the_breath.ogg" type="audio/ogg">
+                </audio--> 
+            </div>
+            <!--h1 id="instructions">Instructions: Press the Space Bar when it feels right</h1-->
+        </div>
+    </body>
+</html>
