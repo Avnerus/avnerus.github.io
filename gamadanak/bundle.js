@@ -1576,7 +1576,7 @@ ScoreBoard.prototype.updateBoard = function(position) {
 }
 
 ScoreBoard.prototype.place = function(position) {
-    this.pointsLabel = new PIXI.Text("Ayala's Points:", {font:"62px JustAnotherHandRegular", fill:"#bb2c2c"});
+    this.pointsLabel = new PIXI.Text("Player's Points:", {font:"62px JustAnotherHandRegular", fill:"#bb2c2c"});
     this.pointsLabel.position.y = 100;
     this.pointsLabel.position.x = 90;
     this.pointsValue = new PIXI.Text(this.points, {font:"48px Arial", fill:"#bb2c2c"});
@@ -1585,7 +1585,7 @@ ScoreBoard.prototype.place = function(position) {
     this.stage.addChild(this.pointsLabel);
     this.stage.addChild(this.pointsValue);
 
-    this.comboLabel = new PIXI.Text("Ayala's Combo:", {font:"62px JustAnotherHandRegular", fill:"#3399cc"});
+    this.comboLabel = new PIXI.Text("Player's Combo:", {font:"62px JustAnotherHandRegular", fill:"#3399cc"});
     this.comboLabel.position.y = 200;
     this.comboLabel.position.x = 90;
     this.comboValue = new PIXI.Text(this.combo, {font:"48px Arial", fill:"#3399cc"});
