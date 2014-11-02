@@ -21,6 +21,7 @@
   <body>
     <script src="js/jquery.min.js"></script>
     <script src="js/bootstrap.min.js"></script>
+    <script src="js/underscore-min.js"></script>
     <script src="js/jquery.flexslider-min.js"></script>
 
     <script src="js/MathUtil.js"></script>
@@ -39,8 +40,8 @@
             <div class="row">
                 <div class="col-md-12">
                     <!--i class="fa fa-arrow-circle-down shirt-arrow"></i-->
-                    <div class="scroll-text">SCROLL</div>
-                    <div class="arrow animated bounce shirt-arrow"></div>
+                    <div class="scroll-text">SCROLL DOWN</div>
+                    <!--div class="arrow animated bounce shirt-arrow"></div-->
                 </div>
             </div>
         </div>
@@ -58,7 +59,16 @@
                 </div>
             </div>
             <div class="row">
-                <div class="col-md-5">
+                <div class="col-md-5 work-data">
+                    <div class="work-links" v-if="links.length > 0">
+                        <div> Links:
+                        <ul>
+                            <li v-repeat="link : links">
+                                <a target="_blank" href='{{link.url}}'>{{link.description}}</a>
+                            </li>
+                        </ul>
+                        </div>
+                    </div>
                     <div class="work-description">
                         {{description}}
                     </div>
@@ -68,16 +78,24 @@
                         <ul class="slides">
                         <li>
                         <!--img src="assets/works/pulse1.jpg" /-->
-                            <img src="http://placehold.it/450x415&text=Image1"/>
+                            <img src="http://placehold.it/450x400&text=Image1"/>
                         </li>
                         <li>
-                            <img src="http://placehold.it/450x415&text=Image2"/>
+                            <img src="http://placehold.it/450x400&text=Image2"/>
                         </li>
                         <li>
-                            <img src="http://placehold.it/450x415&text=Image3"/>
+                            <img src="http://placehold.it/450x400&text=Image3"/>
                         </li>
                         </ul>
                         </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12 nav-arrows">
+                    <i class="fa fa-arrow-left left-arrow" v-on="click:prevWork"></i>
+                    <p class="arrow-text" v-on="click:prevWork"> Prev Idea </p>
+                    <p class="arrow-text next-text" v-on="click:nextWork"> Next Idea </p>
+                    <i class="fa fa-arrow-right right-arrow" v-on="click:nextWork"></i>
                 </div>
             </div>
         </div>

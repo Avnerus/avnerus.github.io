@@ -1,3 +1,7 @@
+html {
+    overflow-y: scroll !important;
+}
+
 #video-container {
     width: 1280px;
     height: 720px;
@@ -13,10 +17,10 @@
 }
 
 .scroll-text {
-    font-size: 16px;
+    font-size: 20px;
     position: relative;
-    left: 620px;
-    bottom: 15px;
+    left: 575px;
+    bottom: 30px;
 }
 
 #arrow-container {
@@ -46,7 +50,35 @@
     bottom: 0px;
 }
 
+.nav-arrows {
+    color: lightgray;
+    font-size: 20px;
+}
 
+.arrow-text {
+    display:inline;
+    cursor: pointer;
+}
+
+.left-arrow {
+    cursor: pointer;
+    margin-left: 10px;
+}
+
+.right-arrow {
+    cursor: pointer;
+}
+
+.next-text {
+   margin-left: 750px; 
+}
+
+.work-links {
+    font-size: 17px;
+    line-height: 1.6;
+    margin-left: 50px;
+    overflow: auto;
+}
 #loading-container {
   margin: auto;
   position: absolute;
@@ -108,9 +140,14 @@
 
 .work-description {
     line-height: 1.6;
-    font-size: 16px;
+    font-size: 17px;
     margin-left: 50px;
-    height: 415px;
+    height: auto;
+    overflow: auto;
+}
+
+.work-data {
+    height: 400px;
     overflow: auto;
 }
 
@@ -156,10 +193,11 @@
 
 
 .flexslider {
-    height: 415px;
+    height: 400px;
     width: 450px;
     margin-left: 40px;
     background: none;
+    margin-bottom: 50px;
 }
 
 .flex-direction-nav a {

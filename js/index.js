@@ -61,13 +61,26 @@ var loader = new PIXI.AssetLoader([
     "assets/brain/bg.jpg",
     "assets/brain/tile_neurons.png",
     "assets/brain/displacement_map.png",
+    //"assets/brain/talk_bubble.png",
     "assets/works/pulse.png",
     "assets/works/gamad.json",
     "assets/works/gamad2.json",
     "assets/works/train.png",
     "assets/works/question_block.png",
-    "assets/works/Koala.json"
+    "assets/works/Koala.json",
+    "assets/works/headphones.png",
+    "assets/works/lightning.png",
+    "assets/works/lightning_f.png",
+    "assets/works/dove.png",
+    "assets/works/face.png",
+    "assets/works/cog.png",
+    "assets/works/keyhole.png",
+    "assets/works/can.png",
+    "assets/works/tripod.png",
+    "assets/works/japan.png",
+    "assets/works/bass.png"
 ]);
+
 loader.onComplete = function() {
     assetsLoaded = true;
     console.log("Assets loaded!");

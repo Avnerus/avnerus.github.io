@@ -6,9 +6,15 @@ body {
 #mixtape {
     color: white;
     position: absolute;
-    left: 300px;
-    top: 400px;
-    width: 820px;
+    bottom: 0;
+    color: white;
+    height: 400px;
+    left: 0;
+    margin: auto;
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: 520px;
 }
 
 #heading {

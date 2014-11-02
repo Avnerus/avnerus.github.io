@@ -182,6 +182,8 @@ var gameOpts = {
 
 var stage = new PIXI.Stage(0x000000);
 var renderer = new PIXI.autoDetectRenderer(gameOpts.stageWidth, gameOpts.stageHeight);
+renderer.view.style.width = window.innerWidth + "px";
+renderer.view.style.height = window.innerHeight + "px";
 document.body.appendChild(renderer.view);
 
 var world = new Box2D.Dynamics.b2World(new Box2D.Common.Math.b2Vec2(0, 10),  true);
@@ -197,6 +199,15 @@ emitter.on('gameStart', function(message){
     paused = false;
 });
 
+
+window.onresize = function() {
+    console.log("Window resize!");
+    renderer.view.style.width = window.innerWidth + "px";
+    renderer.view.style.height = window.innerHeight + "px";
+    var ratio = {x: window.innerWidth / gameOpts.stageWidth, y: window.innerHeight / gameOpts.stageHeight};
+    emitter.emit('resize', ratio);
+}
+
 function start() {
     console.log("Starting Gamad Anak!");
 
@@ -210,7 +221,8 @@ function start() {
     var beatFall = require('./beat_fall')(stage, emitter, gameOpts);
     beatFall.place();
 
-    var gnome = require('./gnome')(stage, emitter, scoreBoard, gameOpts);
+    var ratio = {x: window.innerWidth / gameOpts.stageWidth, y: window.innerHeight / gameOpts.stageHeight};
+    var gnome = require('./gnome')(stage, emitter, scoreBoard, gameOpts, ratio);
     gnome.place();
 
     var sweatpants = require('./sweatpants')(stage, emitter, scoreBoard, world, gameOpts);
@@ -236,16 +248,16 @@ function start() {
 "use strict"
 //var PIXI = require('pixi');
 
-module.exports = function(stage, emitter, scoreBoard, opts) {
-  return new Gnome(stage, emitter,scoreBoard, opts)
+module.exports = function(stage, emitter, scoreBoard, opts, ratio) {
+  return new Gnome(stage, emitter,scoreBoard, opts, ratio)
 }
 
 module.exports.Gnome = Gnome
 
 
-function Gnome(stage, emitter, scoreBoard, opts) {
+function Gnome(stage, emitter, scoreBoard, opts, ratio) {
    // protect against people who forget 'new'
-   if (!(this instanceof Gnome)) return new Gnome(stage, emitter, scoreBoard, opts)
+   if (!(this instanceof Gnome)) return new Gnome(stage, emitter, scoreBoard, opts, ratio)
     // we need to store the passed in variables on 'this'
     // so that they are available to the .prototype methods
     this.stage = stage
@@ -275,8 +287,20 @@ function Gnome(stage, emitter, scoreBoard, opts) {
     emitter.on('anakLostCombo', function(message){
         gnome.anakLostCombo();
     });
+    emitter.on('resize', function(message){
+        gnome.resize(message);
+    });
+
+    gnome.resize(ratio);
 }
 
+Gnome.prototype.resize = function(message) {
+    console.log("Gnome resize!", message);
+    this.sprite.position.y = 112 * message.y;
+    for (var i = 0; i < this.dances.length; i++) {
+        this.dances[i].position.y = 112 * message.y;
+    }
+}
 
 Gnome.prototype.loadAnim = function(name, frames) {
     var dance_seq = [];
@@ -290,7 +314,7 @@ Gnome.prototype.loadAnim = function(name, frames) {
     dance.anchor.x = 0.5;
     dance.anchor.y = 0.5;
     dance.position.x = this.opts.stageWidth / 2;
-    dance.position.y = 330;
+    dance.position.y = 120;
     dance.scale = {x: 0.5, y: 0.5};
     dance.loop = false;
     dance.onComplete = function() {
@@ -307,7 +331,7 @@ Gnome.prototype.place = function(position) {
     this.sprite.anchor.x = 0.5;
     this.sprite.anchor.y = 0.5;
     this.sprite.position.x = this.opts.stageWidth / 2;
-    this.sprite.position.y = 330;
+    this.sprite.position.y = 120;
     this.stage.addChild(this.sprite);
 
 }
