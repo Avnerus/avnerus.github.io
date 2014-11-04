@@ -86,12 +86,21 @@ BrainController.prototype.init = function (opts, stage, ratio, renderer, workCon
     eventEmitter.on('info_clicked', function() {
         self.infoClicked();
     });
+
+    
 }
 
 
 BrainController.prototype.workClicked = function(work) {
     console.log("Work clicked!", work);
     this.vm.$data = work.getData();
+    $('#work-media').addClass('flexslider');
+    Vue.nextTick(function() {
+        console.log("Load flexslider!!");
+        $('#work-media.flexslider').flexslider({
+            slideshow: false,
+        });
+    })
     this.currentWorkIndex = _.indexOf(this.works, work);
     this.showWork();
 }
@@ -106,6 +115,12 @@ BrainController.prototype.showWork = function() {
 BrainController.prototype.hideWork = function() {
     this.workContainer.css("opacity", 0);
     this.showingWork = false;
+    if($('#work-media').hasClass('flexslider')){
+        console.log("Remove and destroy flexslider!!");
+        $('#work-media').removeClass('flexslider')
+            .flexslider('destroy');
+    }
+    
 }
 BrainController.prototype.nextWork = function() {
     console.log("NEXT WORK! Current Index", this.currentWorkIndex);
@@ -196,7 +211,6 @@ BrainController.prototype.initWorks = function() {
         new (require('./works/bass'))()
     ]
 
-     $('.flexslider').flexslider({slideshow: false});
 
     for (var i = 0; i < this.works.length; i++) {
         var work = this.works[i];
@@ -1080,6 +1094,11 @@ Gamad.prototype.getData = function() {
                 url: "https://github.com/Avnerus/gamadanak",
                 description: "View the source code"
             }
+        ],
+        images: [
+            {path: "images/works/gamadanak1.png"},
+            {path: "images/works/gamadanak2.png"},
+            {path: "images/works/gamadanak3.png"}
         ]
     }
 }
