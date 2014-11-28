@@ -78,7 +78,8 @@ var loader = new PIXI.AssetLoader([
     "assets/works/can.png",
     "assets/works/tripod.png",
     "assets/works/japan.png",
-    "assets/works/bass.png"
+    "assets/works/bass.png",
+    "assets/works/biology.png"
 ]);
 
 loader.onComplete = function() {
@@ -89,7 +90,7 @@ loader.onComplete = function() {
     if (videosLoaded) {
        start();
     }
-    videoContoller.loadVideos($('#video-container'), gameOpts.scrollHeight);
+    videoContoller.loadVideos($('#video-container'), gameOpts.scrollHeight, $('#neutral-container'));
 };
 loader.load();
 
@@ -98,6 +99,7 @@ function start() {
    brainController.init(gameOpts, container, ratio, renderer, $('#work-container'), $('#info-container'));
    $('#loading-container').hide();
    videoContoller.playWaiting();
+   renderer.view.id = "pixi-view";
    $('#pixi-container').append(renderer.view);
    setTimeout(showDownArrow, 5000);
 

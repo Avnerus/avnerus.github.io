@@ -16,23 +16,29 @@ function VideoController(opts) {
     this.stageHeight = opts.stageHeight;
     this.zoomMultiplyer = 1;
     this.previousZoomMultiplyer = 1;
+    this.frameCounter = 0;
 
     console.log("Video Controller started", opts);
+
+    this.FF = (typeof window.mozInnerScreenX != 'undefined');
+    this.SAFARI = (navigator.userAgent.search("Safari") >= 0 && navigator.userAgent.search("Chrome") < 0);
 }
 
-VideoController.prototype.loadVideos = function (container, scrollHeight) {
+VideoController.prototype.loadVideos = function (container, scrollHeight, neutralContainer) {
 
     this.container = container;
+    this.neutralContainer = neutralContainer;
+
     this.VIDEOS = {
         waiting: { 
-            'tired_blink': { paths : ['final/tired_blink.webm'] },
-            'shrink_lip': {paths: ['final/shrink_lip.webm']},
-            'rollingEyes_openMouth': {paths: [ 'final/rollingEyes_openMouth.webm' ]},
-            'rollingEyes_blink': {paths: [ 'final/rollingEyes_blink.webm' ]},
-            'open_mouth': {paths: [ 'final/open_mouth.webm' ]},
-            'neutral': {paths: [ 'final/neutral.webm' ]},
-            'blink02': {paths: [ 'final/blink02.webm' ]},
-            'blink01': {paths: [ 'final/blink01.webm' ]}
+            'tired_blink': { paths : ['final/tired_blink.webm','final/tired_blink.mp4'] },
+            'shrink_lip': {paths: ['final/shrink_lip.webm', 'final/shrink_lip.mp4']},
+            'rollingEyes_openMouth': {paths: [ 'final/rollingEyes_openMouth.webm', 'final/rollingEyes_openMouth.mp4'  ]},
+            'rollingEyes_blink': {paths: [ 'final/rollingEyes_blink.webm', 'final/rollingEyes_blink.mp4'  ]},
+            'open_mouth': {paths: [ 'final/open_mouth.webm', 'final/open_mouth.mp4'  ]},
+            'neutral': {paths: [ 'final/neutral.webm', 'final/neutral.mp4'  ]},
+            //'blink02': {paths: [ 'final/blink02.webm', 'final/blink02.mp4'  ]},
+            'blink01': {paths: [ 'final/blink01.webm', 'final/blink01.mp4'  ]}
         },
         enter: {
             frames: {
@@ -56,6 +62,7 @@ VideoController.prototype.loadVideos = function (container, scrollHeight) {
     this.loadVideo('enter', this.VIDEOS.enter, container);
 
     this.nowPlaying = null;
+
 }
 
 VideoController.prototype.loadVideo = function (id, video, container) {
@@ -66,8 +73,6 @@ VideoController.prototype.loadVideo = function (id, video, container) {
 
     if (video.frames) {
         console.log("Loading " + video.id + "(Regular video element)");
-        var FF = (typeof window.mozInnerScreenX != 'undefined');
-        console.log("Running on FF?", FF);
         video.frames.images = [];
         video.frames.loaded = 0;
         for (var i = 0; i < video.frames.count; i++) {
@@ -78,12 +83,12 @@ VideoController.prototype.loadVideo = function (id, video, container) {
             image.name = video.id + "_" + i;
             image.id = video.id + "_" + i;
             image.style.position = "fixed";
-            if (FF) {
+            if (this.FF) {
                 image.style.left = "-75em";
+                image.style.display = "block !important";
             } else {
                 image.style.display = "none";
             }
-            image.style.display = "block !important";
             image.style.zIndex = 0;
             video.frames.images.push(image);
             container.parent().append(image);
@@ -92,11 +97,13 @@ VideoController.prototype.loadVideo = function (id, video, container) {
 
         // Place holder image
         var placeholderImage = new Image();
-        placeholderImage.src ="images/blank.jpg";
+        //placeholderImage.src ="images/blank.jpg";
+        placeholderImage.src = video.frames.images[0].src;
         placeholderImage.alt = "";
         placeholderImage.id = video.id;
         placeholderImage.name = video.id;
         placeholderImage.style.position = "relative";
+        placeholderImage.style.display = "none";
 //        placeholderImage.style.top = "0px";
   //      placeholderImage.style.bottom = "0px";
         container.append(placeholderImage);
@@ -119,10 +126,6 @@ VideoController.prototype.loadVideo = function (id, video, container) {
             videoElement.appendChild(sourceElement);
         }
 
-
-        /*videoElement.oncanplaythrough = function(event) {
-            self.videoCanPlayThrough(event.target);
-        }*/
 
         videoElement.addEventListener("canplaythrough",function(event) {self.videoCanPlayThrough(event.target)}, false);
         videoElement.addEventListener("ended",function(event) {self.videoEnded(event.target)}, false);
@@ -172,6 +175,9 @@ VideoController.prototype.checkLoaded = function() {
     }
     if (allLoaded && this.VIDEOS.enter.loaded) {
         console.log("All videos are loaded!");
+        if (this.SAFARI) {
+            this.neutralContainer.show();
+        }
         this.eventEmitter.emit('videos_loaded');
     }
 }
@@ -185,19 +191,23 @@ VideoController.prototype.playRandomWaiting = function() {
     var keys = Object.keys(this.VIDEOS.waiting);
     var index = Math.floor(Math.random() * (keys.length)); 
     var video = this.VIDEOS.waiting[keys[index]];
+    if (video.loaded) {
 
-    console.log("Playing ", video);
-    
-    if (this.nowPlaying && video.id != this.nowPlaying.id) {
-        this.hideVideo(this.nowPlaying);
+        console.log("Playing ", video);
+        
+        this.showVideo(video);
+
+        if (this.nowPlaying && video.id != this.nowPlaying.id) {
+            this.hideVideo(this.nowPlaying);
+        }
+
+        video.element.pause();
+        video.element.currentTime = 0;
+        video.element.play();
+
+        this.nowPlaying = video;
     }
 
-    this.showVideo(video);
-    video.element.pause();
-    video.element.currentTime = 0;
-    video.element.play();
-
-    this.nowPlaying = video;
 }
 
 VideoController.prototype.videoEnded = function(video) {
@@ -225,6 +235,9 @@ VideoController.prototype.loop = function() {
         this.zoomMultiplyer = 1 + ((offset - zoomStart) / this.zoomHeight  * 15);
     }
     else {
+        if (this.SAFARI) {
+            this.neutralContainer.show();
+        }
         if (this.nowPlaying && this.nowPlaying.id == this.VIDEOS.enter.id) {
             this.playRandomWaiting();
         }
@@ -239,7 +252,7 @@ VideoController.prototype.loop = function() {
 
 VideoController.prototype.zoomVideo = function(zoomMultiplyer) {
     var video = this.nowPlaying;
-    console.log("Zoom : " + zoomMultiplyer);
+    //console.log("Zoom : " + zoomMultiplyer);
     video.rect = {
         width: this.stageWidth * zoomMultiplyer ,
         height: this.stageHeight * zoomMultiplyer
@@ -267,15 +280,18 @@ VideoController.prototype.zoomVideo = function(zoomMultiplyer) {
 VideoController.prototype.showVideoAt = function(video, offsetPercentage) {
     this.container.css("height", "auto");
     if (this.nowPlaying && this.nowPlaying.id != video.id) {
-        this.hideVideo(this.nowPlaying);
         this.showVideo(video);
+        this.hideVideo(this.nowPlaying);
+        if (this.SAFARI) {
+            this.neutralContainer.hide();
+        }
         this.nowPlaying = video;
     }
     var time;
     if (video.frames) {
         // It's a frames video - show the appropiate frame
         var frameNumber =  Math.min(Math.max( Math.round( offsetPercentage * video.frames.count), 1),video.frames.count);
-        if (frameNumber != video.frames.current) {
+        if (frameNumber != video.frames.current && (!this.SAFARI || frameNumber >= 2)) {
             video.element.src = video.frames.images[frameNumber - 1].src;
             video.element.style.width = this.stageWidth;
             video.element.style.height = this.stageHeight;
@@ -290,7 +306,7 @@ VideoController.prototype.showVideoAt = function(video, offsetPercentage) {
 
 
 VideoController.prototype.hideVideo = function (video) {
-  video.element.style.display = "none";
+    video.element.style.display = "none";
 }
 VideoController.prototype.showVideo = function (video) {
   video.element.style.display = "block";  

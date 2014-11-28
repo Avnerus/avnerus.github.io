@@ -86,19 +86,32 @@ BrainController.prototype.init = function (opts, stage, ratio, renderer, workCon
     eventEmitter.on('info_clicked', function() {
         self.infoClicked();
     });
-
-    
 }
 
 
 BrainController.prototype.workClicked = function(work) {
     console.log("Work clicked!", work);
     this.vm.$data = work.getData();
+    this.vm.$data.currentIndex = 0;
     $('#work-media').addClass('flexslider');
+    var self = this;
     Vue.nextTick(function() {
         console.log("Load flexslider!!");
         $('#work-media.flexslider').flexslider({
             slideshow: false,
+            start: function(slider) {
+               $('.slides li img').click(function(event){
+                   event.preventDefault();
+                   slider.flexAnimate(slider.getTarget("next"));
+               });
+            },
+            after: function(slider) {
+                console.log("Current Slide ", slider.currentSlide);
+                var index = slider.currentSlide;
+                if (self.vm.$data.description[index]) {
+                    self.vm.$data.currentIndex = index;
+                }
+            }
         });
     })
     this.currentWorkIndex = _.indexOf(this.works, work);
@@ -166,7 +179,7 @@ BrainController.prototype.initWorks = function() {
 
     this.vm = new Vue({
         el: '#main-container',
-        data: {},
+        data: {currentIndex: 0, description: ""},
         methods: {
             closeWork: function(e) {
                 self.hideWork();
@@ -214,7 +227,8 @@ BrainController.prototype.initWorks = function() {
         new (require('./works/security'))(),
         new (require('./works/cantenna'))(),
         new (require('./works/japan'))(),
-        new (require('./works/bass'))()
+        new (require('./works/bass'))(),
+        new (require('./works/biology'))()
     ]
 
 
@@ -286,7 +300,7 @@ BrainController.prototype.spawnWork = function () {
     
 }
 
-},{"./event_manager":2,"./works/bass":5,"./works/brain":6,"./works/cantenna":7,"./works/equala":8,"./works/gamad":9,"./works/info":10,"./works/japan":11,"./works/koala":12,"./works/peace":13,"./works/pulse":14,"./works/security":15,"./works/train":16,"tween.js":17,"vue":38}],2:[function(require,module,exports){
+},{"./event_manager":2,"./works/bass":5,"./works/biology":6,"./works/brain":7,"./works/cantenna":8,"./works/equala":9,"./works/gamad":10,"./works/info":11,"./works/japan":12,"./works/koala":13,"./works/peace":14,"./works/pulse":15,"./works/security":16,"./works/train":17,"tween.js":18,"vue":39}],2:[function(require,module,exports){
 "use strict"
 
 var events = require('events');
@@ -298,7 +312,7 @@ module.exports.getEmitter = function() {
 }
 
 
-},{"events":45}],3:[function(require,module,exports){
+},{"events":46}],3:[function(require,module,exports){
 var gameOpts = {
     stageWidth: 1280,
     stageHeight: 720,
@@ -379,7 +393,8 @@ var loader = new PIXI.AssetLoader([
     "assets/works/can.png",
     "assets/works/tripod.png",
     "assets/works/japan.png",
-    "assets/works/bass.png"
+    "assets/works/bass.png",
+    "assets/works/biology.png"
 ]);
 
 loader.onComplete = function() {
@@ -390,7 +405,7 @@ loader.onComplete = function() {
     if (videosLoaded) {
        start();
     }
-    videoContoller.loadVideos($('#video-container'), gameOpts.scrollHeight);
+    videoContoller.loadVideos($('#video-container'), gameOpts.scrollHeight, $('#neutral-container'));
 };
 loader.load();
 
@@ -399,6 +414,7 @@ function start() {
    brainController.init(gameOpts, container, ratio, renderer, $('#work-container'), $('#info-container'));
    $('#loading-container').hide();
    videoContoller.playWaiting();
+   renderer.view.id = "pixi-view";
    $('#pixi-container').append(renderer.view);
    setTimeout(showDownArrow, 5000);
 
@@ -424,7 +440,7 @@ function animate() {
     requestAnimationFrame(animate);
 }
 
-},{"./brain_controller":1,"./event_manager":2,"./video_controller":4,"tween.js":17}],4:[function(require,module,exports){
+},{"./brain_controller":1,"./event_manager":2,"./video_controller":4,"tween.js":18}],4:[function(require,module,exports){
 "use strict"
 
 module.exports = function(opts) {
@@ -443,23 +459,29 @@ function VideoController(opts) {
     this.stageHeight = opts.stageHeight;
     this.zoomMultiplyer = 1;
     this.previousZoomMultiplyer = 1;
+    this.frameCounter = 0;
 
     console.log("Video Controller started", opts);
+
+    this.FF = (typeof window.mozInnerScreenX != 'undefined');
+    this.SAFARI = (navigator.userAgent.search("Safari") >= 0 && navigator.userAgent.search("Chrome") < 0);
 }
 
-VideoController.prototype.loadVideos = function (container, scrollHeight) {
+VideoController.prototype.loadVideos = function (container, scrollHeight, neutralContainer) {
 
     this.container = container;
+    this.neutralContainer = neutralContainer;
+
     this.VIDEOS = {
         waiting: { 
-            'tired_blink': { paths : ['final/tired_blink.webm'] },
-            'shrink_lip': {paths: ['final/shrink_lip.webm']},
-            'rollingEyes_openMouth': {paths: [ 'final/rollingEyes_openMouth.webm' ]},
-            'rollingEyes_blink': {paths: [ 'final/rollingEyes_blink.webm' ]},
-            'open_mouth': {paths: [ 'final/open_mouth.webm' ]},
-            'neutral': {paths: [ 'final/neutral.webm' ]},
-            'blink02': {paths: [ 'final/blink02.webm' ]},
-            'blink01': {paths: [ 'final/blink01.webm' ]}
+            'tired_blink': { paths : ['final/tired_blink.webm','final/tired_blink.mp4'] },
+            'shrink_lip': {paths: ['final/shrink_lip.webm', 'final/shrink_lip.mp4']},
+            'rollingEyes_openMouth': {paths: [ 'final/rollingEyes_openMouth.webm', 'final/rollingEyes_openMouth.mp4'  ]},
+            'rollingEyes_blink': {paths: [ 'final/rollingEyes_blink.webm', 'final/rollingEyes_blink.mp4'  ]},
+            'open_mouth': {paths: [ 'final/open_mouth.webm', 'final/open_mouth.mp4'  ]},
+            'neutral': {paths: [ 'final/neutral.webm', 'final/neutral.mp4'  ]},
+            //'blink02': {paths: [ 'final/blink02.webm', 'final/blink02.mp4'  ]},
+            'blink01': {paths: [ 'final/blink01.webm', 'final/blink01.mp4'  ]}
         },
         enter: {
             frames: {
@@ -483,6 +505,7 @@ VideoController.prototype.loadVideos = function (container, scrollHeight) {
     this.loadVideo('enter', this.VIDEOS.enter, container);
 
     this.nowPlaying = null;
+
 }
 
 VideoController.prototype.loadVideo = function (id, video, container) {
@@ -493,8 +516,6 @@ VideoController.prototype.loadVideo = function (id, video, container) {
 
     if (video.frames) {
         console.log("Loading " + video.id + "(Regular video element)");
-        var FF = (typeof window.mozInnerScreenX != 'undefined');
-        console.log("Running on FF?", FF);
         video.frames.images = [];
         video.frames.loaded = 0;
         for (var i = 0; i < video.frames.count; i++) {
@@ -505,12 +526,12 @@ VideoController.prototype.loadVideo = function (id, video, container) {
             image.name = video.id + "_" + i;
             image.id = video.id + "_" + i;
             image.style.position = "fixed";
-            if (FF) {
+            if (this.FF) {
                 image.style.left = "-75em";
+                image.style.display = "block !important";
             } else {
                 image.style.display = "none";
             }
-            image.style.display = "block !important";
             image.style.zIndex = 0;
             video.frames.images.push(image);
             container.parent().append(image);
@@ -519,11 +540,13 @@ VideoController.prototype.loadVideo = function (id, video, container) {
 
         // Place holder image
         var placeholderImage = new Image();
-        placeholderImage.src ="images/blank.jpg";
+        //placeholderImage.src ="images/blank.jpg";
+        placeholderImage.src = video.frames.images[0].src;
         placeholderImage.alt = "";
         placeholderImage.id = video.id;
         placeholderImage.name = video.id;
         placeholderImage.style.position = "relative";
+        placeholderImage.style.display = "none";
 //        placeholderImage.style.top = "0px";
   //      placeholderImage.style.bottom = "0px";
         container.append(placeholderImage);
@@ -546,10 +569,6 @@ VideoController.prototype.loadVideo = function (id, video, container) {
             videoElement.appendChild(sourceElement);
         }
 
-
-        /*videoElement.oncanplaythrough = function(event) {
-            self.videoCanPlayThrough(event.target);
-        }*/
 
         videoElement.addEventListener("canplaythrough",function(event) {self.videoCanPlayThrough(event.target)}, false);
         videoElement.addEventListener("ended",function(event) {self.videoEnded(event.target)}, false);
@@ -599,6 +618,9 @@ VideoController.prototype.checkLoaded = function() {
     }
     if (allLoaded && this.VIDEOS.enter.loaded) {
         console.log("All videos are loaded!");
+        if (this.SAFARI) {
+            this.neutralContainer.show();
+        }
         this.eventEmitter.emit('videos_loaded');
     }
 }
@@ -612,19 +634,23 @@ VideoController.prototype.playRandomWaiting = function() {
     var keys = Object.keys(this.VIDEOS.waiting);
     var index = Math.floor(Math.random() * (keys.length)); 
     var video = this.VIDEOS.waiting[keys[index]];
+    if (video.loaded) {
 
-    console.log("Playing ", video);
-    
-    if (this.nowPlaying && video.id != this.nowPlaying.id) {
-        this.hideVideo(this.nowPlaying);
+        console.log("Playing ", video);
+        
+        this.showVideo(video);
+
+        if (this.nowPlaying && video.id != this.nowPlaying.id) {
+            this.hideVideo(this.nowPlaying);
+        }
+
+        video.element.pause();
+        video.element.currentTime = 0;
+        video.element.play();
+
+        this.nowPlaying = video;
     }
 
-    this.showVideo(video);
-    video.element.pause();
-    video.element.currentTime = 0;
-    video.element.play();
-
-    this.nowPlaying = video;
 }
 
 VideoController.prototype.videoEnded = function(video) {
@@ -652,6 +678,9 @@ VideoController.prototype.loop = function() {
         this.zoomMultiplyer = 1 + ((offset - zoomStart) / this.zoomHeight  * 15);
     }
     else {
+        if (this.SAFARI) {
+            this.neutralContainer.show();
+        }
         if (this.nowPlaying && this.nowPlaying.id == this.VIDEOS.enter.id) {
             this.playRandomWaiting();
         }
@@ -666,7 +695,7 @@ VideoController.prototype.loop = function() {
 
 VideoController.prototype.zoomVideo = function(zoomMultiplyer) {
     var video = this.nowPlaying;
-    console.log("Zoom : " + zoomMultiplyer);
+    //console.log("Zoom : " + zoomMultiplyer);
     video.rect = {
         width: this.stageWidth * zoomMultiplyer ,
         height: this.stageHeight * zoomMultiplyer
@@ -694,15 +723,18 @@ VideoController.prototype.zoomVideo = function(zoomMultiplyer) {
 VideoController.prototype.showVideoAt = function(video, offsetPercentage) {
     this.container.css("height", "auto");
     if (this.nowPlaying && this.nowPlaying.id != video.id) {
-        this.hideVideo(this.nowPlaying);
         this.showVideo(video);
+        this.hideVideo(this.nowPlaying);
+        if (this.SAFARI) {
+            this.neutralContainer.hide();
+        }
         this.nowPlaying = video;
     }
     var time;
     if (video.frames) {
         // It's a frames video - show the appropiate frame
         var frameNumber =  Math.min(Math.max( Math.round( offsetPercentage * video.frames.count), 1),video.frames.count);
-        if (frameNumber != video.frames.current) {
+        if (frameNumber != video.frames.current && (!this.SAFARI || frameNumber >= 2)) {
             video.element.src = video.frames.images[frameNumber - 1].src;
             video.element.style.width = this.stageWidth;
             video.element.style.height = this.stageHeight;
@@ -717,7 +749,7 @@ VideoController.prototype.showVideoAt = function(video, offsetPercentage) {
 
 
 VideoController.prototype.hideVideo = function (video) {
-  video.element.style.display = "none";
+    video.element.style.display = "none";
 }
 VideoController.prototype.showVideo = function (video) {
   video.element.style.display = "block";  
@@ -778,12 +810,72 @@ Bass.prototype.update = function() {
 Bass.prototype.getData = function() {
     return {
         name: "Bass",
-        description: "This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project.  "
+        description: ["This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project.  "]
     }
 }
 
 
 },{"../event_manager":2}],6:[function(require,module,exports){
+"use strict"
+
+module.exports = function() {
+    return new Biology()
+}
+
+module.exports.Biology = Biology;
+
+function Biology() {
+    if (!(this instanceof Biology)) return new Biology()
+
+    this.loaded = false;
+    console.log("Biology work constructed");
+}
+
+Biology.prototype.init = function (opts, stage, clickHandler) {
+
+    console.log("Biology work initializing with opts", opts);
+    this.stage = stage;
+    this.opts = opts;
+    this.eventEmitter = require('../event_manager').getEmitter();
+
+    this.loadSprite();
+}
+
+
+Biology.prototype.loadSprite = function() {
+    var self = this;
+
+
+    var biology = new PIXI.Sprite.fromFrame("assets/works/biology.png");
+    biology.anchor.x = 0.5;
+    biology.anchor.y = 0.5;
+    biology.position.x = 1140;
+    biology.position.y = 330;
+    biology.scale = {x: 0.5, y: 0.5};
+
+    biology.buttonMode = true;
+    biology.setInteractive(true);
+
+    biology.click = function(mouseData){
+      console.log("Biology CLICK");
+      self.eventEmitter.emit('work_clicked', self);
+    }
+
+    this.stage.addChild(biology);
+}
+Biology.prototype.update = function() {
+    
+}
+
+Biology.prototype.getData = function() {
+    return {
+        name: "Biology",
+        description: ["This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project.  "]
+    }
+}
+
+
+},{"../event_manager":2}],7:[function(require,module,exports){
 "use strict"
 
 module.exports = function() {
@@ -858,12 +950,12 @@ Brain.prototype.update = function() {
 Brain.prototype.getData = function() {
     return {
         name: "The Problem of Consciousness",
-        description: "This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project.  "
+        description: [ "This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project.  "]
     }
 }
 
 
-},{"../event_manager":2}],7:[function(require,module,exports){
+},{"../event_manager":2}],8:[function(require,module,exports){
 "use strict"
 
 module.exports = function() {
@@ -933,12 +1025,12 @@ Cantenna.prototype.update = function() {
 Cantenna.prototype.getData = function() {
     return {
         name: "Cantenna Mesh",
-        description: "This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project.  "
+        description: ["This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project.  "]
     }
 }
 
 
-},{"../event_manager":2}],8:[function(require,module,exports){
+},{"../event_manager":2}],9:[function(require,module,exports){
 "use strict"
 
 module.exports = function() {
@@ -1016,12 +1108,27 @@ EQuala.prototype.update = function() {
 EQuala.prototype.getData = function() {
     return {
         name: "EQuala & Feature.FM",
-        description: "This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project.  "
+        description:["Page1", "Page2"],
+        images: [
+            {type: "image", path: "images/works/equala1.png"},
+            {type: "image", path: "images/works/equala2.png"},
+            {type: "image", path: "images/works/equala3.png"}
+        ],
+        links: [
+            {
+                url: "https://www.equala.fm",
+                description: "EQuala Official Page"
+            },
+            {
+                url: "https://www.feature.fm",
+                description: "Feature.FM Official Page"
+            }
+        ],
     }
 }
 
 
-},{"../event_manager":2}],9:[function(require,module,exports){
+},{"../event_manager":2}],10:[function(require,module,exports){
 "use strict"
 
 module.exports = function() {
@@ -1090,7 +1197,7 @@ Gamad.prototype.update = function() {
 Gamad.prototype.getData = function() {
     return {
         name: "Gamad Anak",
-        description: 'Hebrew for "Gnome-Giant": a gift-giving game traditionaly held in Israel during Purim holiday. In my gift I came up with a new way to share music - using a "Mixtape Game". Press Space-Bar along with the beat, to match the Hamman ears in their place - and crazy things start happening.',
+        description:[ 'Hebrew for "Gnome-Giant": a gift-giving game traditionaly held in Israel during Purim holiday. In my gift I came up with a new way to share music - using a "Mixtape Game". Press Space-Bar along with the beat, to match the Hamman ears in their place - and crazy things start happening.'],
         links: [
             {
                 url: "http://avnerus.github.io/gamadanak",
@@ -1110,7 +1217,7 @@ Gamad.prototype.getData = function() {
 }
 
 
-},{"../event_manager":2}],10:[function(require,module,exports){
+},{"../event_manager":2}],11:[function(require,module,exports){
 "use strict"
 
 module.exports = function() {
@@ -1165,13 +1272,13 @@ Info.prototype.update = function() {
 Info.prototype.getData = function() {
     return {
         name: "Info",
-        description: ""
+        description: [""]
     }
 }
 
 
 
-},{"../event_manager":2}],11:[function(require,module,exports){
+},{"../event_manager":2}],12:[function(require,module,exports){
 "use strict"
 
 module.exports = function() {
@@ -1226,12 +1333,12 @@ Japan.prototype.update = function() {
 Japan.prototype.getData = function() {
     return {
         name: "Japan",
-        description: "This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project.  "
+        description: ["Japan"]
     }
 }
 
 
-},{"../event_manager":2}],12:[function(require,module,exports){
+},{"../event_manager":2}],13:[function(require,module,exports){
 "use strict"
 
 module.exports = function() {
@@ -1391,12 +1498,12 @@ Koala.prototype.update = function() {
 Koala.prototype.getData = function() {
     return {
         name: "Koala",
-        description: "This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project.  "
+        description: ["Koala description"]
     }
 }
 
 
-},{"../event_manager":2}],13:[function(require,module,exports){
+},{"../event_manager":2}],14:[function(require,module,exports){
 "use strict"
 
 module.exports = function() {
@@ -1463,12 +1570,12 @@ Peace.prototype.update = function() {
 Peace.prototype.getData = function() {
     return {
         name: "The Conflict",
-        description: "This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project.  "
+        description: ["Conflict description"]
     }
 }
 
 
-},{"../event_manager":2}],14:[function(require,module,exports){
+},{"../event_manager":2}],15:[function(require,module,exports){
 "use strict"
 
 module.exports = function() {
@@ -1553,15 +1660,18 @@ Pulse.prototype.getData = function() {
             }
         ],
         name: "The Pulse Project",
-        description: "My first projet that had purely artistic motives. Inspired by the bio-musical work of Daito Manabe, and fueled by my own interest in exposing human interaction using an audio-visual representation of their heartbeats. In this project I combine the heartbeats of 4 people into one electronic music composition and a space-gravitational scene of orbiting creatures. I tried to reflect the relations between the heartbeats using audio and visuals. The work was displayed in the Israeli Burning-Man festival (Midburn) and the Tel Aviv White-Night festival",
+        description: ["My first projet that had purely artistic motives. Inspired by the bio-musical work of Daito Manabe, and fueled by my own interest in exposing human interaction using an audio-visual representation of their heartbeats. In this project I combine the heartbeats of 4 people into one electronic music composition and a space-gravitational scene of orbiting creatures. I tried to reflect the relations between the heartbeats using audio and visuals. The work was displayed in the Israeli Burning-Man festival (Midburn) and the Tel Aviv White-Night festival", "Here I am testing the project, with my ASSAF computer class. Location: Tel Aviv Makers Hackerspace - TAMI"],
         images: [
             {type: "image", path: "images/works/pulse1.png"}
+        ],
+        videos: [
+            {type: "vimeo", url: "https://player.vimeo.com/video/113006896??api=1&player_id=player_1"}
         ]
     }
 }
 
 
-},{"../event_manager":2}],15:[function(require,module,exports){
+},{"../event_manager":2}],16:[function(require,module,exports){
 "use strict"
 
 module.exports = function() {
@@ -1630,12 +1740,12 @@ Security.prototype.update = function() {
 Security.prototype.getData = function() {
     return {
         name: "IT Security",
-        description: "This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project.  "
+        description: ["IT Security description"]
     }
 }
 
 
-},{"../event_manager":2}],16:[function(require,module,exports){
+},{"../event_manager":2}],17:[function(require,module,exports){
 "use strict"
 
 module.exports = function() {
@@ -1740,7 +1850,7 @@ Train.prototype.run = function() {
 Train.prototype.getData = function() {
     return {
         name: "Railroad Island",
-        description: "During my student exchange in Tokyo, I met Alex, an Australian animator who used to work for Tacticsoft, an Israeli game company that hired my freelance services. Alex was just forming his own game start-up, and when I came back to Israel he offered me to co-develop this railroad simulation mobile game for a Tokyo based publisher. I have developed the train and railroad components using Unity game engine",
+        description: ["During my student exchange in Tokyo, I met Alex, an Australian animator who used to work for Tacticsoft, an Israeli game company that hired my freelance services. Alex was just forming his own game start-up, and when I came back to Israel he offered me to co-develop this railroad simulation mobile game for a Tokyo based publisher. I have developed the train and railroad components using Unity game engine"],
         links: [
             {
                 url: "https://play.google.com/store/apps/details?id=jp.colopl.entrain",
@@ -1759,7 +1869,7 @@ Train.prototype.getData = function() {
 }
 
 
-},{"../event_manager":2}],17:[function(require,module,exports){
+},{"../event_manager":2}],18:[function(require,module,exports){
 /**
  * Tween.js - Licensed under the MIT license
  * https://github.com/sole/tween.js
@@ -2517,7 +2627,7 @@ TWEEN.Interpolation = {
 };
 
 module.exports=TWEEN;
-},{}],18:[function(require,module,exports){
+},{}],19:[function(require,module,exports){
 var utils = require('./utils')
 
 function Batcher () {
@@ -2563,7 +2673,7 @@ BatcherProto.reset = function () {
 }
 
 module.exports = Batcher
-},{"./utils":43}],19:[function(require,module,exports){
+},{"./utils":44}],20:[function(require,module,exports){
 var Batcher        = require('./batcher'),
     bindingBatcher = new Batcher(),
     bindingId      = 1
@@ -2667,7 +2777,7 @@ BindingProto.unbind = function () {
 }
 
 module.exports = Binding
-},{"./batcher":18}],20:[function(require,module,exports){
+},{"./batcher":19}],21:[function(require,module,exports){
 var Emitter     = require('./emitter'),
     Observer    = require('./observer'),
     config      = require('./config'),
@@ -3705,7 +3815,7 @@ function getRoot (compiler) {
 }
 
 module.exports = Compiler
-},{"./binding":19,"./config":21,"./deps-parser":22,"./directive":23,"./emitter":34,"./exp-parser":35,"./observer":39,"./text-parser":41,"./utils":43,"./viewmodel":44}],21:[function(require,module,exports){
+},{"./binding":20,"./config":22,"./deps-parser":23,"./directive":24,"./emitter":35,"./exp-parser":36,"./observer":40,"./text-parser":42,"./utils":44,"./viewmodel":45}],22:[function(require,module,exports){
 var TextParser = require('./text-parser')
 
 module.exports = {
@@ -3725,7 +3835,7 @@ Object.defineProperty(module.exports, 'delimiters', {
         TextParser.setDelimiters(delimiters)
     }
 })
-},{"./text-parser":41}],22:[function(require,module,exports){
+},{"./text-parser":42}],23:[function(require,module,exports){
 var Emitter  = require('./emitter'),
     utils    = require('./utils'),
     Observer = require('./observer'),
@@ -3791,7 +3901,7 @@ module.exports = {
     }
     
 }
-},{"./emitter":34,"./observer":39,"./utils":43}],23:[function(require,module,exports){
+},{"./emitter":35,"./observer":40,"./utils":44}],24:[function(require,module,exports){
 var dirId           = 1,
     ARG_RE          = /^[\w\$-]+$/,
     FILTER_TOKEN_RE = /[^\s'"]+|'[^']+'|"[^"]+"/g,
@@ -4050,7 +4160,7 @@ function escapeQuote (v) {
 }
 
 module.exports = Directive
-},{"./text-parser":41}],24:[function(require,module,exports){
+},{"./text-parser":42}],25:[function(require,module,exports){
 var utils = require('../utils'),
     slice = [].slice
 
@@ -4092,7 +4202,7 @@ module.exports = {
         parent.insertBefore(frag, this.el)
     }
 }
-},{"../utils":43}],25:[function(require,module,exports){
+},{"../utils":44}],26:[function(require,module,exports){
 var utils    = require('../utils')
 
 /**
@@ -4149,7 +4259,7 @@ module.exports = {
         }
     }
 }
-},{"../utils":43}],26:[function(require,module,exports){
+},{"../utils":44}],27:[function(require,module,exports){
 var utils      = require('../utils'),
     config     = require('../config'),
     transition = require('../transition'),
@@ -4279,7 +4389,7 @@ directives.html    = require('./html')
 directives.style   = require('./style')
 directives.partial = require('./partial')
 directives.view    = require('./view')
-},{"../config":21,"../transition":42,"../utils":43,"./html":24,"./if":25,"./model":27,"./on":28,"./partial":29,"./repeat":30,"./style":31,"./view":32,"./with":33}],27:[function(require,module,exports){
+},{"../config":22,"../transition":43,"../utils":44,"./html":25,"./if":26,"./model":28,"./on":29,"./partial":30,"./repeat":31,"./style":32,"./view":33,"./with":34}],28:[function(require,module,exports){
 var utils = require('../utils'),
     isIE9 = navigator.userAgent.indexOf('MSIE 9.0') > 0,
     filter = [].filter
@@ -4454,7 +4564,7 @@ module.exports = {
         }
     }
 }
-},{"../utils":43}],28:[function(require,module,exports){
+},{"../utils":44}],29:[function(require,module,exports){
 var utils    = require('../utils')
 
 /**
@@ -4513,7 +4623,7 @@ module.exports = {
         this.el.removeEventListener('load', this.iframeBind)
     }
 }
-},{"../utils":43}],29:[function(require,module,exports){
+},{"../utils":44}],30:[function(require,module,exports){
 var utils = require('../utils')
 
 /**
@@ -4564,7 +4674,7 @@ module.exports = {
     }
 
 }
-},{"../utils":43}],30:[function(require,module,exports){
+},{"../utils":44}],31:[function(require,module,exports){
 var utils      = require('../utils'),
     config     = require('../config')
 
@@ -4811,7 +4921,7 @@ function indexOf (vms, obj) {
     }
     return -1
 }
-},{"../config":21,"../utils":43}],31:[function(require,module,exports){
+},{"../config":22,"../utils":44}],32:[function(require,module,exports){
 var prefixes = ['-webkit-', '-moz-', '-ms-']
 
 /**
@@ -4858,7 +4968,7 @@ module.exports = {
     }
 
 }
-},{}],32:[function(require,module,exports){
+},{}],33:[function(require,module,exports){
 /**
  *  Manages a conditional child VM using the
  *  binding's value as the component ID.
@@ -4915,7 +5025,7 @@ module.exports = {
     }
 
 }
-},{}],33:[function(require,module,exports){
+},{}],34:[function(require,module,exports){
 var utils = require('../utils')
 
 /**
@@ -4966,7 +5076,7 @@ module.exports = {
     }
 
 }
-},{"../utils":43}],34:[function(require,module,exports){
+},{"../utils":44}],35:[function(require,module,exports){
 var slice = [].slice
 
 function Emitter (ctx) {
@@ -5064,7 +5174,7 @@ EmitterProto.applyEmit = function (event) {
 }
 
 module.exports = Emitter
-},{}],35:[function(require,module,exports){
+},{}],36:[function(require,module,exports){
 var utils           = require('./utils'),
     STR_SAVE_RE     = /"(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'/g,
     STR_RESTORE_RE  = /"(\d+)"/g,
@@ -5255,7 +5365,7 @@ exports.eval = function (exp, compiler, data) {
     }
     return res
 }
-},{"./utils":43}],36:[function(require,module,exports){
+},{"./utils":44}],37:[function(require,module,exports){
 var utils    = require('./utils'),
     get      = utils.get,
     slice    = [].slice,
@@ -5447,7 +5557,7 @@ function stripQuotes (str) {
         return str.slice(1, -1)
     }
 }
-},{"./utils":43}],37:[function(require,module,exports){
+},{"./utils":44}],38:[function(require,module,exports){
 // string -> DOM conversion
 // wrappers originally from jQuery, scooped from component/domify
 var map = {
@@ -5515,7 +5625,7 @@ module.exports = function (templateString) {
     }
     return frag
 }
-},{}],38:[function(require,module,exports){
+},{}],39:[function(require,module,exports){
 var config      = require('./config'),
     ViewModel   = require('./viewmodel'),
     utils       = require('./utils'),
@@ -5704,7 +5814,7 @@ function inheritOptions (child, parent, topLevel) {
 }
 
 module.exports = ViewModel
-},{"./config":21,"./directives":26,"./filters":36,"./observer":39,"./transition":42,"./utils":43,"./viewmodel":44}],39:[function(require,module,exports){
+},{"./config":22,"./directives":27,"./filters":37,"./observer":40,"./transition":43,"./utils":44,"./viewmodel":45}],40:[function(require,module,exports){
 /* jshint proto:true */
 
 var Emitter  = require('./emitter'),
@@ -6151,7 +6261,7 @@ var pub = module.exports = {
     convert     : convert,
     convertKey  : convertKey
 }
-},{"./emitter":34,"./utils":43}],40:[function(require,module,exports){
+},{"./emitter":35,"./utils":44}],41:[function(require,module,exports){
 var toFragment = require('./fragment');
 
 /**
@@ -6199,7 +6309,7 @@ module.exports = function(template) {
     return toFragment(templateNode.outerHTML);
 }
 
-},{"./fragment":37}],41:[function(require,module,exports){
+},{"./fragment":38}],42:[function(require,module,exports){
 var openChar        = '{',
     endChar         = '}',
     ESCAPE_RE       = /[-.*+?^${}()|[\]\/\\]/g,
@@ -6296,7 +6406,7 @@ exports.parse         = parse
 exports.parseAttr     = parseAttr
 exports.setDelimiters = setDelimiters
 exports.delimiters    = [openChar, endChar]
-},{"./directive":23}],42:[function(require,module,exports){
+},{"./directive":24}],43:[function(require,module,exports){
 var endEvents  = sniffEndEvents(),
     config     = require('./config'),
     // batch enter animations so we only force the layout once
@@ -6525,7 +6635,7 @@ function sniffEndEvents () {
 // Expose some stuff for testing purposes
 transition.codes = codes
 transition.sniff = sniffEndEvents
-},{"./batcher":18,"./config":21}],43:[function(require,module,exports){
+},{"./batcher":19,"./config":22}],44:[function(require,module,exports){
 var config       = require('./config'),
     toString     = ({}).toString,
     win          = window,
@@ -6852,7 +6962,7 @@ function enableDebug () {
         }
     }
 }
-},{"./config":21,"./fragment":37,"./template-parser.js":40,"./viewmodel":44}],44:[function(require,module,exports){
+},{"./config":22,"./fragment":38,"./template-parser.js":41,"./viewmodel":45}],45:[function(require,module,exports){
 var Compiler   = require('./compiler'),
     utils      = require('./utils'),
     transition = require('./transition'),
@@ -7044,7 +7154,7 @@ function query (el) {
 
 module.exports = ViewModel
 
-},{"./batcher":18,"./compiler":20,"./transition":42,"./utils":43}],45:[function(require,module,exports){
+},{"./batcher":19,"./compiler":21,"./transition":43,"./utils":44}],46:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a

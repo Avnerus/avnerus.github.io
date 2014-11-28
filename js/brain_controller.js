@@ -85,19 +85,32 @@ BrainController.prototype.init = function (opts, stage, ratio, renderer, workCon
     eventEmitter.on('info_clicked', function() {
         self.infoClicked();
     });
-
-    
 }
 
 
 BrainController.prototype.workClicked = function(work) {
     console.log("Work clicked!", work);
     this.vm.$data = work.getData();
+    this.vm.$data.currentIndex = 0;
     $('#work-media').addClass('flexslider');
+    var self = this;
     Vue.nextTick(function() {
         console.log("Load flexslider!!");
         $('#work-media.flexslider').flexslider({
             slideshow: false,
+            start: function(slider) {
+               $('.slides li img').click(function(event){
+                   event.preventDefault();
+                   slider.flexAnimate(slider.getTarget("next"));
+               });
+            },
+            after: function(slider) {
+                console.log("Current Slide ", slider.currentSlide);
+                var index = slider.currentSlide;
+                if (self.vm.$data.description[index]) {
+                    self.vm.$data.currentIndex = index;
+                }
+            }
         });
     })
     this.currentWorkIndex = _.indexOf(this.works, work);
@@ -114,11 +127,6 @@ BrainController.prototype.showWork = function() {
 BrainController.prototype.hideWork = function() {
     this.workContainer.css("opacity", 0);
     this.showingWork = false;
-    if($('#work-media').hasClass('flexslider')){
-        console.log("Remove and destroy flexslider!!");
-        $('#work-media').removeClass('flexslider')
-            .flexslider('destroy');
-    }
     
 }
 BrainController.prototype.nextWork = function() {
@@ -127,7 +135,16 @@ BrainController.prototype.nextWork = function() {
     if (this.currentWorkIndex > this.works.length -1) {
         this.currentWorkIndex = 0;
     }
+    this.resetSlider();
     this.workClicked(this.works[this.currentWorkIndex]);
+}
+
+BrainController.prototype.resetSlider = function() {
+    if($('#work-media').hasClass('flexslider')){
+        console.log("Remove and destroy flexslider!!");
+        $('#work-media').removeClass('flexslider')
+            .flexslider('destroy');
+    }
 }
 
 BrainController.prototype.prevWork = function() {
@@ -136,6 +153,7 @@ BrainController.prototype.prevWork = function() {
     if (this.currentWorkIndex < 0) {
         this.currentWorkIndex = this.works.length - 1;
     }
+    this.resetSlider();
     this.workClicked(this.works[this.currentWorkIndex]);
 }
 BrainController.prototype.infoClicked = function() {
@@ -160,7 +178,7 @@ BrainController.prototype.initWorks = function() {
 
     this.vm = new Vue({
         el: '#main-container',
-        data: {},
+        data: {currentIndex: 0, description: ""},
         methods: {
             closeWork: function(e) {
                 self.hideWork();
@@ -181,6 +199,7 @@ BrainController.prototype.initWorks = function() {
     function() {
         if (self.workContainer.css("opacity") == 0) {
             self.workContainer.css("height", "0px");
+            self.resetSlider();
         }
     });
 
@@ -207,7 +226,8 @@ BrainController.prototype.initWorks = function() {
         new (require('./works/security'))(),
         new (require('./works/cantenna'))(),
         new (require('./works/japan'))(),
-        new (require('./works/bass'))()
+        new (require('./works/bass'))(),
+        new (require('./works/biology'))()
     ]
 
 

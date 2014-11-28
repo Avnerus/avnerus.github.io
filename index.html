@@ -34,6 +34,9 @@
             <img src="images/hourglass.gif">
            </img>
         </div>
+        <div id="neutral-container">
+            <img src="/videos/final/neutral.jpg">
+        </div>
         <div id="video-container">
         </div>
         <div id="arrow-container">
@@ -70,18 +73,18 @@
                         </div>
                     </div>
                     <div class="work-description">
-                        {{description}}
+                        {{description[currentIndex]}}
                     </div>
                 </div>
                 <div class="col-md-7">
                     <div id="work-media">
                         <ul class="slides">
                             <li v-repeat="image : images">
-                                <img src='{{image.path}}'></img>
+                                <img v-attr="src: image.path"></img>
                             </li>
-                            <!--li>
-                                <img src="images/works/gamadanak1.png"></img>
-                            </li-->
+                            <li v-repeat="video : videos">
+                                <iframe id="player_1" v-attr="src: video.url" width="595" height="370" frameborder="0" webkitAllowFullScreen mozallowfullscreen allowFullScreen></iframe>
+                            </li>
                         </ul>
                         </div>
                 </div>
