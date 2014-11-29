@@ -394,7 +394,8 @@ var loader = new PIXI.AssetLoader([
     "assets/works/tripod.png",
     "assets/works/japan.png",
     "assets/works/bass.png",
-    "assets/works/biology.png"
+    "assets/works/biology.png",
+    "assets/works/bacteria.png"
 ]);
 
 loader.onComplete = function() {
@@ -861,6 +862,17 @@ Biology.prototype.loadSprite = function() {
       self.eventEmitter.emit('work_clicked', self);
     }
 
+    var bacteria = new PIXI.Sprite.fromFrame("assets/works/bacteria.png");
+    bacteria.anchor.x = 0.5;
+    bacteria.anchor.y = 0.5;
+    bacteria.position.x = 20;
+    bacteria.position.y = 40;
+    bacteria.scale = {x: 0.75, y: 0.75};
+
+
+    TweenMax.to(bacteria.scale, 1, {ease: Linear.easeNone, repeat: -1, yoyo: true, x: 1, y: 0.5});
+
+    biology.addChild(bacteria);
     this.stage.addChild(biology);
 }
 Biology.prototype.update = function() {
@@ -1128,7 +1140,7 @@ EQuala.prototype.getData = function() {
         description:[
             "I first met Lior when we served together as programmers in Mamram, IDF's computer unit. After the discharge, he went to work for CyberArk security company and I went to look for new directions in Tel Aviv university and took freelance projects. Eventually, Lior had decided to become an entrepreneur, and just when I was looking to expand into the mobile industry, he was looking for programmers for a new mobile app. The industry: Music. The crew: A group of lovely people carefully selected by Lior. I was hooked.",
             'EQuala.fm is a social radio app. We collect your friends\' listening habits, and tune them into a radio station controlled by our "Friends EQualizer". When I came into the team, the Android client was nearing completion, and I took it upon myself to learn iOS and build the entire client from scratch. Quickly I also became involved in project management and design.',
-            'Feature.fm is our "Pivot". It started as a way to monetize EQuala, but became a thing on its own. This time, I was one of the idea creators from the get-go (Also came up with the name!). The idea: work with online music streaming services who are looking for a way to monetize. Instead of playing ads, they play targeted featured songs from rising musicians, provided by us. To the artists, we provide analytics, management and a community.'
+            'Feature.fm is our "Pivot". It started as a way to monetize EQuala, but became a thing on its own. This time, I was one of the idea creators from the get-go (Also came up with the name!). The idea: work with online music streaming services who are looking for a way to monetize. Instead of playing ads, they play targeted featured songs from rising musicians, provided by us. To the artists, we provide analytics, management and a community. I wrote a large part of the system, from the low database tier, to the server logic and the web client.'
         ],
         images: [
             {type: "image", path: "images/works/equala1.png"},
@@ -1354,7 +1366,10 @@ Japan.prototype.update = function() {
 Japan.prototype.getData = function() {
     return {
         name: "Japan",
-        description: ["Japan"]
+        description: ["Japan1"],
+        images: [
+            {type: "image", path: "images/works/japan1.jpg"}
+        ],
     }
 }
 
