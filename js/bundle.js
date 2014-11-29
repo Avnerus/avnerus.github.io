@@ -1,4 +1,4 @@
-(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 "use strict"
 
 module.exports = function(videoController) {
@@ -1025,7 +1025,24 @@ Cantenna.prototype.update = function() {
 Cantenna.prototype.getData = function() {
     return {
         name: "Cantenna Mesh",
-        description: ["This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project.  "]
+        description: [
+            'I started out my volunteer in ASSAF\'s refugee youth center as a computer teacher. Later on, I was introduced to the TAMI hackerspace and the "Arig" mesh project. The idea is simple and is used all around the world: use cheap home equipment such as personal WiFi routers and tin cans, to form a community based WiFi network, that does not rely on any corporate or government infrastrucure. I saw the need for such a network in the refugee community of south Tel Aviv, because they don\'t get support from our government and are genrally unable to own a 3G internet connection. I also saw this as a great educational opportunity for the kids in ASSAF.',
+            "Together we hack our routers, drill out tin cans and make them into antennas, and then climb roofs to install them all over south Tel Aviv. Here we are testing the signal strength from one roof to the next."
+        ],
+        links: [
+            {
+                url: "http://telavivmakers.org/index.php/Main_Page",
+                description: "TAMI - Tel Aviv Makers Hackerspace"
+            },
+            {
+                url: "http://arig.org.il",
+                description: "ARIG - Israeli Mesh Project"
+            }
+        ],
+        images: [
+            {type: "image", path: "images/works/cantenna1.jpg"},
+            {type: "image", path: "images/works/cantenna2.jpg"}
+        ],
     }
 }
 
@@ -1108,7 +1125,11 @@ EQuala.prototype.update = function() {
 EQuala.prototype.getData = function() {
     return {
         name: "EQuala & Feature.FM",
-        description:["Page1", "Page2"],
+        description:[
+            "I first met Lior when we served together as programmers in Mamram, IDF's computer unit. After the discharge, he went to work for CyberArk security company and I went to look for new directions in Tel Aviv university and took freelance projects. Eventually, Lior had decided to become an entrepreneur, and just when I was looking to expand into the mobile industry, he was looking for programmers for a new mobile app. The industry: Music. The crew: A group of lovely people carefully selected by Lior. I was hooked.",
+            'EQuala.fm is a social radio app. We collect your friends\' listening habits, and tune them into a radio station controlled by our "Friends EQualizer". When I came into the team, the Android client was nearing completion, and I took it upon myself to learn iOS and build the entire client from scratch. Quickly I also became involved in project management and design.',
+            'Feature.fm is our "Pivot". It started as a way to monetize EQuala, but became a thing on its own. This time, I was one of the idea creators from the get-go (Also came up with the name!). The idea: work with online music streaming services who are looking for a way to monetize. Instead of playing ads, they play targeted featured songs from rising musicians, provided by us. To the artists, we provide analytics, management and a community.'
+        ],
         images: [
             {type: "image", path: "images/works/equala1.png"},
             {type: "image", path: "images/works/equala2.png"},
@@ -7302,7 +7323,10 @@ EventEmitter.prototype.addListener = function(type, listener) {
                     'leak detected. %d listeners added. ' +
                     'Use emitter.setMaxListeners() to increase limit.',
                     this._events[type].length);
-      console.trace();
+      if (typeof console.trace === 'function') {
+        // not supported in IE 10
+        console.trace();
+      }
     }
   }
 
@@ -7456,4 +7480,4 @@ function isUndefined(arg) {
   return arg === void 0;
 }
 
-},{}]},{},[3])
+},{}]},{},[3]);
