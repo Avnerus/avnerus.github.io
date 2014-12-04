@@ -95,7 +95,7 @@ BrainController.prototype.workClicked = function(work) {
     this.vm.$data.currentIndex = 0;
     $('#work-media').addClass('flexslider');
     var self = this;
-    Vue.nextTick(function() {
+/*    Vue.nextTick(function() {
         console.log("Load flexslider!!");
         $('#work-media.flexslider').flexslider({
             slideshow: false,
@@ -113,14 +113,14 @@ BrainController.prototype.workClicked = function(work) {
                 }
             }
         });
-    })
+    })*/
     this.currentWorkIndex = _.indexOf(this.works, work);
     this.showWork();
 }
 
 
 BrainController.prototype.showWork = function() {
-    this.workContainer.css("height", "620px");
+    this.workContainer.css("height", "100%");
     this.workContainer.css("opacity", 1);
     this.showingWork = true;
 }
@@ -141,11 +141,11 @@ BrainController.prototype.nextWork = function() {
 }
 
 BrainController.prototype.resetSlider = function() {
-    if($('#work-media').hasClass('flexslider')){
+/*    if($('#work-media').hasClass('flexslider')){
         console.log("Remove and destroy flexslider!!");
         $('#work-media').removeClass('flexslider')
             .flexslider('destroy');
-    }
+    }*/
 }
 
 BrainController.prototype.prevWork = function() {
@@ -181,6 +181,11 @@ BrainController.prototype.initWorks = function() {
         el: '#main-container',
         data: {currentIndex: 0, description: ""},
         methods: {
+            containerClick: function(e) {
+                if (e.target == e.currentTarget) {
+                    self.hideWork();
+                }
+            },
             closeWork: function(e) {
                 self.hideWork();
             },
@@ -811,7 +816,11 @@ Bass.prototype.update = function() {
 Bass.prototype.getData = function() {
     return {
         name: "Bass",
-        description: ["This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project.  "]
+        description:  [ 
+            {
+                text: "Bass project"
+            }
+        ]
     }
 }
 
@@ -882,7 +891,11 @@ Biology.prototype.update = function() {
 Biology.prototype.getData = function() {
     return {
         name: "Biology",
-        description: ["This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project.  "]
+        description:  [ 
+            {
+                text: "Biology project"
+            }
+        ]
     }
 }
 
@@ -962,7 +975,11 @@ Brain.prototype.update = function() {
 Brain.prototype.getData = function() {
     return {
         name: "The Problem of Consciousness",
-        description: [ "This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project.  "]
+        description:  [ 
+            {
+                text: "Consciousness project"
+            }
+        ]
     }
 }
 
@@ -1038,8 +1055,15 @@ Cantenna.prototype.getData = function() {
     return {
         name: "Cantenna Mesh",
         description: [
-            'I started out my volunteer in ASSAF\'s refugee youth center as a computer teacher. Later on, I was introduced to the TAMI hackerspace and the "Arig" mesh project. The idea is simple and is used all around the world: use cheap home equipment such as personal WiFi routers and tin cans, to form a community based WiFi network, that does not rely on any corporate or government infrastrucure. I saw the need for such a network in the refugee community of south Tel Aviv, because they don\'t get support from our government and are genrally unable to own a 3G internet connection. I also saw this as a great educational opportunity for the kids in ASSAF.',
-            "Together we hack our routers, drill out tin cans and make them into antennas, and then climb roofs to install them all over south Tel Aviv. Here we are testing the signal strength from one roof to the next."
+            {
+
+                text: 'I started out my volunteer in ASSAF\'s refugee youth center as a computer teacher. Later on, I was introduced to the TAMI hackerspace and the "Arig" mesh project. The idea is simple and is used all around the world: use cheap home equipment such as personal WiFi routers and tin cans, to form a community based WiFi network, that does not rely on any corporate or government infrastrucure. I saw the need for such a network in the refugee community of south Tel Aviv, because they don\'t get support from our government and are genrally unable to own a 3G internet connection. I also saw this as a great educational opportunity for the kids in ASSAF.',
+                image: "images/works/cantenna1.jpg"
+            },
+            {
+                text: "Together we hack our routers, drill out tin cans and make them into antennas, and then climb roofs to install them all over south Tel Aviv. Here we are testing the signal strength from one roof to the next.",
+                image: "images/works/cantenna2.jpg"
+            }
         ],
         links: [
             {
@@ -1050,11 +1074,7 @@ Cantenna.prototype.getData = function() {
                 url: "http://arig.org.il",
                 description: "ARIG - Israeli Mesh Project"
             }
-        ],
-        images: [
-            {type: "image", path: "images/works/cantenna1.jpg"},
-            {type: "image", path: "images/works/cantenna2.jpg"}
-        ],
+        ]
     }
 }
 
@@ -1137,15 +1157,19 @@ EQuala.prototype.update = function() {
 EQuala.prototype.getData = function() {
     return {
         name: "EQuala & Feature.FM",
-        description:[
-            "I first met Lior when we served together as programmers in Mamram, IDF's computer unit. After the discharge, he went to work for CyberArk security company and I went to look for new directions in Tel Aviv university and took freelance projects. Eventually, Lior had decided to become an entrepreneur, and just when I was looking to expand into the mobile industry, he was looking for programmers for a new mobile app. The industry: Music. The crew: A group of lovely people carefully selected by Lior. I was hooked.",
-            'EQuala.fm is a social radio app. We collect your friends\' listening habits, and tune them into a radio station controlled by our "Friends EQualizer". When I came into the team, the Android client was nearing completion, and I took it upon myself to learn iOS and build the entire client from scratch. Quickly I also became involved in project management and design.',
-            'Feature.fm is our "Pivot". It started as a way to monetize EQuala, but became a thing on its own. This time, I was one of the idea creators from the get-go (Also came up with the name!). The idea: work with online music streaming services who are looking for a way to monetize. Instead of playing ads, they play targeted featured songs from rising musicians, provided by us. To the artists, we provide analytics, management and a community. I wrote a large part of the system, from the low database tier, to the server logic and the web client.'
-        ],
-        images: [
-            {type: "image", path: "images/works/equala1.png"},
-            {type: "image", path: "images/works/equala2.png"},
-            {type: "image", path: "images/works/equala3.png"}
+        description: [
+            {
+                text: "I first met Lior when we served together as programmers in Mamram, IDF's computer unit. After the discharge, he went to work for CyberArk security company and I went to look for new directions in Tel Aviv university and took freelance projects. Eventually, Lior had decided to become an entrepreneur, and just when I was looking to expand into the mobile industry, he was looking for programmers for a new mobile app. The industry: Music. The crew: A group of lovely people carefully selected by Lior. I was hooked.",
+                image: "images/works/equala1.png"
+            },
+            {
+                text: 'EQuala.fm is a social radio app. We collect your friends\' listening habits, and tune them into a radio station controlled by our "Friends EQualizer". When I came into the team, the Android client was nearing completion, and I took it upon myself to learn iOS and build the entire client from scratch. Quickly I also became involved in project management and design.',
+                image: "images/works/equala2.png"
+            },
+            {
+                text: 'Feature.fm is our "Pivot". It started as a way to monetize EQuala, but became a thing on its own. This time, I was one of the idea creators from the get-go (Also came up with the name!). The idea: work with online music streaming services who are looking for a way to monetize. Instead of playing ads, they play targeted featured songs from rising musicians, provided by us. To the artists, we provide analytics, management and a community. I wrote a large part of the system, from the low database tier, to the server logic and the web client.',
+                image: "images/works/equala3.png"
+            }
         ],
         links: [
             {
@@ -1156,7 +1180,7 @@ EQuala.prototype.getData = function() {
                 url: "https://www.feature.fm",
                 description: "Feature.FM Official Page"
             }
-        ],
+        ]
     }
 }
 
@@ -1230,7 +1254,16 @@ Gamad.prototype.update = function() {
 Gamad.prototype.getData = function() {
     return {
         name: "Gamad Anak",
-        description:[ 'Hebrew for "Gnome-Giant": a gift-giving game traditionaly held in Israel during Purim holiday. In my gift I came up with a new way to share music - using a "Mixtape Game". Press Space-Bar along with the beat, to match the Hamman ears in their place - and crazy things start happening.'],
+        description:[ 
+            {
+                text: 'Hebrew for "Gnome-Giant": a gift-giving game traditionaly held in Israel during Purim holiday. In my gift I came up with a new way to share music - using a "Mixtape Game". Press Space-Bar along with the beat, to match the Hamman ears in their place - and crazy things start happening.',
+                image: "images/works/gamadanak1.png",
+
+            },
+            {
+                image: "images/works/gamadanak3.png"
+            }
+        ],
         links: [
             {
                 url: "http://avnerus.github.io/gamadanak",
@@ -1240,11 +1273,6 @@ Gamad.prototype.getData = function() {
                 url: "https://github.com/Avnerus/gamadanak",
                 description: "View the source code"
             }
-        ],
-        images: [
-            {type: "image", path: "images/works/gamadanak1.png"},
-            {type: "image", path: "images/works/gamadanak2.png"},
-            {type: "image", path: "images/works/gamadanak3.png"}
         ]
     }
 }
@@ -1305,7 +1333,7 @@ Info.prototype.update = function() {
 Info.prototype.getData = function() {
     return {
         name: "Info",
-        description: [""]
+        description: []
     }
 }
 
@@ -1366,10 +1394,13 @@ Japan.prototype.update = function() {
 Japan.prototype.getData = function() {
     return {
         name: "Japan",
-        description: ["Japan1"],
-        images: [
-            {type: "image", path: "images/works/japan1.jpg"}
-        ],
+        description: [
+            {
+                text: "Japan!",
+                image: "images/works/japan1.jpg"
+
+            }
+        ]
     }
 }
 
@@ -1606,7 +1637,11 @@ Peace.prototype.update = function() {
 Peace.prototype.getData = function() {
     return {
         name: "The Conflict",
-        description: ["Conflict description"]
+        description:  [ 
+            {
+                text: "Conflict project"
+            }
+        ]
     }
 }
 
@@ -1696,12 +1731,15 @@ Pulse.prototype.getData = function() {
             }
         ],
         name: "The Pulse Project",
-        description: ["My first projet that had purely artistic motives. Inspired by the bio-musical work of Daito Manabe, and fueled by my own interest in exposing human interaction using an audio-visual representation of their heartbeats. In this project I combine the heartbeats of 4 people into one electronic music composition and a space-gravitational scene of orbiting creatures. I tried to reflect the relations between the heartbeats using audio and visuals. The work was displayed in the Israeli Burning-Man festival (Midburn) and the Tel Aviv White-Night festival", "Here I am testing the project, with my ASSAF computer class. Location: Tel Aviv Makers Hackerspace - TAMI"],
-        images: [
-            {type: "image", path: "images/works/pulse1.png"}
-        ],
-        videos: [
-            {type: "vimeo", url: "https://player.vimeo.com/video/113006896??api=1&player_id=player_1"}
+        description: [
+            {
+                text: "My first projet that had purely artistic motives. Inspired by the bio-musical work of Daito Manabe, and fueled by my own interest in exposing human interaction using an audio-visual representation of their heartbeats. In this project I combine the heartbeats of 4 people into one electronic music composition and a space-gravitational scene of orbiting creatures. I tried to reflect the relations between the heartbeats using audio and visuals. The work was displayed in the Israeli Burning-Man festival (Midburn) and the Tel Aviv White-Night festival",
+                image: "images/works/pulse1.png"
+            },
+            {
+                text: "Here I am testing the project, with my ASSAF computer class. Location: Tel Aviv Makers Hackerspace - TAMI", 
+                video: "https://player.vimeo.com/video/113006896??api=1&player_id=player_1"
+            }
         ]
     }
 }
@@ -1776,7 +1814,11 @@ Security.prototype.update = function() {
 Security.prototype.getData = function() {
     return {
         name: "IT Security",
-        description: ["IT Security description"]
+        description:  [ 
+            {
+                text: "Security project"
+            }
+        ]
     }
 }
 
@@ -1886,7 +1928,15 @@ Train.prototype.run = function() {
 Train.prototype.getData = function() {
     return {
         name: "Railroad Island",
-        description: ["During my student exchange in Tokyo, I met Alex, an Australian animator who used to work for Tacticsoft, an Israeli game company that hired my freelance services. Alex was just forming his own game start-up, and when I came back to Israel he offered me to co-develop this railroad simulation mobile game for a Tokyo based publisher. I have developed the train and railroad components using Unity game engine"],
+        description: [
+            {
+                text: "During my student exchange in Tokyo, I met Alex, an Australian animator who used to work for Tacticsoft, an Israeli game company that hired my freelance services. Alex was just forming his own game start-up, and when I came back to Israel he offered me to co-develop this railroad simulation mobile game for a Tokyo based publisher. I have developed the train and railroad components using Unity game engine",
+                image: "images/works/train1.jpg",
+            }, 
+            {
+              image: "images/works/train2.png"
+            }
+        ],
         links: [
             {
                 url: "https://play.google.com/store/apps/details?id=jp.colopl.entrain",
@@ -1896,10 +1946,6 @@ Train.prototype.getData = function() {
                 url: "https://itunes.apple.com/us/app/railroad-island!/id647758295?mt=8",
                 description: "iTunes App Store"
             }
-        ],
-        images: [
-            {type: "image", path: "images/works/train1.jpg"},
-            {type: "image", path: "images/works/train2.png"}
         ]
     }
 }
