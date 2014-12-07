@@ -95,7 +95,7 @@ BrainController.prototype.workClicked = function(work) {
     this.vm.$data.currentIndex = 0;
     $('#work-media').addClass('flexslider');
     var self = this;
-    Vue.nextTick(function() {
+/*    Vue.nextTick(function() {
         console.log("Load flexslider!!");
         $('#work-media.flexslider').flexslider({
             slideshow: false,
@@ -113,14 +113,14 @@ BrainController.prototype.workClicked = function(work) {
                 }
             }
         });
-    })
+    })*/
     this.currentWorkIndex = _.indexOf(this.works, work);
     this.showWork();
 }
 
 
 BrainController.prototype.showWork = function() {
-    this.workContainer.css("height", "620px");
+    this.workContainer.css("height", "100%");
     this.workContainer.css("opacity", 1);
     this.showingWork = true;
 }
@@ -141,11 +141,11 @@ BrainController.prototype.nextWork = function() {
 }
 
 BrainController.prototype.resetSlider = function() {
-    if($('#work-media').hasClass('flexslider')){
+/*    if($('#work-media').hasClass('flexslider')){
         console.log("Remove and destroy flexslider!!");
         $('#work-media').removeClass('flexslider')
             .flexslider('destroy');
-    }
+    }*/
 }
 
 BrainController.prototype.prevWork = function() {
@@ -181,6 +181,12 @@ BrainController.prototype.initWorks = function() {
         el: '#main-container',
         data: {currentIndex: 0, description: ""},
         methods: {
+            containerClick: function(e) {
+                console.log("BOO");
+                if (e.target == e.currentTarget) {
+                    self.hideWork();
+                }
+            },
             closeWork: function(e) {
                 self.hideWork();
             },
@@ -394,7 +400,8 @@ var loader = new PIXI.AssetLoader([
     "assets/works/tripod.png",
     "assets/works/japan.png",
     "assets/works/bass.png",
-    "assets/works/biology.png"
+    "assets/works/biology.png",
+    "assets/works/bacteria.png"
 ]);
 
 loader.onComplete = function() {
@@ -418,6 +425,8 @@ function start() {
    $('#pixi-container').append(renderer.view);
    setTimeout(showDownArrow, 5000);
 
+   parentScrollFix();
+
    requestAnimationFrame(animate);
 }
 
@@ -439,6 +448,38 @@ function animate() {
     renderer.render(stage);
     requestAnimationFrame(animate);
 }
+
+
+function parentScrollFix() {
+    // PARENT SCROLL FIX http://stackoverflow.com/questions/5802467/prevent-scrolling-of-parent-element
+    $('.scrollable').on('DOMMouseScroll mousewheel', function(ev) {
+        var $this = $(this),
+            scrollTop = this.scrollTop,
+            scrollHeight = this.scrollHeight,
+            height = $this.height(),
+            delta = ev.originalEvent.wheelDelta,
+            up = delta > 0;
+
+        var prevent = function() {
+            ev.stopPropagation();
+            ev.preventDefault();
+            ev.returnValue = false;
+            return false;
+        }
+        
+        if (!up && -delta > scrollHeight - height - scrollTop) {
+            // Scrolling down, but this will take us past the bottom.
+            $this.scrollTop(scrollHeight);
+            return prevent();
+        } else if (up && delta > scrollTop) {
+            // Scrolling up, but this will take us past the top.
+            $this.scrollTop(0);
+            return prevent();
+        }
+    });
+}
+
+
 
 },{"./brain_controller":1,"./event_manager":2,"./video_controller":4,"tween.js":18}],4:[function(require,module,exports){
 "use strict"
@@ -713,7 +754,7 @@ VideoController.prototype.zoomVideo = function(zoomMultiplyer) {
     video.element.style.left = video.rect.left + "px";
     video.element.style.bottom = video.rect.bottom + "px";
 
-    if (zoomMultiplyer > 8) {
+    if (zoomMultiplyer > 7) {
         this.container.css("display","none");
     } else {
         this.container.css("display","block");
@@ -810,7 +851,11 @@ Bass.prototype.update = function() {
 Bass.prototype.getData = function() {
     return {
         name: "Bass",
-        description: ["This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project.  "]
+        description:  [ 
+            {
+                text: "Bass project"
+            }
+        ]
     }
 }
 
@@ -861,6 +906,17 @@ Biology.prototype.loadSprite = function() {
       self.eventEmitter.emit('work_clicked', self);
     }
 
+    var bacteria = new PIXI.Sprite.fromFrame("assets/works/bacteria.png");
+    bacteria.anchor.x = 0.5;
+    bacteria.anchor.y = 0.5;
+    bacteria.position.x = 20;
+    bacteria.position.y = 40;
+    bacteria.scale = {x: 0.75, y: 0.75};
+
+
+    TweenMax.to(bacteria.scale, 1, {ease: Linear.easeNone, repeat: -1, yoyo: true, x: 1, y: 0.5});
+
+    biology.addChild(bacteria);
     this.stage.addChild(biology);
 }
 Biology.prototype.update = function() {
@@ -870,7 +926,11 @@ Biology.prototype.update = function() {
 Biology.prototype.getData = function() {
     return {
         name: "Biology",
-        description: ["This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project.  "]
+        description:  [ 
+            {
+                text: "Biology project"
+            }
+        ]
     }
 }
 
@@ -950,7 +1010,11 @@ Brain.prototype.update = function() {
 Brain.prototype.getData = function() {
     return {
         name: "The Problem of Consciousness",
-        description: [ "This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project.  "]
+        description:  [ 
+            {
+                text: "Consciousness project"
+            }
+        ]
     }
 }
 
@@ -1025,7 +1089,27 @@ Cantenna.prototype.update = function() {
 Cantenna.prototype.getData = function() {
     return {
         name: "Cantenna Mesh",
-        description: ["This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project. This is a very nice project.  "]
+        description: [
+            {
+
+                text: 'Using cheap home equipment such as personal WiFi routers and tin cans, we form a community based WiFi networkthat does not rely on any corporate or government infrastrucure. I created this workshop for the kids at ASSAF youth center, where I volunteer with refugees in South Tel Aviv',
+                image: "images/works/cantenna1.jpg"
+            },
+            {
+                text: "We hack our routers, drill out tin cans and make them into antennas, and then climb roofs to install them all over south Tel Aviv. Here we are testing the signal strength from one roof to the next.",
+                image: "images/works/cantenna2.jpg"
+            }
+        ],
+        links: [
+            {
+                url: "http://telavivmakers.org/index.php/Main_Page",
+                description: "TAMI - Tel Aviv Makers Hackerspace"
+            },
+            {
+                url: "http://arig.org.il",
+                description: "ARIG - Israeli Mesh Project"
+            }
+        ]
     }
 }
 
@@ -1108,11 +1192,19 @@ EQuala.prototype.update = function() {
 EQuala.prototype.getData = function() {
     return {
         name: "EQuala & Feature.FM",
-        description:["Page1", "Page2"],
-        images: [
-            {type: "image", path: "images/works/equala1.png"},
-            {type: "image", path: "images/works/equala2.png"},
-            {type: "image", path: "images/works/equala3.png"}
+        description: [
+            {
+                text: "The industry: Music. The crew: A group of lovely people carefully selected by Lior Aharoni, my old co-worker from the IDF.",
+                image: "images/works/equala1.png"
+            },
+            {
+                text: 'EQuala.fm is a social radio app. We collect your friends\' listening habits, and tune them into a radio station controlled by our "Friends EQualizer". I wrote the iOS client and was involved in the product design.',
+                image: "images/works/equala2.png"
+            },
+            {
+                text: 'In Feature.fm we work with online music streaming services who are looking for a way to monetize. Instead of playing ads, they play targeted featured songs from rising musicians, provided by us. To the artists, we provide analytics, management and a community. I wrote and designed a large part of the system, from the low database tier, to the server logic and the web client.',
+                image: "images/works/equala3.png"
+            }
         ],
         links: [
             {
@@ -1123,7 +1215,7 @@ EQuala.prototype.getData = function() {
                 url: "https://www.feature.fm",
                 description: "Feature.FM Official Page"
             }
-        ],
+        ]
     }
 }
 
@@ -1197,7 +1289,16 @@ Gamad.prototype.update = function() {
 Gamad.prototype.getData = function() {
     return {
         name: "Gamad Anak",
-        description:[ 'Hebrew for "Gnome-Giant": a gift-giving game traditionaly held in Israel during Purim holiday. In my gift I came up with a new way to share music - using a "Mixtape Game". Press Space-Bar along with the beat, to match the Hamman ears in their place - and crazy things start happening.'],
+        description:[ 
+            {
+                text: 'Hebrew for "Gnome-Giant": a gift-giving game traditionaly held in Israel during Purim holiday. In my gift I came up with a new way to share music - using a "Mixtape Game". Press Space-Bar along with the beat, to match the Hamman ears in their place - and crazy things start happening.',
+                image: "images/works/gamadanak1.png",
+
+            },
+            {
+                image: "images/works/gamadanak3.png"
+            }
+        ],
         links: [
             {
                 url: "http://avnerus.github.io/gamadanak",
@@ -1207,11 +1308,6 @@ Gamad.prototype.getData = function() {
                 url: "https://github.com/Avnerus/gamadanak",
                 description: "View the source code"
             }
-        ],
-        images: [
-            {type: "image", path: "images/works/gamadanak1.png"},
-            {type: "image", path: "images/works/gamadanak2.png"},
-            {type: "image", path: "images/works/gamadanak3.png"}
         ]
     }
 }
@@ -1272,7 +1368,7 @@ Info.prototype.update = function() {
 Info.prototype.getData = function() {
     return {
         name: "Info",
-        description: [""]
+        description: []
     }
 }
 
@@ -1333,7 +1429,13 @@ Japan.prototype.update = function() {
 Japan.prototype.getData = function() {
     return {
         name: "Japan",
-        description: ["Japan"]
+        description: [
+            {
+                text: "Japan!",
+                image: "images/works/japan1.jpg"
+
+            }
+        ]
     }
 }
 
@@ -1497,8 +1599,23 @@ Koala.prototype.update = function() {
 
 Koala.prototype.getData = function() {
     return {
-        name: "Koala",
-        description: ["Koala description"]
+        name: "Koala (WIP)",
+        description: [
+            {
+
+                text: "A mobile game about a Koala that is sick of only sleeping and eating and dreams about becoming an office worker. The concept was created by me and I've started developing this along with my friend Ilan Aminoff. The game is currently on hold.",
+                image: "images/works/koala1.png"
+            },
+            {
+                text: "In the game mechanics, the screen is split between the tree habitat and the office. Office actions that the Koala is doing in her sleep, affect her tree in the real world. ",
+                image: "images/works/koala2.png"
+            },
+            {
+                text: "Developed in C++ using Cocos2D-X",
+                image: "images/works/koala3.png"
+            }
+        ],
+        links: []
     }
 }
 
@@ -1570,7 +1687,11 @@ Peace.prototype.update = function() {
 Peace.prototype.getData = function() {
     return {
         name: "The Conflict",
-        description: ["Conflict description"]
+        description:  [ 
+            {
+                text: "Conflict project"
+            }
+        ]
     }
 }
 
@@ -1660,12 +1781,15 @@ Pulse.prototype.getData = function() {
             }
         ],
         name: "The Pulse Project",
-        description: ["My first projet that had purely artistic motives. Inspired by the bio-musical work of Daito Manabe, and fueled by my own interest in exposing human interaction using an audio-visual representation of their heartbeats. In this project I combine the heartbeats of 4 people into one electronic music composition and a space-gravitational scene of orbiting creatures. I tried to reflect the relations between the heartbeats using audio and visuals. The work was displayed in the Israeli Burning-Man festival (Midburn) and the Tel Aviv White-Night festival", "Here I am testing the project, with my ASSAF computer class. Location: Tel Aviv Makers Hackerspace - TAMI"],
-        images: [
-            {type: "image", path: "images/works/pulse1.png"}
-        ],
-        videos: [
-            {type: "vimeo", url: "https://player.vimeo.com/video/113006896??api=1&player_id=player_1"}
+        description: [
+            {
+                text: "My first projet that had purely artistic motives. Inspired by the bio-musical work of Daito Manabe, and fueled by my own interest in exposing human interaction using an audio-visual representation of their heartbeats. In this project I combine the heartbeats of 4 people into one electronic music composition and a space-gravitational scene of orbiting creatures. I tried to reflect the relations between the heartbeats using audio and visuals. The work was displayed in the Israeli Burning-Man festival (Midburn) and the Tel Aviv White-Night festival",
+                image: "images/works/pulse1.png"
+            },
+            {
+                text: "Here I am testing the project, with my ASSAF computer class. Location: Tel Aviv Makers Hackerspace - TAMI", 
+                video: "https://player.vimeo.com/video/113006896??api=1&player_id=player_1"
+            }
         ]
     }
 }
@@ -1740,7 +1864,11 @@ Security.prototype.update = function() {
 Security.prototype.getData = function() {
     return {
         name: "IT Security",
-        description: ["IT Security description"]
+        description:  [ 
+            {
+                text: "Security project"
+            }
+        ]
     }
 }
 
@@ -1850,7 +1978,15 @@ Train.prototype.run = function() {
 Train.prototype.getData = function() {
     return {
         name: "Railroad Island",
-        description: ["During my student exchange in Tokyo, I met Alex, an Australian animator who used to work for Tacticsoft, an Israeli game company that hired my freelance services. Alex was just forming his own game start-up, and when I came back to Israel he offered me to co-develop this railroad simulation mobile game for a Tokyo based publisher. I have developed the train and railroad components using Unity game engine"],
+        description: [
+            {
+                text: "I railroad simulation mobile game, co-developed with two Austrlians, for a Tokyo based publisher. I have developed the train and railroad components using Unity game engine",
+                image: "images/works/train1.jpg",
+            }, 
+            {
+              image: "images/works/train2.png"
+            }
+        ],
         links: [
             {
                 url: "https://play.google.com/store/apps/details?id=jp.colopl.entrain",
@@ -1860,10 +1996,6 @@ Train.prototype.getData = function() {
                 url: "https://itunes.apple.com/us/app/railroad-island!/id647758295?mt=8",
                 description: "iTunes App Store"
             }
-        ],
-        images: [
-            {type: "image", path: "images/works/train1.jpg"},
-            {type: "image", path: "images/works/train2.png"}
         ]
     }
 }
