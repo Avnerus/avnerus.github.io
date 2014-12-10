@@ -88,6 +88,18 @@ BrainController.prototype.init = function (opts, stage, ratio, renderer, workCon
     eventEmitter.on('info_clicked', function() {
         self.infoClicked();
     });
+
+    // Detect ESC
+    $(document).keyup(function(e) {
+        if (e.keyCode == 27) { 
+            if (self.showingWork) {
+                self.hideWork();
+            }
+            if (self.showingInfo) {
+                self.hideInfo();
+            }
+        }   
+    });
 }
 
 
@@ -506,21 +518,31 @@ loader.load();
 
 
 function start() {
-    brainController.init(gameOpts, container, ratio, renderer, $('#work-container'), $('#info-container'), $('#nav-row'));
     $('#loading-container').hide();
-    videoContoller.playWaiting();
-    renderer.view.id = "pixi-view";
-    $('#pixi-container').append(renderer.view);
-    setTimeout(showDownArrow, 5000);
 
-
-    var FF = (typeof window.mozInnerScreenX != 'undefined');
-
-    if (!FF) {
-        parentScrollFix();
+    // Support check
+    var mobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    var msie = (window.navigator.userAgent.indexOf("MSIE ") != -1);
+    console.log("mobile", mobile, "msie", msie);
+    if (mobile || msie) {
+        $('#supported-container').show();
     }
+    else {
+        brainController.init(gameOpts, container, ratio, renderer, $('#work-container'), $('#info-container'), $('#nav-row'));
+        videoContoller.playWaiting();
+        renderer.view.id = "pixi-view";
+        $('#pixi-container').append(renderer.view);
+        setTimeout(showDownArrow, 5000);
 
-    requestAnimationFrame(animate);
+
+        var FF = (typeof window.mozInnerScreenX != 'undefined');
+
+        if (!FF) {
+            parentScrollFix();
+        }
+
+        requestAnimationFrame(animate);
+    }
 }
 
 function showDownArrow() {
