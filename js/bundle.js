@@ -21,7 +21,7 @@ function BrainController(videoController) {
     console.log("Brain Controller started");
 }
 
-BrainController.prototype.init = function (opts, stage, ratio, renderer, workContainer, infoContainer) {
+BrainController.prototype.init = function (opts, stage, ratio, renderer, workContainer, infoContainer, navRow) {
 
     console.log("Brain Controller initializing with opts", opts);
 
@@ -30,6 +30,7 @@ BrainController.prototype.init = function (opts, stage, ratio, renderer, workCon
     this.opts = opts;
     this.workContainer = workContainer;
     this.infoContainer = infoContainer;
+    this.navRow = navRow;
 
 	this.bgContainer = new PIXI.DisplayObjectContainer();
     this.showingWork = false;
@@ -74,6 +75,7 @@ BrainController.prototype.init = function (opts, stage, ratio, renderer, workCon
 
 
     this.initWorks();
+    this.initMusic();
 
     this.loaded = true;
 
@@ -124,11 +126,13 @@ BrainController.prototype.workClicked = function(work) {
 BrainController.prototype.showWork = function() {
     this.workContainer.css("height", "100%");
     this.workContainer.css("opacity", 1);
+    this.navRow.css("height", "auto");
     this.showingWork = true;
 }
 
 BrainController.prototype.hideWork = function() {
     this.workContainer.css("opacity", 0);
+    this.navRow.css("height", "0px");
     this.showingWork = false;
     
 }
@@ -243,6 +247,85 @@ BrainController.prototype.initWorks = function() {
     for (var i = 0; i < this.works.length; i++) {
         var work = this.works[i];
         work.init(this.opts, this.bgContainer);
+    }
+}
+
+
+BrainController.prototype.initMusic = function() {
+    var speaker = new PIXI.Sprite.fromFrame("assets/brain/speaker.png");
+    speaker.anchor.x = 0.5;
+    speaker.anchor.y = 0.5;
+    speaker.position.x = 50;
+    speaker.position.y = 691;
+    speaker.scale = {x: 0.2, y: 0.2};
+
+    speaker.buttonMode = true;
+    speaker.setInteractive(true);
+    speaker.visible = false;
+
+    this.bgContainer.addChild(speaker);
+
+    var nospeaker = new PIXI.Sprite.fromFrame("assets/brain/nospeaker.png");
+    nospeaker.anchor.x = 0.5;
+    nospeaker.anchor.y = 0.5;
+    nospeaker.position.x = 50;
+    nospeaker.position.y = 691;
+    nospeaker.scale = {x: 0.2, y: 0.2};
+
+    nospeaker.buttonMode = true;
+    nospeaker.setInteractive(true);
+    nospeaker.visible = true;
+
+    this.bgContainer.addChild(nospeaker);
+
+    this.speaker = speaker;
+    this.nospeaker = nospeaker;
+
+    var kerokero = new PIXI.Sprite.fromFrame("assets/brain/kerokero.jpg");
+    kerokero.anchor.x = 0.5;
+    kerokero.anchor.y = 0.5;
+    kerokero.position.x = 120;
+    kerokero.position.y = 693;
+    kerokero.scale = {x: 0.35, y: 0.35};
+
+    kerokero.buttonMode = true;
+    kerokero.setInteractive(true);
+    kerokero.visible = false;
+
+
+    this.kerokero = kerokero;
+
+    this.bgContainer.addChild(kerokero);
+
+    this.speaker = speaker;
+    this.nospeaker = nospeaker;
+    var widgetIframe = document.getElementById('sc-widget');
+    this.widget = SC.Widget(widgetIframe);
+    this.soundsLength = 15;
+    var self = this;
+    this.firstPlay = true;
+    speaker.click  = function(mouseData){
+        self.widget.pause();
+        self.speaker.visible = self.kerokero.visible = false;
+        self.nospeaker.visible = true;
+    }
+    nospeaker.click  = function(mouseData){
+        //self.widget.play();
+        self.nospeaker.visible = false;
+        self.speaker.visible = self.kerokero.visible = true;
+        var index = MathUtil.rndIntRange(0, self.soundsLength - 1);
+        console.log("Skip index", index);
+        if (self.firstPlay) {
+            self.firstPlay = false;
+            self.widget.skip(index);
+        }
+        setTimeout(function() {
+            self.widget.play();
+        },0);
+    }
+
+    kerokero.click = function(mouseData) {
+        window.open("https://soundcloud.com/kerokerobonito", "kerokerosc");
     }
 }
 
@@ -382,6 +465,9 @@ eventEmitter.on('videos_loaded', function() {
 
 var loader = new PIXI.AssetLoader([
     "assets/brain/bg.jpg",
+    "assets/brain/speaker.png",
+    "assets/brain/nospeaker.png",
+    "assets/brain/kerokero.jpg",
     "assets/brain/tile_neurons.png",
     "assets/brain/displacement_map.png",
     //"assets/brain/talk_bubble.png",
@@ -420,7 +506,7 @@ loader.load();
 
 
 function start() {
-    brainController.init(gameOpts, container, ratio, renderer, $('#work-container'), $('#info-container'));
+    brainController.init(gameOpts, container, ratio, renderer, $('#work-container'), $('#info-container'), $('#nav-row'));
     $('#loading-container').hide();
     videoContoller.playWaiting();
     renderer.view.id = "pixi-view";
