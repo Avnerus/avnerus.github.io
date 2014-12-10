@@ -95,7 +95,9 @@ BrainController.prototype.workClicked = function(work) {
     $('#work-media').addClass('flexslider');
     var self = this;
     Vue.nextTick(function() {
-        console.log("Load flexslider!!");
+        $('.magnify-image').magnificPopup({type:'image', closeOnContentClick: true});
+        
+        /*console.log("Load flexslider!!");
         $('#work-media.flexslider').flexslider({
             slideshow: false,
             start: function(slider) {
@@ -111,7 +113,7 @@ BrainController.prototype.workClicked = function(work) {
                     self.vm.$data.currentIndex = index;
                 }
             }
-        });
+        });*/
     })
     this.currentWorkIndex = _.indexOf(this.works, work);
     this.showWork();
@@ -119,7 +121,7 @@ BrainController.prototype.workClicked = function(work) {
 
 
 BrainController.prototype.showWork = function() {
-    this.workContainer.css("height", "620px");
+    this.workContainer.css("height", "100%");
     this.workContainer.css("opacity", 1);
     this.showingWork = true;
 }
@@ -140,11 +142,11 @@ BrainController.prototype.nextWork = function() {
 }
 
 BrainController.prototype.resetSlider = function() {
-    if($('#work-media').hasClass('flexslider')){
+/*    if($('#work-media').hasClass('flexslider')){
         console.log("Remove and destroy flexslider!!");
         $('#work-media').removeClass('flexslider')
             .flexslider('destroy');
-    }
+    }*/
 }
 
 BrainController.prototype.prevWork = function() {
@@ -180,6 +182,12 @@ BrainController.prototype.initWorks = function() {
         el: '#main-container',
         data: {currentIndex: 0, description: ""},
         methods: {
+            containerClick: function(e) {
+                console.log("BOO");
+                if (e.target == e.currentTarget) {
+                    self.hideWork();
+                }
+            },
             closeWork: function(e) {
                 self.hideWork();
             },

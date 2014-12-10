@@ -155,6 +155,7 @@ video {
     color: white;
     height: 92%;
     overflow: auto;
+    margin-top: 20px;
     
 }
 
@@ -178,12 +179,6 @@ video {
     font-size: 17px;
     margin-left: 50px;
     height: auto;
-    overflow: auto;
-}
-
-.work-data {
-    height: 400px;
-    overflow: auto;
 }
 
 #info-container {
@@ -221,7 +216,7 @@ video {
 
 .info-description {
     line-height: 1.6;
-    font-size: 20px;
+    font-size: 17px;
     margin-left: 50px;
     height: 415px;
     overflow: auto;
@@ -346,4 +341,19 @@ canvas {
      user-select: none;
     -webkit-user-drag: none; 
      user-drag: none;
+}
+
+
+.item-row {
+    margin-bottom: 20px;
+}
+
+.magnify-image {
+    cursor: -webkit-zoom-in;
+    cursor: -moz-zoom-in;
+    cursor: zoom-in;
+}
+
+#nav-row {
+    
 }

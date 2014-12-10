@@ -95,8 +95,10 @@ BrainController.prototype.workClicked = function(work) {
     this.vm.$data.currentIndex = 0;
     $('#work-media').addClass('flexslider');
     var self = this;
-/*    Vue.nextTick(function() {
-        console.log("Load flexslider!!");
+    Vue.nextTick(function() {
+        $('.magnify-image').magnificPopup({type:'image', closeOnContentClick: true});
+        
+        /*console.log("Load flexslider!!");
         $('#work-media.flexslider').flexslider({
             slideshow: false,
             start: function(slider) {
@@ -112,8 +114,8 @@ BrainController.prototype.workClicked = function(work) {
                     self.vm.$data.currentIndex = index;
                 }
             }
-        });
-    })*/
+        });*/
+    })
     this.currentWorkIndex = _.indexOf(this.works, work);
     this.showWork();
 }
@@ -182,6 +184,7 @@ BrainController.prototype.initWorks = function() {
         data: {currentIndex: 0, description: ""},
         methods: {
             containerClick: function(e) {
+                console.log("BOO");
                 if (e.target == e.currentTarget) {
                     self.hideWork();
                 }
@@ -417,14 +420,21 @@ loader.load();
 
 
 function start() {
-   brainController.init(gameOpts, container, ratio, renderer, $('#work-container'), $('#info-container'));
-   $('#loading-container').hide();
-   videoContoller.playWaiting();
-   renderer.view.id = "pixi-view";
-   $('#pixi-container').append(renderer.view);
-   setTimeout(showDownArrow, 5000);
+    brainController.init(gameOpts, container, ratio, renderer, $('#work-container'), $('#info-container'));
+    $('#loading-container').hide();
+    videoContoller.playWaiting();
+    renderer.view.id = "pixi-view";
+    $('#pixi-container').append(renderer.view);
+    setTimeout(showDownArrow, 5000);
 
-   requestAnimationFrame(animate);
+
+    var FF = (typeof window.mozInnerScreenX != 'undefined');
+
+    if (!FF) {
+        parentScrollFix();
+    }
+
+    requestAnimationFrame(animate);
 }
 
 function showDownArrow() {
@@ -445,6 +455,38 @@ function animate() {
     renderer.render(stage);
     requestAnimationFrame(animate);
 }
+
+
+function parentScrollFix() {
+    // PARENT SCROLL FIX http://stackoverflow.com/questions/5802467/prevent-scrolling-of-parent-element
+    $('.scrollable').on('DOMMouseScroll mousewheel', function(ev) {
+        var $this = $(this),
+            scrollTop = this.scrollTop,
+            scrollHeight = this.scrollHeight,
+            height = $this.height(),
+            delta = ev.originalEvent.wheelDelta,
+            up = delta > 0;
+
+        var prevent = function() {
+            ev.stopPropagation();
+            ev.preventDefault();
+            ev.returnValue = false;
+            return false;
+        }
+        
+        if (!up && -delta > scrollHeight - height - scrollTop) {
+            // Scrolling down, but this will take us past the bottom.
+            $this.scrollTop(scrollHeight);
+            return prevent();
+        } else if (up && delta > scrollTop) {
+            // Scrolling up, but this will take us past the top.
+            $this.scrollTop(0);
+            return prevent();
+        }
+    });
+}
+
+
 
 },{"./brain_controller":1,"./event_manager":2,"./video_controller":4,"tween.js":18}],4:[function(require,module,exports){
 "use strict"
@@ -719,7 +761,7 @@ VideoController.prototype.zoomVideo = function(zoomMultiplyer) {
     video.element.style.left = video.rect.left + "px";
     video.element.style.bottom = video.rect.bottom + "px";
 
-    if (zoomMultiplyer > 8) {
+    if (zoomMultiplyer > 7) {
         this.container.css("display","none");
     } else {
         this.container.css("display","block");
@@ -815,12 +857,21 @@ Bass.prototype.update = function() {
 
 Bass.prototype.getData = function() {
     return {
-        name: "Bass",
+        name: "Music",
         description:  [ 
             {
-                text: "Bass project"
+                text: "Music is more than a passion for me. It is my way to commnicate. I find it better than any langauge. My main instrument would be the electric Bass, but I also play accostic/electric guitar, Okinawa Sanshin, Synthesizer and Ukulele.",
+                youtube: "http://www.youtube.com/embed/E9sDCTB_peU"
+            },
+            {
+                image: "images/works/bass2.jpg",
+                imageBig: "images/works/bass2_big.jpg"
+            },
+            {
+                youtube: "http://www.youtube.com/embed/NFhuxUd05O0"
             }
-        ]
+        ],
+        links: []
     }
 }
 
@@ -890,12 +941,15 @@ Biology.prototype.update = function() {
 
 Biology.prototype.getData = function() {
     return {
-        name: "Biology",
+        name: "Biology - Cell Signal Simulation",
         description:  [ 
             {
-                text: "Biology project"
+                text: "For my final project in my biology B.Sc studies, I worked with Prof. Eshel Ben Jacob and built a cell signaling simulation for cancer cells during wound healing.",
+                image: "images/works/biology1.jpg",
+                imageBig: "images/works/biology1_big.jpg"
             }
-        ]
+        ],
+        links: []
     }
 }
 
@@ -977,8 +1031,16 @@ Brain.prototype.getData = function() {
         name: "The Problem of Consciousness",
         description:  [ 
             {
-                text: "Consciousness project"
+                text: "In Tel Aviv university's \"Consciousness Studies\" course, we tried to solve 'the hard problem of consciousness'. In the picture: \"Mary's Room\" - a famous thought experiment by Frank Jacskson (1982).",
+                image: "images/works/brain1.jpg",
             }
+        ],
+        links: [
+            {
+                url: "/docs/creation_of_meaning.pdf",
+                description: "Creation of Meaning - From our Brain to Society: Final paper for Prof. Hiroshi Sakurai, Waseda University."
+            },
+
         ]
     }
 }
@@ -1057,12 +1119,14 @@ Cantenna.prototype.getData = function() {
         description: [
             {
 
-                text: 'I started out my volunteer in ASSAF\'s refugee youth center as a computer teacher. Later on, I was introduced to the TAMI hackerspace and the "Arig" mesh project. The idea is simple and is used all around the world: use cheap home equipment such as personal WiFi routers and tin cans, to form a community based WiFi network, that does not rely on any corporate or government infrastrucure. I saw the need for such a network in the refugee community of south Tel Aviv, because they don\'t get support from our government and are genrally unable to own a 3G internet connection. I also saw this as a great educational opportunity for the kids in ASSAF.',
-                image: "images/works/cantenna1.jpg"
+                text: 'Using cheap home equipment such as personal WiFi routers and tin cans, we form a community based WiFi networkthat does not rely on any corporate or government infrastrucure. I created this workshop for the kids at ASSAF youth center, where I volunteer with refugees in South Tel Aviv',
+                image: "images/works/cantenna1.jpg",
+                imageBig: "images/works/cantenna1_big.jpg"
             },
             {
-                text: "Together we hack our routers, drill out tin cans and make them into antennas, and then climb roofs to install them all over south Tel Aviv. Here we are testing the signal strength from one roof to the next.",
-                image: "images/works/cantenna2.jpg"
+                text: "We hack our routers, drill out tin cans and make them into antennas, and then climb roofs to install them all over south Tel Aviv. Here we are testing the signal strength from one roof to the next.",
+                image: "images/works/cantenna2.jpg",
+                imageBig: "images/works/cantenna2_big.jpg"
             }
         ],
         links: [
@@ -1159,16 +1223,19 @@ EQuala.prototype.getData = function() {
         name: "EQuala & Feature.FM",
         description: [
             {
-                text: "I first met Lior when we served together as programmers in Mamram, IDF's computer unit. After the discharge, he went to work for CyberArk security company and I went to look for new directions in Tel Aviv university and took freelance projects. Eventually, Lior had decided to become an entrepreneur, and just when I was looking to expand into the mobile industry, he was looking for programmers for a new mobile app. The industry: Music. The crew: A group of lovely people carefully selected by Lior. I was hooked.",
-                image: "images/works/equala1.png"
+                text: "The industry: Music. The crew: A group of lovely people carefully selected by Lior Aharoni, my old co-worker from the IDF.",
+                image: "images/works/equala1.png",
+                imageBig: "images/works/equala1_big.png"
             },
             {
-                text: 'EQuala.fm is a social radio app. We collect your friends\' listening habits, and tune them into a radio station controlled by our "Friends EQualizer". When I came into the team, the Android client was nearing completion, and I took it upon myself to learn iOS and build the entire client from scratch. Quickly I also became involved in project management and design.',
-                image: "images/works/equala2.png"
+                text: 'EQuala.fm is a social radio app. We collect your friends\' listening habits, and tune them into a radio station controlled by our "Friends EQualizer". I wrote the iOS client and was involved in the product design.',
+                image: "images/works/equala2.png",
+                imageBig: "images/works/equala2_big.png"
             },
             {
-                text: 'Feature.fm is our "Pivot". It started as a way to monetize EQuala, but became a thing on its own. This time, I was one of the idea creators from the get-go (Also came up with the name!). The idea: work with online music streaming services who are looking for a way to monetize. Instead of playing ads, they play targeted featured songs from rising musicians, provided by us. To the artists, we provide analytics, management and a community. I wrote a large part of the system, from the low database tier, to the server logic and the web client.',
-                image: "images/works/equala3.png"
+                text: 'In Feature.fm we work with online music streaming services who are looking for a way to monetize. Instead of playing ads, they play targeted featured songs from rising musicians, provided by us. To the artists, we provide analytics, management and a community. I wrote and designed a large part of the system, from the low database tier, to the server logic and the web client.',
+                image: "images/works/equala3.png",
+                imageBig: "images/works/equala3_big.png"
             }
         ],
         links: [
@@ -1396,11 +1463,28 @@ Japan.prototype.getData = function() {
         name: "Japan",
         description: [
             {
-                text: "Japan!",
-                image: "images/works/japan1.jpg"
+                text: "Japan has a place in my soul since early childhood. It started with Okinawa Goju Karate at the age of 12, moved on to being an anime otaku in highschool and at the age of 24, after being discharged from the army, I went on a 4 month cross country trip. 2.5 months of that trip were spent in Okinawa. I studied Karate with the Higaona Sensei, the Goju Ryu master and learned to play the Sanshin. I also went diving in the islands on weekends.",
+                image: "images/works/japan1.jpg",
+                imageBig: "images/works/japan1_big.jpg"
 
+            },
+            {
+                text: "Finally in 2010 I was ready to see what is it like to actually live in Japan. I was accepted to a student exchange program in Waseda university and lived in Japan for a full year.",
+                image: "images/works/japan2.jpg",
+                imageBig: "images/works/japan2_big.jpg"
+
+            },
+            {
+                text: "Now I can speak the language and Japan still resides in my mind. It is apparent in everying aspect of my life and character.",
+                image: "images/works/japan3.jpg",
+                imageBig: "images/works/japan3_big.jpg"
+
+            },
+            {
+                youtube: "http://www.youtube.com/embed/7TrUsnLMt1k"
             }
-        ]
+        ],
+        links: []
     }
 }
 
@@ -1564,8 +1648,23 @@ Koala.prototype.update = function() {
 
 Koala.prototype.getData = function() {
     return {
-        name: "Koala",
-        description: ["Koala description"]
+        name: "Koala (WIP)",
+        description: [
+            {
+
+                text: "A mobile game about a Koala that is sick of only sleeping and eating and dreams about becoming an office worker. The concept was created by me and I've started developing this along with my friend Ilan Aminoff. The game is currently on hold.",
+                image: "images/works/koala1.png"
+            },
+            {
+                text: "In the game mechanics, the screen is split between the tree habitat and the office. Office actions that the Koala is doing in her sleep, affect her tree in the real world. ",
+                image: "images/works/koala2.png"
+            },
+            {
+                text: "Developed in C++ using Cocos2D-X",
+                image: "images/works/koala3.png"
+            }
+        ],
+        links: []
     }
 }
 
@@ -1639,9 +1738,24 @@ Peace.prototype.getData = function() {
         name: "The Conflict",
         description:  [ 
             {
-                text: "Conflict project"
+                text: 'In 2012 I attened the "Vacation from War" seminar for Israelis and Palestinians that took place in Walberberg, Germany. Ever since, I try to give as much as I can for the resolution of our conflict. I believe this should be the main concern in Israel, and solved before anything else.',
+                image: "images/works/peace1.jpg",
+                imageBig: "images/works/peace1_big.jpg"
+            },
+            {
+                image: "images/works/peace2.jpg",
+                imageBig: "images/works/peace2_big.jpg"
+            },
+            {
+                image: "images/works/peace3.jpg",
+                imageBig: "images/works/peace3_big.jpg"
+            },
+            {
+                image: "images/works/peace4.jpg",
+                imageBig: "images/works/peace4_big.jpg"
             }
-        ]
+        ],
+        links: []
     }
 }
 
@@ -1733,12 +1847,12 @@ Pulse.prototype.getData = function() {
         name: "The Pulse Project",
         description: [
             {
-                text: "My first projet that had purely artistic motives. Inspired by the bio-musical work of Daito Manabe, and fueled by my own interest in exposing human interaction using an audio-visual representation of their heartbeats. In this project I combine the heartbeats of 4 people into one electronic music composition and a space-gravitational scene of orbiting creatures. I tried to reflect the relations between the heartbeats using audio and visuals. The work was displayed in the Israeli Burning-Man festival (Midburn) and the Tel Aviv White-Night festival",
+                text: "Inspired by the bio-musical work of Daito Manabe, and fueled by my own interest in exposing human interaction using an audio-visual representation of their heartbeats. In this project I combine the heartbeats of 4 people into one electronic music composition and a space-gravitational scene of orbiting creatures. I tried to reflect the relations between the heartbeats using audio and visuals. The work was displayed in the Israeli Burning-Man festival (Midburn) and the Tel Aviv White-Night festival",
                 image: "images/works/pulse1.png"
             },
             {
                 text: "Here I am testing the project, with my ASSAF computer class. Location: Tel Aviv Makers Hackerspace - TAMI", 
-                video: "https://player.vimeo.com/video/113006896??api=1&player_id=player_1"
+                vimeo: "https://player.vimeo.com/video/113006896??api=1&player_id=player_1"
             }
         ]
     }
@@ -1816,8 +1930,16 @@ Security.prototype.getData = function() {
         name: "IT Security",
         description:  [ 
             {
-                text: "Security project"
+                text: "There is not much that I can disclose from 7 years of being a security researcher for the Israeli Army and government, but I know that \"hacking\", in the broad sense of the word, is a lifestyle that I will always maintain. Whether it\'s comuters, the brain or life.",
+                image: "images/works/security1.png",
             }
+        ],
+        links: [
+            {
+                url: "http://seclists.org/fulldisclosure/2005/Dec/659",
+                description: "Another Checkpoint SecureClient NGX SCV Bypass - My report on Full-Disclosure mailing list"
+            },
+
         ]
     }
 }
@@ -1930,11 +2052,12 @@ Train.prototype.getData = function() {
         name: "Railroad Island",
         description: [
             {
-                text: "During my student exchange in Tokyo, I met Alex, an Australian animator who used to work for Tacticsoft, an Israeli game company that hired my freelance services. Alex was just forming his own game start-up, and when I came back to Israel he offered me to co-develop this railroad simulation mobile game for a Tokyo based publisher. I have developed the train and railroad components using Unity game engine",
+                text: "I railroad simulation mobile game, co-developed with two Austrlians, for a Tokyo based publisher. I have developed the train and railroad components using Unity game engine",
                 image: "images/works/train1.jpg",
             }, 
             {
-              image: "images/works/train2.png"
+              image: "images/works/train2.png",
+              imageBig: "images/works/train2_big.png"
             }
         ],
         links: [

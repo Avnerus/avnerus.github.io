@@ -79,7 +79,8 @@ var loader = new PIXI.AssetLoader([
     "assets/works/tripod.png",
     "assets/works/japan.png",
     "assets/works/bass.png",
-    "assets/works/biology.png"
+    "assets/works/biology.png",
+    "assets/works/bacteria.png"
 ]);
 
 loader.onComplete = function() {
@@ -96,14 +97,21 @@ loader.load();
 
 
 function start() {
-   brainController.init(gameOpts, container, ratio, renderer, $('#work-container'), $('#info-container'));
-   $('#loading-container').hide();
-   videoContoller.playWaiting();
-   renderer.view.id = "pixi-view";
-   $('#pixi-container').append(renderer.view);
-   setTimeout(showDownArrow, 5000);
+    brainController.init(gameOpts, container, ratio, renderer, $('#work-container'), $('#info-container'));
+    $('#loading-container').hide();
+    videoContoller.playWaiting();
+    renderer.view.id = "pixi-view";
+    $('#pixi-container').append(renderer.view);
+    setTimeout(showDownArrow, 5000);
 
-   requestAnimationFrame(animate);
+
+    var FF = (typeof window.mozInnerScreenX != 'undefined');
+
+    if (!FF) {
+        parentScrollFix();
+    }
+
+    requestAnimationFrame(animate);
 }
 
 function showDownArrow() {
@@ -124,3 +132,35 @@ function animate() {
     renderer.render(stage);
     requestAnimationFrame(animate);
 }
+
+
+function parentScrollFix() {
+    // PARENT SCROLL FIX http://stackoverflow.com/questions/5802467/prevent-scrolling-of-parent-element
+    $('.scrollable').on('DOMMouseScroll mousewheel', function(ev) {
+        var $this = $(this),
+            scrollTop = this.scrollTop,
+            scrollHeight = this.scrollHeight,
+            height = $this.height(),
+            delta = ev.originalEvent.wheelDelta,
+            up = delta > 0;
+
+        var prevent = function() {
+            ev.stopPropagation();
+            ev.preventDefault();
+            ev.returnValue = false;
+            return false;
+        }
+        
+        if (!up && -delta > scrollHeight - height - scrollTop) {
+            // Scrolling down, but this will take us past the bottom.
+            $this.scrollTop(scrollHeight);
+            return prevent();
+        } else if (up && delta > scrollTop) {
+            // Scrolling up, but this will take us past the top.
+            $this.scrollTop(0);
+            return prevent();
+        }
+    });
+}
+
+
