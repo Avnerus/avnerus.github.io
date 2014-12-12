@@ -1140,17 +1140,17 @@ function PlayerController(emitter) {
     this.mixtape = [
         // DEMO
         {
-            file: "16_buy_nothing_day.ogg",
+            file: "buy_nothing_day.mp3",
             text: "The Go! Team - Buy Nothing Day",
             bpm: 141.254
         },
         { 
-            file: "9_burning.ogg",
+            file: "burning.mp3",
             text: "The Whitest Boy Alive - Burning",
             bpm: 150.81
         },
         { 
-            file: "15_amanaemonesia.ogg",
+            file: "amanaemonesia.mp3",
             text: "Chairlift - Amanaemonesia",
             bpm: 166.957
         }
