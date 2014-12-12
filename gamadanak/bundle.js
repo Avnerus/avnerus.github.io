@@ -1,4 +1,4 @@
-(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 "use strict"
 // var PIXI = require('pixi');
 var TWEEN = require('tween.js');
@@ -1140,17 +1140,17 @@ function PlayerController(emitter) {
     this.mixtape = [
         // DEMO
         {
-            file: "buy_nothing_day.mp3",
+            file: "16_buy_nothing_day.ogg",
             text: "The Go! Team - Buy Nothing Day",
             bpm: 141.254
         },
         { 
-            file: "burning.mp3",
+            file: "9_burning.ogg",
             text: "The Whitest Boy Alive - Burning",
             bpm: 150.81
         },
         { 
-            file: "amanaemonesia.mp3",
+            file: "15_amanaemonesia.ogg",
             text: "Chairlift - Amanaemonesia",
             bpm: 166.957
         }
@@ -1435,10 +1435,11 @@ function PlayerController(emitter) {
 }
 
 PlayerController.prototype.onPlayPressed = function() {
-    console.log("Play Pressed");
+    console.log("Play Pressed! Current index: " + this.currentSongIndex);
     if (this.currentSongIndex == -1) {
         this.currentSongIndex = 0;
         this.currentSong = this.mixtape[0];
+        console.log(this.currentSong);
         this.currentSong.sound.play();
         $("#song-label").text(this.currentSong.text);
     } else {
@@ -2019,10 +2020,7 @@ EventEmitter.prototype.addListener = function(type, listener) {
                     'leak detected. %d listeners added. ' +
                     'Use emitter.setMaxListeners() to increase limit.',
                     this._events[type].length);
-      if (typeof console.trace === 'function') {
-        // not supported in IE 10
-        console.trace();
-      }
+      console.trace();
     }
   }
 
@@ -2176,4 +2174,4 @@ function isUndefined(arg) {
   return arg === void 0;
 }
 
-},{}]},{},[2]);
+},{}]},{},[2])

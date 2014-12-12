@@ -316,10 +316,11 @@ function PlayerController(emitter) {
 }
 
 PlayerController.prototype.onPlayPressed = function() {
-    console.log("Play Pressed");
+    console.log("Play Pressed! Current index: " +  this.currentSongIndex);
     if (this.currentSongIndex == -1) {
         this.currentSongIndex = 0;
         this.currentSong = this.mixtape[0];
+        console.log(this.currentSong);
         this.currentSong.sound.play();
         $("#song-label").text(this.currentSong.text);
     } else {
