@@ -19,15 +19,21 @@ function PlayerController(emitter) {
 
     // The MIXTAPE
     this.mixtape = [
+        // DEMO
         { 
-            file: "lies.ogg",
-            text: "CHVRCHES - Lies",
-            bpm: 103.027
+            file: "9_burning.ogg",
+            text: "The Whitest Boy Alive - Burning",
+            bpm: 150.81
         },
-        {
-            file: "zebra.ogg",
-            text: "Beachc House - Zebra",
-            bpm: 118.379
+        { 
+            file: "15_amanaemonesia.ogg",
+            text: "Chairlift - Amanaemonesia",
+            bpm: 166.957
+        },
+        { 
+            file: "16_buy_nothing_day.ogg",
+            text: "The Go! Team - Buy Nothing Day",
+            bpm: 141.254
         }
      /*  { 
             file: "1_sink_the_seine.ogg",

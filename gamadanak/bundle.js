@@ -1,4 +1,4 @@
-(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 "use strict"
 // var PIXI = require('pixi');
 var TWEEN = require('tween.js');
@@ -1138,15 +1138,21 @@ function PlayerController(emitter) {
 
     // The MIXTAPE
     this.mixtape = [
-        { 
-            file: "lies.ogg",
-            text: "CHVRCHES - Lies",
-            bpm: 103.027
-        },
+        // DEMO
         {
-            file: "zebra.ogg",
-            text: "Beachc House - Zebra",
-            bpm: 118.379
+            file: "16_buy_nothing_day.ogg",
+            text: "The Go! Team - Buy Nothing Day",
+            bpm: 141.254
+        },
+        { 
+            file: "9_burning.ogg",
+            text: "The Whitest Boy Alive - Burning",
+            bpm: 150.81
+        },
+        { 
+            file: "15_amanaemonesia.ogg",
+            text: "Chairlift - Amanaemonesia",
+            bpm: 166.957
         }
      /*  { 
             file: "1_sink_the_seine.ogg",
@@ -1614,7 +1620,7 @@ ScoreBoard.prototype.place = function(position) {
     this.comboLabel.position.x = 90;
     this.comboValue = new PIXI.Text(this.combo, {font:"48px Arial", fill:"#3399cc"});
     this.comboValue.position.y = 208;
-    this.comboValue.position.x = 300;
+    this.comboValue.position.x = 310;
 
     this.stage.addChild(this.comboLabel);
     this.stage.addChild(this.comboValue);
@@ -1629,6 +1635,11 @@ ScoreBoard.prototype.place = function(position) {
     this.stage.addChild(this.lastScoreLabel);
     this.stage.addChild(this.lastScoreValue);
 
+    this.instructionsLabel = new PIXI.Text("Instructions: Press the SPACE-BAR at the right moment!", {font:"48px JustAnotherHandRegular", fill:"white"});
+    this.instructionsLabel.position.y = 620;
+    this.instructionsLabel.position.x = 90;
+
+    this.stage.addChild(this.instructionsLabel);
     // Bounce tweens
 
     var forthTarget = {x: 1.5, y: 1.5};
@@ -2008,7 +2019,10 @@ EventEmitter.prototype.addListener = function(type, listener) {
                     'leak detected. %d listeners added. ' +
                     'Use emitter.setMaxListeners() to increase limit.',
                     this._events[type].length);
-      console.trace();
+      if (typeof console.trace === 'function') {
+        // not supported in IE 10
+        console.trace();
+      }
     }
   }
 
@@ -2162,4 +2176,4 @@ function isUndefined(arg) {
   return arg === void 0;
 }
 
-},{}]},{},[2])
+},{}]},{},[2]);
