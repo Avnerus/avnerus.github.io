@@ -1141,10 +1141,13 @@ function init() {
       tapeUIs[i].stop();
     }
   }
-
-  if (soundManager.ok()) {
-     window.emitter.emit('soundInit', {});
-  }
+  
+  setTimeout(function() {
+    console.log("Sound init check");
+    if (soundManager.ok()) {
+       window.emitter.emit('soundInit', {});
+    }
+  }, 1000);
 
   tapes = document.querySelectorAll('div.tape');
 
