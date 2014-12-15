@@ -1,4 +1,4 @@
-(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 "use strict"
 
 module.exports = function(videoController) {
@@ -252,7 +252,9 @@ BrainController.prototype.initWorks = function() {
         new (require('./works/cantenna'))(),
         new (require('./works/japan'))(),
         new (require('./works/bass'))(),
-        new (require('./works/biology'))()
+        new (require('./works/biology'))(),
+        new (require('./works/drone'))(),
+        new (require('./works/playbot'))()
     ]
 
 
@@ -403,7 +405,7 @@ BrainController.prototype.spawnWork = function () {
     
 }
 
-},{"./event_manager":2,"./works/bass":5,"./works/biology":6,"./works/brain":7,"./works/cantenna":8,"./works/equala":9,"./works/gamad":10,"./works/info":11,"./works/japan":12,"./works/koala":13,"./works/peace":14,"./works/pulse":15,"./works/security":16,"./works/train":17,"tween.js":18,"vue":39}],2:[function(require,module,exports){
+},{"./event_manager":2,"./works/bass":5,"./works/biology":6,"./works/brain":7,"./works/cantenna":8,"./works/drone":9,"./works/equala":10,"./works/gamad":11,"./works/info":12,"./works/japan":13,"./works/koala":14,"./works/peace":15,"./works/playbot":16,"./works/pulse":17,"./works/security":18,"./works/train":19,"tween.js":20,"vue":41}],2:[function(require,module,exports){
 "use strict"
 
 var events = require('events');
@@ -415,7 +417,7 @@ module.exports.getEmitter = function() {
 }
 
 
-},{"events":46}],3:[function(require,module,exports){
+},{"events":48}],3:[function(require,module,exports){
 var gameOpts = {
     stageWidth: 1280,
     stageHeight: 720,
@@ -501,7 +503,9 @@ var loader = new PIXI.AssetLoader([
     "assets/works/japan.png",
     "assets/works/bass.png",
     "assets/works/biology.png",
-    "assets/works/bacteria.png"
+    "assets/works/bacteria.png",
+    "assets/works/drone.png",
+    "assets/works/playbot.png"
 ]);
 
 loader.onComplete = function() {
@@ -601,7 +605,7 @@ function parentScrollFix() {
 
 
 
-},{"./brain_controller":1,"./event_manager":2,"./video_controller":4,"tween.js":18}],4:[function(require,module,exports){
+},{"./brain_controller":1,"./event_manager":2,"./video_controller":4,"tween.js":20}],4:[function(require,module,exports){
 "use strict"
 
 module.exports = function(opts) {
@@ -1263,6 +1267,73 @@ Cantenna.prototype.getData = function() {
 "use strict"
 
 module.exports = function() {
+    return new Drone()
+}
+
+module.exports.Drone = Drone;
+
+function Drone() {
+    if (!(this instanceof Drone)) return new Drone()
+
+    this.loaded = false;
+    console.log("Drone work constructed");
+}
+
+Drone.prototype.init = function (opts, stage, clickHandler) {
+
+    console.log("Drone work initializing with opts", opts);
+    this.stage = stage;
+    this.opts = opts;
+    this.eventEmitter = require('../event_manager').getEmitter();
+
+    this.loadSprite();
+}
+
+
+Drone.prototype.loadSprite = function() {
+    var self = this;
+
+    var drone = new PIXI.Sprite.fromFrame("assets/works/drone.png");
+    drone.anchor.x = 0.5;
+    drone.anchor.y = 0.5;
+    drone.position.x = 1380;
+    drone.position.y = 80;
+    drone.scale = {x: 0.8, y: 0.8};
+
+    drone.buttonMode = true;
+    drone.setInteractive(true);
+
+    TweenMax.to(drone.position , 15 , {ease: Linear.easeNone, repeat: -1, x: -100});
+    
+    drone.click  = function(mouseData){
+      console.log("Drone CLICK");
+      self.eventEmitter.emit('work_clicked', self);
+    }
+
+    this.stage.addChild(drone);
+}
+Drone.prototype.update = function() {
+    
+}
+
+Drone.prototype.getData = function() {
+    return {
+        name: "Drone Pigeon (WIP)",
+        description:  [ 
+            {
+                text: "Will UAV's (Drones) ever become such an integral part of our life, that we'll be feeding them in the city square like pigeons? Recently I've been thinking about this concept for an installation.",
+                image: "images/works/pigeon.png"
+            }
+        ],
+        links: []
+    }
+}
+
+
+},{"../event_manager":2}],10:[function(require,module,exports){
+"use strict"
+
+module.exports = function() {
     return new EQuala()
 }
 
@@ -1376,7 +1447,7 @@ EQuala.prototype.getData = function() {
 }
 
 
-},{"../event_manager":2}],10:[function(require,module,exports){
+},{"../event_manager":2}],11:[function(require,module,exports){
 "use strict"
 
 module.exports = function() {
@@ -1469,7 +1540,7 @@ Gamad.prototype.getData = function() {
 }
 
 
-},{"../event_manager":2}],11:[function(require,module,exports){
+},{"../event_manager":2}],12:[function(require,module,exports){
 "use strict"
 
 module.exports = function() {
@@ -1530,7 +1601,7 @@ Info.prototype.getData = function() {
 
 
 
-},{"../event_manager":2}],12:[function(require,module,exports){
+},{"../event_manager":2}],13:[function(require,module,exports){
 "use strict"
 
 module.exports = function() {
@@ -1613,7 +1684,7 @@ Japan.prototype.getData = function() {
 }
 
 
-},{"../event_manager":2}],13:[function(require,module,exports){
+},{"../event_manager":2}],14:[function(require,module,exports){
 "use strict"
 
 module.exports = function() {
@@ -1793,7 +1864,7 @@ Koala.prototype.getData = function() {
 }
 
 
-},{"../event_manager":2}],14:[function(require,module,exports){
+},{"../event_manager":2}],15:[function(require,module,exports){
 "use strict"
 
 module.exports = function() {
@@ -1884,7 +1955,77 @@ Peace.prototype.getData = function() {
 }
 
 
-},{"../event_manager":2}],15:[function(require,module,exports){
+},{"../event_manager":2}],16:[function(require,module,exports){
+"use strict"
+
+module.exports = function() {
+    return new Playbot()
+}
+
+module.exports.Playbot = Playbot;
+
+function Playbot() {
+    if (!(this instanceof Playbot)) return new Playbot()
+
+    this.loaded = false;
+    console.log("Playbot work constructed");
+}
+
+Playbot.prototype.init = function (opts, stage, clickHandler) {
+
+    console.log("Playbot work initializing with opts", opts);
+    this.stage = stage;
+    this.opts = opts;
+    this.eventEmitter = require('../event_manager').getEmitter();
+
+    this.loadSprite();
+}
+
+
+Playbot.prototype.loadSprite = function() {
+    var self = this;
+
+
+    var playbot = new PIXI.Sprite.fromFrame("assets/works/playbot.png");
+    playbot.anchor.x = 0.5;
+    playbot.anchor.y = 0.5;
+    playbot.position.x = 210;
+//    playbot.position.x = 1090;
+//    playbot.position.y = 205;
+    playbot.position.y = 200;
+    playbot.scale = {x: 0.8, y: 0.8};
+
+    playbot.buttonMode = true;
+    playbot.setInteractive(true);
+
+    playbot.click  = function(mouseData){
+      console.log("Playbot CLICK");
+      self.eventEmitter.emit('work_clicked', self);
+    }
+
+    this.stage.addChild(playbot);
+}
+Playbot.prototype.update = function() {
+    
+}
+
+Playbot.prototype.getData = function() {
+    return {
+        name: "Palestinian Playbot (WIP)",
+        description:  [ 
+            {
+                text: "Recently I've been thinking about ways to connect Israelis and Palestinians. I came up with this design for a play bot that can be placed in the public space, and connect to our neighbors beyond the wall (3D Figures by Noa Simhoni).",
+                image: "images/works/playbots.png",
+                imageBig: "images/works/playbots_big.png"
+            }
+        ],
+        links: [
+        ]
+    }
+}
+
+
+},{"../event_manager":2}],17:[function(require,module,exports){
 "use strict"
 
 module.exports = function() {
@@ -1983,7 +2124,7 @@ Pulse.prototype.getData = function() {
 }
 
 
-},{"../event_manager":2}],16:[function(require,module,exports){
+},{"../event_manager":2}],18:[function(require,module,exports){
 "use strict"
 
 module.exports = function() {
@@ -2069,7 +2210,7 @@ Security.prototype.getData = function() {
 }
 
 
-},{"../event_manager":2}],17:[function(require,module,exports){
+},{"../event_manager":2}],19:[function(require,module,exports){
 "use strict"
 
 module.exports = function() {
@@ -2198,7 +2339,7 @@ Train.prototype.getData = function() {
 }
 
 
-},{"../event_manager":2}],18:[function(require,module,exports){
+},{"../event_manager":2}],20:[function(require,module,exports){
 /**
  * Tween.js - Licensed under the MIT license
  * https://github.com/sole/tween.js
@@ -2956,7 +3097,7 @@ TWEEN.Interpolation = {
 };
 
 module.exports=TWEEN;
-},{}],19:[function(require,module,exports){
+},{}],21:[function(require,module,exports){
 var utils = require('./utils')
 
 function Batcher () {
@@ -3002,7 +3143,7 @@ BatcherProto.reset = function () {
 }
 
 module.exports = Batcher
-},{"./utils":44}],20:[function(require,module,exports){
+},{"./utils":46}],22:[function(require,module,exports){
 var Batcher        = require('./batcher'),
     bindingBatcher = new Batcher(),
     bindingId      = 1
@@ -3106,7 +3247,7 @@ BindingProto.unbind = function () {
 }
 
 module.exports = Binding
-},{"./batcher":19}],21:[function(require,module,exports){
+},{"./batcher":21}],23:[function(require,module,exports){
 var Emitter     = require('./emitter'),
     Observer    = require('./observer'),
     config      = require('./config'),
@@ -4144,7 +4285,7 @@ function getRoot (compiler) {
 }
 
 module.exports = Compiler
-},{"./binding":20,"./config":22,"./deps-parser":23,"./directive":24,"./emitter":35,"./exp-parser":36,"./observer":40,"./text-parser":42,"./utils":44,"./viewmodel":45}],22:[function(require,module,exports){
+},{"./binding":22,"./config":24,"./deps-parser":25,"./directive":26,"./emitter":37,"./exp-parser":38,"./observer":42,"./text-parser":44,"./utils":46,"./viewmodel":47}],24:[function(require,module,exports){
 var TextParser = require('./text-parser')
 
 module.exports = {
@@ -4164,7 +4305,7 @@ Object.defineProperty(module.exports, 'delimiters', {
         TextParser.setDelimiters(delimiters)
     }
 })
-},{"./text-parser":42}],23:[function(require,module,exports){
+},{"./text-parser":44}],25:[function(require,module,exports){
 var Emitter  = require('./emitter'),
     utils    = require('./utils'),
     Observer = require('./observer'),
@@ -4230,7 +4371,7 @@ module.exports = {
     }
     
 }
-},{"./emitter":35,"./observer":40,"./utils":44}],24:[function(require,module,exports){
+},{"./emitter":37,"./observer":42,"./utils":46}],26:[function(require,module,exports){
 var dirId           = 1,
     ARG_RE          = /^[\w\$-]+$/,
     FILTER_TOKEN_RE = /[^\s'"]+|'[^']+'|"[^"]+"/g,
@@ -4489,7 +4630,7 @@ function escapeQuote (v) {
 }
 
 module.exports = Directive
-},{"./text-parser":42}],25:[function(require,module,exports){
+},{"./text-parser":44}],27:[function(require,module,exports){
 var utils = require('../utils'),
     slice = [].slice
 
@@ -4531,7 +4672,7 @@ module.exports = {
         parent.insertBefore(frag, this.el)
     }
 }
-},{"../utils":44}],26:[function(require,module,exports){
+},{"../utils":46}],28:[function(require,module,exports){
 var utils    = require('../utils')
 
 /**
@@ -4588,7 +4729,7 @@ module.exports = {
         }
     }
 }
-},{"../utils":44}],27:[function(require,module,exports){
+},{"../utils":46}],29:[function(require,module,exports){
 var utils      = require('../utils'),
     config     = require('../config'),
     transition = require('../transition'),
@@ -4718,7 +4859,7 @@ directives.html    = require('./html')
 directives.style   = require('./style')
 directives.partial = require('./partial')
 directives.view    = require('./view')
-},{"../config":22,"../transition":43,"../utils":44,"./html":25,"./if":26,"./model":28,"./on":29,"./partial":30,"./repeat":31,"./style":32,"./view":33,"./with":34}],28:[function(require,module,exports){
+},{"../config":24,"../transition":45,"../utils":46,"./html":27,"./if":28,"./model":30,"./on":31,"./partial":32,"./repeat":33,"./style":34,"./view":35,"./with":36}],30:[function(require,module,exports){
 var utils = require('../utils'),
     isIE9 = navigator.userAgent.indexOf('MSIE 9.0') > 0,
     filter = [].filter
@@ -4893,7 +5034,7 @@ module.exports = {
         }
     }
 }
-},{"../utils":44}],29:[function(require,module,exports){
+},{"../utils":46}],31:[function(require,module,exports){
 var utils    = require('../utils')
 
 /**
@@ -4952,7 +5093,7 @@ module.exports = {
         this.el.removeEventListener('load', this.iframeBind)
     }
 }
-},{"../utils":44}],30:[function(require,module,exports){
+},{"../utils":46}],32:[function(require,module,exports){
 var utils = require('../utils')
 
 /**
@@ -5003,7 +5144,7 @@ module.exports = {
     }
 
 }
-},{"../utils":44}],31:[function(require,module,exports){
+},{"../utils":46}],33:[function(require,module,exports){
 var utils      = require('../utils'),
     config     = require('../config')
 
@@ -5250,7 +5391,7 @@ function indexOf (vms, obj) {
     }
     return -1
 }
-},{"../config":22,"../utils":44}],32:[function(require,module,exports){
+},{"../config":24,"../utils":46}],34:[function(require,module,exports){
 var prefixes = ['-webkit-', '-moz-', '-ms-']
 
 /**
@@ -5297,7 +5438,7 @@ module.exports = {
     }
 
 }
-},{}],33:[function(require,module,exports){
+},{}],35:[function(require,module,exports){
 /**
  *  Manages a conditional child VM using the
  *  binding's value as the component ID.
@@ -5354,7 +5495,7 @@ module.exports = {
     }
 
 }
-},{}],34:[function(require,module,exports){
+},{}],36:[function(require,module,exports){
 var utils = require('../utils')
 
 /**
@@ -5405,7 +5546,7 @@ module.exports = {
     }
 
 }
-},{"../utils":44}],35:[function(require,module,exports){
+},{"../utils":46}],37:[function(require,module,exports){
 var slice = [].slice
 
 function Emitter (ctx) {
@@ -5503,7 +5644,7 @@ EmitterProto.applyEmit = function (event) {
 }
 
 module.exports = Emitter
-},{}],36:[function(require,module,exports){
+},{}],38:[function(require,module,exports){
 var utils           = require('./utils'),
     STR_SAVE_RE     = /"(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'/g,
     STR_RESTORE_RE  = /"(\d+)"/g,
@@ -5694,7 +5835,7 @@ exports.eval = function (exp, compiler, data) {
     }
     return res
 }
-},{"./utils":44}],37:[function(require,module,exports){
+},{"./utils":46}],39:[function(require,module,exports){
 var utils    = require('./utils'),
     get      = utils.get,
     slice    = [].slice,
@@ -5886,7 +6027,7 @@ function stripQuotes (str) {
         return str.slice(1, -1)
     }
 }
-},{"./utils":44}],38:[function(require,module,exports){
+},{"./utils":46}],40:[function(require,module,exports){
 // string -> DOM conversion
 // wrappers originally from jQuery, scooped from component/domify
 var map = {
@@ -5954,7 +6095,7 @@ module.exports = function (templateString) {
     }
     return frag
 }
-},{}],39:[function(require,module,exports){
+},{}],41:[function(require,module,exports){
 var config      = require('./config'),
     ViewModel   = require('./viewmodel'),
     utils       = require('./utils'),
@@ -6143,7 +6284,7 @@ function inheritOptions (child, parent, topLevel) {
 }
 
 module.exports = ViewModel
-},{"./config":22,"./directives":27,"./filters":37,"./observer":40,"./transition":43,"./utils":44,"./viewmodel":45}],40:[function(require,module,exports){
+},{"./config":24,"./directives":29,"./filters":39,"./observer":42,"./transition":45,"./utils":46,"./viewmodel":47}],42:[function(require,module,exports){
 /* jshint proto:true */
 
 var Emitter  = require('./emitter'),
@@ -6590,7 +6731,7 @@ var pub = module.exports = {
     convert     : convert,
     convertKey  : convertKey
 }
-},{"./emitter":35,"./utils":44}],41:[function(require,module,exports){
+},{"./emitter":37,"./utils":46}],43:[function(require,module,exports){
 var toFragment = require('./fragment');
 
 /**
@@ -6638,7 +6779,7 @@ module.exports = function(template) {
     return toFragment(templateNode.outerHTML);
 }
 
-},{"./fragment":38}],42:[function(require,module,exports){
+},{"./fragment":40}],44:[function(require,module,exports){
 var openChar        = '{',
     endChar         = '}',
     ESCAPE_RE       = /[-.*+?^${}()|[\]\/\\]/g,
@@ -6735,7 +6876,7 @@ exports.parse         = parse
 exports.parseAttr     = parseAttr
 exports.setDelimiters = setDelimiters
 exports.delimiters    = [openChar, endChar]
-},{"./directive":24}],43:[function(require,module,exports){
+},{"./directive":26}],45:[function(require,module,exports){
 var endEvents  = sniffEndEvents(),
     config     = require('./config'),
     // batch enter animations so we only force the layout once
@@ -6964,7 +7105,7 @@ function sniffEndEvents () {
 // Expose some stuff for testing purposes
 transition.codes = codes
 transition.sniff = sniffEndEvents
-},{"./batcher":19,"./config":22}],44:[function(require,module,exports){
+},{"./batcher":21,"./config":24}],46:[function(require,module,exports){
 var config       = require('./config'),
     toString     = ({}).toString,
     win          = window,
@@ -7291,7 +7432,7 @@ function enableDebug () {
         }
     }
 }
-},{"./config":22,"./fragment":38,"./template-parser.js":41,"./viewmodel":45}],45:[function(require,module,exports){
+},{"./config":24,"./fragment":40,"./template-parser.js":43,"./viewmodel":47}],47:[function(require,module,exports){
 var Compiler   = require('./compiler'),
     utils      = require('./utils'),
     transition = require('./transition'),
@@ -7483,7 +7624,7 @@ function query (el) {
 
 module.exports = ViewModel
 
-},{"./batcher":19,"./compiler":21,"./transition":43,"./utils":44}],46:[function(require,module,exports){
+},{"./batcher":21,"./compiler":23,"./transition":45,"./utils":46}],48:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -7631,7 +7772,10 @@ EventEmitter.prototype.addListener = function(type, listener) {
                     'leak detected. %d listeners added. ' +
                     'Use emitter.setMaxListeners() to increase limit.',
                     this._events[type].length);
-      console.trace();
+      if (typeof console.trace === 'function') {
+        // not supported in IE 10
+        console.trace();
+      }
     }
   }
 
@@ -7785,4 +7929,4 @@ function isUndefined(arg) {
   return arg === void 0;
 }
 
-},{}]},{},[3])
+},{}]},{},[3]);
