@@ -386,10 +386,10 @@ BrainController.prototype.setMaskByOffset = function() {
         this.setTwist(1);
         this.maskUpdated = false;
     }
-    if (multi < 8 && this.showingWork) {
+    if (multi < 7 && this.showingWork) {
         this.hideWork();
     }
-    if (multi < 8 && this.showingInfo) {
+    if (multi < 7 && this.showingInfo) {
         this.hideInfo();
     }
 }
@@ -882,7 +882,7 @@ VideoController.prototype.zoomVideo = function(zoomMultiplyer) {
     video.element.style.left = video.rect.left + "px";
     video.element.style.bottom = video.rect.bottom + "px";
 
-    if (zoomMultiplyer > 7) {
+    if (zoomMultiplyer >= 7) {
         this.container.css("display","none");
     } else {
         this.container.css("display","block");
