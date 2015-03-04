@@ -37,17 +37,6 @@
 	</head>
 	<body>
 
-		<script type="text/javascript">
-		  var _gaq = _gaq || [];
-		  _gaq.push(['_setAccount', 'UA-86951-7']);
-		  _gaq.push(['_trackPageview']);
-
-		  (function() {
-		    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-		    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-		    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(ga);
-		  })();
-		</script>
 
 		<script src="three.js"></script>
 		<script src="FBOUtils.js"></script>
@@ -164,32 +153,6 @@
 
 		</script>
 
-		<script id="vs-copy" type="x-shader/x-vertex">
-
-			uniform sampler2D map;
-			varying vec2 vUv;
-
-			void main() {
-
-				vUv = position.xy;
-				gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
-
-			}
-
-		</script>
-
-		<script id="fs-copy" type="x-shader/x-fragment">
-
-			uniform sampler2D map;
-			varying vec2 vUv;
-
-			void main() {
-
-				gl_FragColor = texture2D( map, vUv );
-
-			}
-
-		</script>
 
 		<script>
 
@@ -221,7 +184,9 @@
 
 				scene = new THREE.Scene();
 
-                camera = new THREE.PerspectiveCamera(90, window.innerWidth / window.innerHeight, 1, 10000);
+               // camera = new THREE.PerspectiveCamera(90, window.innerWidth / window.innerHeight, 1, 10000);
+                camera = new THREE.PerspectiveCamera(90, 1, 0.001, 700);
+                
                 
 				scene.add( camera );
 
@@ -229,14 +194,14 @@
                  scene.add(camera);
 
                   controls = new THREE.OrbitControls(camera, element);
-                  /*controls.rotateUp(Math.PI / 4);
+                /*  controls.rotateUp(Math.PI / 4);
                   controls.target.set(
                     camera.position.x + 0.1,
                     camera.position.y,
                     camera.position.z
-                  );
-                  controls.noZoom = true5;
-                  controls.noPan = true;*/
+                  );*/
+                 // controls.noZoom = true;
+                 // controls.noPan = true;
                 
                 /*camera = new THREE.PerspectiveCamera( 50, window.innerWidth / window.innerHeight, 1, 1000 );
                 controls = new THREE.OrbitControls2( camera );
@@ -260,9 +225,10 @@
                 }
                 window.addEventListener('deviceorientation', setOrientationControls, true);
 
-				var width = 512, height = 512;
+				//var width = 350, height = 350;
+                //var width = 1024, height = 1024;
 				//var width = 64, height = 64;
-				// var width = 128, height = 128;
+				 var width = 128, height = 128;
 
 				if ( ! renderer.context.getExtension( 'OES_texture_float' ) ) {
 
@@ -307,15 +273,15 @@
 
 				});*/
                 var loader = new THREE.JSONLoader();
-                loader.load( 'human.js', function ( geometry, materials) {
+                loader.load( 'human2.js', function ( geometry, materials) {
 
 
                             console.log("Found geometry! ", geometry);
                             var textGeo = geometry;
                             
-                            THREE.GeometryUtils.scale(textGeo, new THREE.Vector3(0.3, 0.3, 0.3));
+                            //THREE.GeometryUtils.scale(textGeo, new THREE.Vector3(0.1, 0.1, 0.1));
 
-                            //textGeo.applyMatrix( new THREE.Matrix4().makeTranslation( -0.9, 0, 0.2 ) );
+                            textGeo.applyMatrix( new THREE.Matrix4().makeTranslation( 0.4, -2.5, -0.7 ) );
 
                             points = THREE.GeometryUtils.randomPointsInGeometry( textGeo, data.length / 3 );
 
@@ -407,7 +373,7 @@
 
 				//document.addEventListener( 'mousemove', onDocumentMouseMove, false );
                window.addEventListener('resize', resize, false);
-               setTimeout(resize, 1);
+               setTimeout(resize, 5000);
                 
 
 			}
