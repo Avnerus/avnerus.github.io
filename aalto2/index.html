@@ -213,11 +213,9 @@
 
 				renderer = new THREE.WebGLRenderer( { antialias: false } );
                 
-				renderer.setSize( window.innerWidth, window.innerHeight );
                 renderer.setClearColor( 0x000000, 1 );
                 element = renderer.domElement;
                 effect = new THREE.StereoEffect(renderer);
-                effect.setSize( window.innerWidth, window.innerHeight );
                 
 				container.appendChild( renderer.domElement );
 
@@ -408,6 +406,9 @@
 					});
 
 				//document.addEventListener( 'mousemove', onDocumentMouseMove, false );
+               window.addEventListener('resize', resize, false);
+               setTimeout(resize, 1);
+                
 
 			}
 
@@ -421,11 +422,37 @@
 			function animate() {
 
 				requestAnimationFrame( animate );
+                update();
 				render();
 
 			}
 
 			var timer = 0;
+
+            function update(dt) {
+
+              camera.updateProjectionMatrix();
+
+              controls.update();
+            }
+            
+
+
+            function resize() {
+             // var width = container.offsetWidth;
+              //var height = container.offsetHeight;
+              var width = window.innerWidth;
+              var height = window.innerHeight;
+              console.log("Resize!" , container, container.offsetWidth,  container.offsetHeight);
+
+
+              camera.aspect = width / height;
+              camera.updateProjectionMatrix();
+
+              renderer.setSize(width, height);
+              effect.setSize(width, height);
+            }
+            
 
 			function render() {
                 if (!simulationShader) {
@@ -444,7 +471,6 @@
 				fboParticles.simulate(fboParticles.out);
 				material.uniforms.map.value = fboParticles.out;
 
-				controls.update();
 
 				effect.render( scene, camera );
 
