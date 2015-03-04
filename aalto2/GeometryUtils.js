@@ -5,6 +5,17 @@
 
 THREE.GeometryUtils = {
 
+
+    scale: function(geometry, scale) {
+        	// change all geometry.vertices
+            for(var i = 0; i < geometry.vertices.length; i++) {
+                var vertex = geometry.vertices[i];
+                vertex.multiply(scale);
+            }
+            // mark the vertices as dirty
+            geometry.__dirtyVertices = true;
+    },
+
 	// Merge two geometries or geometry and geometry from object (using object's transform)
 
 	merge: function ( geometry1, geometry2, materialIndexOffset ) {
