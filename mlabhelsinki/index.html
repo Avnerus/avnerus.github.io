@@ -165,7 +165,7 @@
       scene = new THREE.Scene();
 
       camera = new THREE.PerspectiveCamera(90, 1, 0.001, 700);
-      camera.position.set(-300, 400, 0);
+      camera.position.set(-300, 500, -100);
       scene.add(camera);
 
       controls = new THREE.OrbitControls(camera, element);
@@ -284,7 +284,7 @@
          }
         for ( i = 0; i < scene.children.length; i ++ ) {
             var object = scene.children[ i ];
-            if ( object instanceof THREE.PointCloud && object != fboMes && object != fboMeshh ) {
+            if ( object instanceof THREE.PointCloud && object != fboMesh ) {
                 object.rotation.y = time * ( i < 4 ? i + 1 : - ( i + 1 ) );
 
             }
@@ -333,7 +333,7 @@
                     
                     //THREE.GeometryUtils.scale(fboGeo, new THREE.Vector3(0.1, 0.1, 0.1));
 
-                    fboGeo.applyMatrix( new THREE.Matrix4().makeTranslation( 0, -0.2, 0) );
+                    fboGeo.applyMatrix( new THREE.Matrix4().makeTranslation( 0, 0.3, 0.5) );
                     //fboGeo.applyMatrix( new THREE.Matrix4().makeRotationZ(-20 * Math.PI / 180 ));
                     fboGeo.applyMatrix( new THREE.Matrix4().makeRotationY(-90 * Math.PI / 180 ));
 
@@ -418,6 +418,9 @@
                     } );
 
                     fboMesh = new THREE.PointCloud( geometry, material );
+                    fboMesh.position.set(80, 0, 0);
+                    fboMesh.frustumCulled = false;
+
                     scene.add( fboMesh );
             });
     }
