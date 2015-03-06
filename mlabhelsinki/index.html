@@ -52,6 +52,7 @@
         uniform sampler2D origin;
         
         uniform float timer;
+        uniform float messFactor;
 
 
         float rand(vec2 co){
@@ -75,9 +76,9 @@
                 float y = pos.y;
                 float z = pos.z;
 
-                pos.x += sin( y * 7.0 ) * cos( z * 12.0 ) * 0.005;
-                pos.y += sin( x * 8.0 ) * cos( z * 13.0 ) * 0.005;
-                pos.z += sin( x * 9.0 ) * cos( y * 14.0 ) * 0.005;
+                pos.x += sin( y * 7.0 ) * cos( z * 12.0 ) * messFactor;
+                pos.y += sin( x * 8.0 ) * cos( z * 13.0 ) * messFactor;
+                pos.z += sin( x * 9.0 ) * cos( y * 14.0 ) * messFactor;
 
             }
 
@@ -132,9 +133,9 @@
 
         void main() {
 
-            float depth = smoothstep( 750.0, -500.0, gl_FragCoord.z / gl_FragCoord.w );
-            float x = rand(gl_FragCoord.xz);
-            gl_FragColor = vec4( texture2D( map, vUv ).xyz * 20.0 , depth );
+            float depth = smoothstep( 750.0, -10.0, gl_FragCoord.z / gl_FragCoord.w );
+            //gl_FragColor = vec4( texture2D( map, vUv ).xyz * 20.0 , depth );
+            gl_FragColor = vec4( 1.0,0,0, depth );
 
         }
 
@@ -152,10 +153,119 @@
     var fboMesh;
 	var data, texture, points;
     var fboParticles, rtTexturePos, rtTexturePos2, simulationShader;
+    var messFactor = 0.005;
+    var fboWidth = 256, fboHeight = 256;
+
+    var fboObjectsData = [];
     
 
     init();
     animate();
+
+    function getRandomArbitrary(min, max) {
+        return Math.random() * (max - min) + min;
+    }
+
+    function getRandomInt(min, max) {
+        return Math.round(Math.random() * (max - min)) + min;
+    }
+
+    function nowRotating(evt) {
+        console.log("Now rotating! ", evt);
+        // Scattered or complete
+        var opt = getRandomArbitrary(0,1);
+        if (opt > 0.5) {
+            // messy
+            messFactor = getRandomArbitrary(0.01, 0.05);
+        } else {
+            // complete
+            messFactor = getRandomArbitrary(0.001, 0.005);
+        }
+    }
+
+    function loadFBO(path) {
+        console.log("Load FBO! ", path);
+        var loader = new THREE.JSONLoader();
+        loader.load( path, function ( geometry, materials) {
+
+                    data = new Float32Array( fboWidth * fboHeight * 3 );
+
+                    console.log("Found geometry! ", geometry);
+                    var fboGeo = geometry;
+                    
+                    //THREE.GeometryUtils.scale(fboGeo, new THREE.Vector3(0.1, 0.1, 0.1));
+
+                    fboGeo.applyMatrix( new THREE.Matrix4().makeTranslation( 0, 0.3, 0.5) );
+                    //fboGeo.applyMatrix( new THREE.Matrix4().makeRotationZ(-20 * Math.PI / 180 ));
+                    fboGeo.applyMatrix( new THREE.Matrix4().makeRotationY(-90 * Math.PI / 180 ));
+
+                    points = THREE.GeometryUtils.randomPointsInGeometry( fboGeo, data.length / 3 );
+
+                    for ( var i = 0, j = 0, l = data.length; i < l; i += 3, j += 1 ) {
+
+                        data[ i ] = points[ j ].x;
+                        data[ i + 1 ] = points[ j ].y;
+                        data[ i + 2 ] = points[ j ].z;
+                    }
+
+                    fboObjectsData.push(data);                   
+                    if (fboObjectsData.length >1) {
+                        console.log("Done ", path);
+                        addFBO();
+                        setInterval(switchFBO, 5000);
+
+                    }
+        });
+    }
+
+    function switchFBO() {
+        console.log("Switch FBO!");
+
+        var index = getRandomInt(0,fboObjectsData.length -1);
+        console.log(index);
+        var data = fboObjectsData[index];
+    
+        var texture = new THREE.DataTexture( data, fboWidth, fboHeight, THREE.RGBFormat, THREE.FloatType );
+        texture.minFilter = THREE.NearestFilter;
+        texture.magFilter = THREE.NearestFilter;
+        texture.needsUpdate = true;
+
+        // zz85 - fbo init
+
+        rtTexturePos = new THREE.WebGLRenderTarget(fboWidth, fboHeight, {
+            wrapS:THREE.RepeatWrapping,
+            wrapT:THREE.RepeatWrapping,
+            minFilter: THREE.NearestFilter,
+            magFilter: THREE.NearestFilter,
+            format: THREE.RGBFormat,
+            type:THREE.HalfFloatType,
+            stencilBuffer: false
+        });
+
+        rtTexturePos2 = rtTexturePos.clone();
+
+        simulationShader = new THREE.ShaderMaterial({
+
+            uniforms: {
+                tPositions: { type: "t", value: texture },
+                origin: { type: "t", value: texture },
+                timer: { type: "f", value: 0},
+                messFactor: {type: "f", value: 0.05}
+
+            },
+
+            vertexShader: document.getElementById('texture_vertex_simulation_shader').textContent,
+            fragmentShader:  document.getElementById('texture_fragment_simulation_shader').textContent
+
+        });
+
+        fboParticles = new THREE.FBOUtils( fboWidth, renderer, simulationShader );
+        fboParticles.renderToTexture(rtTexturePos, rtTexturePos2);
+
+        fboParticles.in = rtTexturePos;
+        fboParticles.out = rtTexturePos2;
+
+    }
 
     function init() {
       renderer = new THREE.WebGLRenderer();
@@ -174,6 +284,7 @@
       scene.add(camera);
 
       controls = new THREE.OrbitControls(camera, element);
+      controls.nowRotating = nowRotating;
       controls.rotateUp(Math.PI / 4);
       controls.target.set(
         camera.position.x + 0.1,
@@ -192,6 +303,7 @@
         }
 
         controls = new THREE.DeviceOrientationControls(camera, true);
+        controls.setNowRotatingCallback(nowRotating);
         controls.connect();
         controls.update();
 
@@ -231,11 +343,12 @@
       addParticles();
 
       // Add FBO
-      addFBO();
-
+      loadFBO("models/human3.js");
+      loadFBO("models/lowpolytree.js");
 
       window.addEventListener('resize', resize, false);
       setTimeout(resize, 1);
+      //setTimeout(switchFBO, 3000);
     }
 
     function resize() {
@@ -266,6 +379,7 @@
         animateParticles();
         timer += 0.01;
         simulationShader.uniforms.timer.value = timer;
+        simulationShader.uniforms.messFactor.value = messFactor;
 
         // swap
         var tmp = fboParticles.in;
@@ -319,7 +433,6 @@
 
 
     function addFBO() {
-        var width = 128, height = 128;
 
         if ( ! renderer.context.getExtension( 'OES_texture_float' ) ) {
             alert( 'OES_texture_float is not :(' );
@@ -327,113 +440,89 @@
         // Start Creation of DataTexture
         // Could it be simplified with THREE.FBOUtils.createTextureFromData(textureWidth, textureWidth, data); ?
 
-        data = new Float32Array( width * height * 3 );
-        
-        var loader = new THREE.JSONLoader();
-        loader.load( 'models/human3.js', function ( geometry, materials) {
+        var data = fboObjectsData[1];
+
+        var texture = new THREE.DataTexture( data, fboWidth, fboHeight, THREE.RGBFormat, THREE.FloatType );
+        texture.minFilter = THREE.NearestFilter;
+        texture.magFilter = THREE.NearestFilter;
+        texture.needsUpdate = true;
+
+        // zz85 - fbo init
+
+        rtTexturePos = new THREE.WebGLRenderTarget(fboWidth, fboHeight, {
+            wrapS:THREE.RepeatWrapping,
+            wrapT:THREE.RepeatWrapping,
+            minFilter: THREE.NearestFilter,
+            magFilter: THREE.NearestFilter,
+            format: THREE.RGBFormat,
+            type:THREE.HalfFloatType,
+            stencilBuffer: false
+        });
+
+        rtTexturePos2 = rtTexturePos.clone();
+
+        simulationShader = new THREE.ShaderMaterial({
+
+            uniforms: {
+                tPositions: { type: "t", value: texture },
+                origin: { type: "t", value: texture },
+                timer: { type: "f", value: 0},
+                messFactor: {type: "f", value: 0.05}
+
+            },
+
+            vertexShader: document.getElementById('texture_vertex_simulation_shader').textContent,
+            fragmentShader:  document.getElementById('texture_fragment_simulation_shader').textContent
+
+        });
+
+        fboParticles = new THREE.FBOUtils( fboWidth, renderer, simulationShader );
+        fboParticles.renderToTexture(rtTexturePos, rtTexturePos2);
+
+        fboParticles.in = rtTexturePos;
+        fboParticles.out = rtTexturePos2;
 
 
-                    console.log("Found geometry! ", geometry);
-                    var fboGeo = geometry;
-                    
-                    //THREE.GeometryUtils.scale(fboGeo, new THREE.Vector3(0.1, 0.1, 0.1));
+        geometry = new THREE.Geometry();
 
-                    fboGeo.applyMatrix( new THREE.Matrix4().makeTranslation( 0, 0.3, 0.5) );
-                    //fboGeo.applyMatrix( new THREE.Matrix4().makeRotationZ(-20 * Math.PI / 180 ));
-                    fboGeo.applyMatrix( new THREE.Matrix4().makeRotationY(-90 * Math.PI / 180 ));
+        for ( var i = 0, l = fboWidth * fboHeight; i < l; i ++ ) {
 
-                    points = THREE.GeometryUtils.randomPointsInGeometry( fboGeo, data.length / 3 );
+            var vertex = new THREE.Vector3();
+            vertex.x = ( i % fboWidth ) / fboWidth ;
+            vertex.y = Math.floor( i / fboWidth ) / fboHeight;
+            geometry.vertices.push( vertex );
 
-                    for ( var i = 0, j = 0, l = data.length; i < l; i += 3, j += 1 ) {
+        }
 
-                        data[ i ] = points[ j ].x;
-                        data[ i + 1 ] = points[ j ].y;
-                        data[ i + 2 ] = points[ j ].z;
+        material = new THREE.ShaderMaterial( {
 
-                    }
+            uniforms: {
 
-                    console.log( data.length / 3 );
+                "map": { type: "t", value: rtTexturePos },
+                "width": { type: "f", value: fboWidth },
+                "height": { type: "f", value: fboHeight },
 
-                    texture = new THREE.DataTexture( data, width, height, THREE.RGBFormat, THREE.FloatType );
-                    texture.minFilter = THREE.NearestFilter;
-                    texture.magFilter = THREE.NearestFilter;
-                    texture.needsUpdate = true;
+                "pointSize": { type: "f", value: 4 }
 
-                    // zz85 - fbo init
+            },
+            vertexShader: document.getElementById( 'vs-particles' ).textContent,
+            fragmentShader: document.getElementById( 'fs-particles' ).textContent,
+            depthTest: false,
+            transparent: true
 
-                    rtTexturePos = new THREE.WebGLRenderTarget(width, height, {
-                        wrapS:THREE.RepeatWrapping,
-                        wrapT:THREE.RepeatWrapping,
-                        minFilter: THREE.NearestFilter,
-                        magFilter: THREE.NearestFilter,
-                        format: THREE.RGBFormat,
-                        type:THREE.HalfFloatType,
-                        stencilBuffer: false
-                    });
+        } );
 
-                    rtTexturePos2 = rtTexturePos.clone();
+        fboMesh = new THREE.PointCloud( geometry, material );
+        fboMesh.position.set(80, 0, 0);
+        fboMesh.frustumCulled = false;
 
-                    simulationShader = new THREE.ShaderMaterial({
-
-                        uniforms: {
-                            tPositions: { type: "t", value: texture },
-                            origin: { type: "t", value: texture },
-                            timer: { type: "f", value: 0}
-                        },
-
-                        vertexShader: document.getElementById('texture_vertex_simulation_shader').textContent,
-                        fragmentShader:  document.getElementById('texture_fragment_simulation_shader').textContent
-
-                    });
-
-                    fboParticles = new THREE.FBOUtils( width, renderer, simulationShader );
-                    fboParticles.renderToTexture(rtTexturePos, rtTexturePos2);
-
-                    fboParticles.in = rtTexturePos;
-                    fboParticles.out = rtTexturePos2;
-
-
-                    geometry = new THREE.Geometry();
-
-                    for ( var i = 0, l = width * height; i < l; i ++ ) {
-
-                        var vertex = new THREE.Vector3();
-                        vertex.x = ( i % width ) / width ;
-                        vertex.y = Math.floor( i / width ) / height;
-                        geometry.vertices.push( vertex );
-
-                    }
-
-                    material = new THREE.ShaderMaterial( {
-
-                        uniforms: {
-
-                            "map": { type: "t", value: rtTexturePos },
-                            "width": { type: "f", value: width },
-                            "height": { type: "f", value: height },
-
-                            "pointSize": { type: "f", value: 3 }
-
-                        },
-                        vertexShader: document.getElementById( 'vs-particles' ).textContent,
-                        fragmentShader: document.getElementById( 'fs-particles' ).textContent,
-                        depthTest: false,
-                        transparent: true
-
-                    } );
-
-                    fboMesh = new THREE.PointCloud( geometry, material );
-                    fboMesh.position.set(80, 0, 0);
-                    fboMesh.frustumCulled = false;
-
-                    scene.add( fboMesh );
-            });
+        scene.add( fboMesh );
     }
 
     function addParticles() {
       particleGeometry = new THREE.Geometry();
 
-      for ( i = 0; i < 20000; i ++ ) {
+      for ( i = 0; i < 200; i ++ ) {
 
          var vertex = new THREE.Vector3();
          vertex.x = Math.random() * 2000 - 1000;
