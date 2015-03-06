@@ -364,6 +364,10 @@ THREE.OrbitControls = function ( object, domElement ) {
 
       if ( scope.noRotate === true ) return;
 
+      if (scope.nowRotating) {
+          scope.nowRotating(event);
+      }
+      
       rotateEnd.set( event.clientX, event.clientY );
       rotateDelta.subVectors( rotateEnd, rotateStart );
 

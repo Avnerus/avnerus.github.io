@@ -19,9 +19,13 @@
 
   var deviceOrientation = {};
   var screenOrientation = window.orientation || 0;
+  var nowRotating = null;
 
   function onDeviceOrientationChangeEvent(evt) {
     deviceOrientation = evt;
+    if (nowRotating) {
+        nowRotating(evt);
+    }
   }
   window.addEventListener('deviceorientation', onDeviceOrientationChangeEvent, false);
 
@@ -84,6 +88,11 @@ THREE.DeviceOrientationControls = function(object) {
   var euler = new THREE.Euler();
   var q0 = new THREE.Quaternion(); // - PI/2 around the x-axis
   var q1 = new THREE.Quaternion(- Math.sqrt(0.5), 0, 0, Math.sqrt(0.5));
+
+
+  this.setNowRotatingCallback = function(func) {
+      nowRotating = func;
+  }
 
 
   this.update = (function(delta) {
