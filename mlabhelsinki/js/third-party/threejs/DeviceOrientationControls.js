@@ -18,14 +18,27 @@
 (function() {
 
   var deviceOrientation = {};
+  var lastOrientation = null;
   var screenOrientation = window.orientation || 0;
   var nowRotating = null;
 
   function onDeviceOrientationChangeEvent(evt) {
     deviceOrientation = evt;
-    if (nowRotating) {
-        nowRotating(evt);
-    }
+    if (lastOrientation == null || 
+        Math.abs(deviceOrientation.alpha - lastOrientation.alpha) > 5 ||
+        Math.abs(deviceOrientation.beta - lastOrientation.beta) > 5 ||
+        Math.abs(deviceOrientation.gamma - lastOrientation.gamma) > 5 
+       ) {
+        lastOrientation = {
+            alpha: deviceOrientation.alpha,
+            beta: deviceOrientation.beta,
+            gamma: deviceOrientation.gamma
+        }
+        if (nowRotating) {
+            nowRotating(evt);
+        }
+
+   }
   }
   window.addEventListener('deviceorientation', onDeviceOrientationChangeEvent, false);
 

@@ -18,11 +18,60 @@
         right: 0;
         bottom: 0;
       }
+      #loading {
+          margin: auto;
+          color: white;
+          font-size: 36px;
+          left: 50%;
+          position: fixed;
+          top: 50%;
+          margin-left: -82px;
+          margin-top: -38px;
+      }
+      .loading-icon img {
+          position: relative;
+          left: 37%;
+      }
+      .start-button {
+          -webkit-border-radius: 0;
+          -moz-border-radius: 0;
+          border-radius: 0px;
+          font-size: 32px;
+          padding: 10px 20px 10px 20px;
+          border: solid #FFFFFF 2px;
+          text-decoration: none;
+          color: #FFFFFF;
+          position: relative;
+          top: 40px;          
+          left: 10px;
+      }
+
+      .start-button:hover {
+          background: #BABABA;
+          text-decoration: none;
+      }
+      #start-container {
+          display: none;
+          text-align: center;
+      }
+      
     </style>
   </head>
   <body>
     <div id="example"></div>
-
+    <div id="loading">
+        <div id="loading-container">
+            <div class="loading-icon">
+                <img src="ajax-loader.gif"></img>
+            </div>
+            <div class="loading-text">
+                LOADING
+            </div>
+        </div>
+        <div id="start-container">
+            <a target="_self" href="#" class="start-button" >ENTER</a>
+        </div>
+    </div>
   <script src="js/third-party/threejs/three.js"></script>
   <script src="js/third-party/threejs/StereoEffect.js"></script>
   <script src="js/third-party/threejs/DeviceOrientationControls.js"></script>
@@ -30,8 +79,8 @@
   <script src="js/third-party/threejs/FBOUtils.js"></script>
   <script src="js/third-party/threejs/GeometryUtils.js"></script>
 
-  <!--Soundcloud API-->
-  <script src="https://w.soundcloud.com/player/api.js" type="text/javascript"></script>
+  <!--Soundcloud SDK-->
+  <script src="//connect.soundcloud.com/sdk.js"></script>
 
 
 
@@ -148,14 +197,9 @@
 
   <script>
     var widget;
+    var widgetReady = false;
     window.onload = function() {
-        var widgetIframe = document.getElementById('sc-widget');
-        widget = SC.Widget(widgetIframe);
-        widget.bind(SC.Widget.Events.READY, function() {
-            console.log("Playing! ", widgetIframe, widget);
-            widget.skip(4);
-            widget.play();
-        });
+        preload();
     }
 
     var camera, scene, renderer;
@@ -164,21 +208,13 @@
 
     var clock = new THREE.Clock();
     var materials = [];
-    var fboMaterials = [];
     var paremeters = [];
-    var fboMeshes = [];
 	var data, texture, points;
-    var fboParticlesArray = [];
     var rtTexturePos, rtTexturePos2
-    var simulationShaders = [];
-    var messFactor = 0.05;
-    var fboWidth = 80, fboHeight = 80;
+    var fboWidth = 64, fboHeight = 64;
+    var fbos = [];
 
     var fboObjectsData = [];
-    
-
-    init();
-    animate();
 
     function getRandomArbitrary(min, max) {
         return Math.random() * (max - min) + min;
@@ -188,16 +224,31 @@
         return Math.round(Math.random() * (max - min)) + min;
     }
 
+    function checkReady() {
+         if (fboObjectsData.length > 2 && widgetReady) {
+             console.log("Ready!");
+             document.getElementById("loading-container").style.display = "none";
+             document.getElementById("start-container").style.display = "block";
+
+             document.querySelector('.start-button').addEventListener('click', function () {
+                     start();
+           }, false);
+         }
+    }
+
     function nowRotating(evt) {
-        //console.log("Now rotating! ", evt);
+        console.log("Now rotating! ", evt);
         // Scattered or complete
-        var opt = getRandomArbitrary(0,1);
-        if (opt > 0.5) {
-            // messy
-            messFactor = getRandomArbitrary(0.01, 0.05);
-        } else {
-            // complete
-            messFactor = getRandomArbitrary(0.001, 0.005);
+        for (var i = 0; i < fbos.length; i++) {
+            var opt = getRandomArbitrary(0,1);
+            if (opt > 0.5) {
+                // messy
+                console.log("Messy");
+                fbos[i].messFactor = getRandomArbitrary(0.01, 0.05);
+            } else {
+                // complete
+                fbos[i].messFactor = getRandomArbitrary(0.001, 0.005);
+            }
         }
     }
 
@@ -217,6 +268,7 @@
                     //fboGeo.applyMatrix( new THREE.Matrix4().makeRotationZ(-20 * Math.PI / 180 ));
                     fboGeo.applyMatrix( new THREE.Matrix4().makeRotationY(-90 * Math.PI / 180 ));
 
+                    console.log(data.length);
                     points = THREE.GeometryUtils.randomPointsInGeometry( fboGeo, data.length / 3 );
 
                     for ( var i = 0, j = 0, l = data.length; i < l; i += 3, j += 1 ) {
@@ -227,24 +279,14 @@
                     }
 
                     fboObjectsData.push(data);                   
-                    if (fboObjectsData.length > 1) {
-                        console.log("Done ", path);
-                        addFBO(new THREE.Vector3(-400,0,0),0);
-                        addFBO(new THREE.Vector3(0,0,0),1);
-                        
-                        var switchIndex = getRandomInt(0,fboMaterials.length -1);
-                        setInterval(function() {
-                                switchFBO(switchIndex)
-                        }, 5000);
 
-                    }
         });
     }
 
     function switchFBO(fboIndex) {
-        console.log("Switch FBO!");
 
         var index = getRandomInt(0,fboObjectsData.length -1);
+        console.log("Switch FBO!" ,fboIndex);
         console.log(index);
         var data = fboObjectsData[index];
     
@@ -266,8 +308,9 @@
         });
 
         rtTexturePos2 = rtTexturePos.clone();
+        var FBO = fbos[fboIndex];
 
-        simulationShaders[fboIndex] = new THREE.ShaderMaterial({
+        FBO.simulationShader = new THREE.ShaderMaterial({
 
             uniforms: {
                 tPositions: { type: "t", value: texture },
@@ -282,12 +325,38 @@
 
         });
 
-        fboParticlesArray[fboIndex] = new THREE.FBOUtils( fboWidth, renderer, simulationShaders[fboIndex] );
-        fboParticlesArray[fboIndex].renderToTexture(rtTexturePos, rtTexturePos2);
+        FBO.fboParticles = new THREE.FBOUtils( fboWidth, renderer, FBO.simulationShader );
+        FBO.fboParticles.renderToTexture(rtTexturePos, rtTexturePos2);
 
-        fboParticlesArray[fboIndex].in = rtTexturePos;
-        fboParticlesArray[fboIndex].out = rtTexturePos2;
+        FBO.fboParticles.in = rtTexturePos;
+        FBO.fboParticles.out = rtTexturePos2;
 
+    }
+
+    function preload() {
+        SC.initialize({
+            client_id: "3b91ad88b17c054c9b04e95325489d66"
+        });
+        SC.stream("/tracks/182413775", function(sound) {
+                console.log("Got sound!", sound);
+                widget = sound;
+                widgetReady = true;
+                checkReady();
+        })
+
+        // LoadFBO FBO
+        loadFBO("models/human3.js", new THREE.Vector3(0, 0.3, 0.5));
+        loadFBO("models/tree.js", new THREE.Vector3(0, -0.5, 0.5));
+        loadFBO("models/snow.js", new THREE.Vector3(0, -0.5, 0.5));
+        
+        
+    }
+    function start(e) {
+        console.log("Start!");
+        widget.play();
+        document.getElementById("loading").style.display = "none";
+        init();
+        animate();
     }
 
     function init() {
@@ -364,10 +433,16 @@
 
       // Add Particles
       addParticles();
+      addFBO(new THREE.Vector3(-600,0,0));
+      addFBO(new THREE.Vector3(0,0,400));
+      addFBO(new THREE.Vector3(0,0,-400));
+      addFBO(new THREE.Vector3(0,0,0));
 
-      // Add FBO
-      loadFBO("models/human3.js", new THREE.Vector3(0, 0.3, 0.5));
-      loadFBO("models/tree.js", new THREE.Vector3(0, -0.5, 0.5));
+      setInterval(function() {
+              var switchIndex = getRandomInt(0,fbos.length -1);
+              switchFBO(switchIndex)
+      }, 5000);
+
 
       window.addEventListener('resize', resize, false);
       setTimeout(resize, 1);
@@ -396,25 +471,26 @@
      var timer = 0;
 
      function render(dt) {
-        if (!simulationShaders[0]) {
+        if (fbos.length < 1 || !fbos[0].simulationShader) {
              return;
         }
         animateParticles();
         timer += 0.01;
 
         // swap
-        for (var i = 0; i < fboParticlesArray.length; i++) {
-            var fboParticles = fboParticlesArray[i];
-            simulationShaders[i].uniforms.timer.value = timer;
-            simulationShaders[i].uniforms.messFactor.value = messFactor;
-            
-            var tmp = fboParticles.in;
-            fboParticles.in = fboParticles.out;
-            fboParticles.out = tmp;
+        for (var i = 0; i < fbos.length; i++) {
 
-            simulationShaders[i].uniforms.tPositions.value = fboParticles.in;
-            fboParticles.simulate(fboParticles.out);
-            fboMaterials[i].uniforms.map.value = fboParticles.out;
+            var FBO = fbos[i];
+            FBO.simulationShader.uniforms.timer.value = timer;
+            FBO.simulationShader.uniforms.messFactor.value = FBO.messFactor;
+            
+            var tmp = FBO.fboParticles.in;
+            FBO.fboParticles.in = FBO.fboParticles.out;
+            FBO.fboParticles.out = tmp;
+
+            FBO.simulationShader.uniforms.tPositions.value = FBO.fboParticles.in;
+            FBO.fboParticles.simulate(FBO.fboParticles.out);
+            FBO.material.uniforms.map.value = FBO.fboParticles.out;
         }
         
         effect.render(scene, camera);
@@ -459,13 +535,15 @@
     }
 
 
-    function addFBO(location, fboIndex) {
+    function addFBO(location) {
 
         if ( ! renderer.context.getExtension( 'OES_texture_float' ) ) {
             alert( 'OES_texture_float is not :(' );
         }
         // Start Creation of DataTexture
         // Could it be simplified with THREE.FBOUtils.createTextureFromData(textureWidth, textureWidth, data); ?
+
+        var FBO = {};
 
         var data = fboObjectsData[0];
 
@@ -488,7 +566,7 @@
 
         rtTexturePos2 = rtTexturePos.clone();
 
-        simulationShaders[fboIndex] = new THREE.ShaderMaterial({
+        FBO.simulationShader = new THREE.ShaderMaterial({
 
             uniforms: {
                 tPositions: { type: "t", value: texture },
@@ -503,11 +581,13 @@
 
         });
 
-        fboParticlesArray[fboIndex] = new THREE.FBOUtils( fboWidth, renderer, simulationShaders[fboIndex] );
-        fboParticlesArray[fboIndex].renderToTexture(rtTexturePos, rtTexturePos2);
+        FBO.fboParticles = new THREE.FBOUtils( fboWidth, renderer, FBO.simulationShader);
+        FBO.fboParticles.renderToTexture(rtTexturePos, rtTexturePos2);
 
-        fboParticlesArray[fboIndex].in = rtTexturePos;
-        fboParticlesArray[fboIndex].out = rtTexturePos2;
+        FBO.fboParticles.in = rtTexturePos;
+        FBO.fboParticles.out = rtTexturePos2;
+
+        FBO.messFactor = 0.005;
 
 
         geometry = new THREE.Geometry();
@@ -521,7 +601,7 @@
 
         }
 
-        fboMaterials[fboIndex] = new THREE.ShaderMaterial( {
+        FBO.material = new THREE.ShaderMaterial( {
 
             uniforms: {
 
@@ -529,7 +609,7 @@
                 "width": { type: "f", value: fboWidth },
                 "height": { type: "f", value: fboHeight },
 
-                "pointSize": { type: "f", value: 4 }
+                "pointSize": { type: "f", value: 3.5 }
 
             },
             vertexShader: document.getElementById( 'vs-particles' ).textContent,
@@ -539,13 +619,13 @@
 
         } );
 
-        var fboMesh = new THREE.PointCloud( geometry, fboMaterials[fboIndex] );
-        fboMesh.position.set(location.x, location.y, location.z);
-        fboMesh.frustumCulled = false;
+        FBO.mesh = new THREE.PointCloud( geometry, FBO.material );
+        FBO.mesh.position.set(location.x, location.y, location.z);
+        FBO.mesh.frustumCulled = false;
 
-        fboMeshes.push(fboMesh);
+        fbos.push(FBO);
 
-        scene.add( fboMesh );
+        scene.add( FBO.mesh );
     }
 
     function addParticles() {
@@ -588,7 +668,6 @@
       }
 }
   </script>
-  <iframe id="sc-widget" src="https://w.soundcloud.com/player/?url=https://soundcloud.com/staalplaat/sets/gunter-schickert-pharoah-chromium-oxtlr-3xlp-gatefold-grautag" width="100%" height="0" scrolling="no" frameborder="no"></iframe>
   
   </body>
 </html>
