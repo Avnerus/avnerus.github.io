@@ -237,13 +237,11 @@
     }
 
     function nowRotating(evt) {
-        console.log("Now rotating! ", evt);
         // Scattered or complete
         for (var i = 0; i < fbos.length; i++) {
             var opt = getRandomArbitrary(0,1);
             if (opt > 0.5) {
                 // messy
-                console.log("Messy");
                 fbos[i].messFactor = getRandomArbitrary(0.01, 0.05);
             } else {
                 // complete
@@ -279,6 +277,8 @@
                     }
 
                     fboObjectsData.push(data);                   
+
+                    checkReady();
 
         });
     }
@@ -347,7 +347,7 @@
         // LoadFBO FBO
         loadFBO("models/human3.js", new THREE.Vector3(0, 0.3, 0.5));
         loadFBO("models/tree.js", new THREE.Vector3(0, -0.5, 0.5));
-        loadFBO("models/snow.js", new THREE.Vector3(0, -0.5, 0.5));
+        loadFBO("models/cross.js", new THREE.Vector3(0, -0.5, 0.5));
         
         
     }
@@ -405,43 +405,17 @@
       window.addEventListener('deviceorientation', setOrientationControls, true);
 
 
-/*      var light = new THREE.HemisphereLight(0x777777, 0x000000, 0.6);
-      scene.add(light);
-
-      var texture = THREE.ImageUtils.loadTexture(
-        'textures/patterns/checker.png'
-      );
-      texture.wrapS = THREE.RepeatWrapping;
-      texture.wrapT = THREE.RepeatWrapping;
-      texture.repeat = new THREE.Vector2(50, 50);
-      texture.anisotropy = renderer.getMaxAnisotropy();
-
-      var material = new THREE.MeshPhongMaterial({
-        color: 0xffffff,
-        specular: 0xffffff,
-        shininess: 20,
-        shading: THREE.FlatShading,
-        map: texture
-      });
-
-      var geometry = new THREE.PlaneGeometry(1000, 1000);
-
-      var mesh = new THREE.Mesh(geometry, material);
-      mesh.rotation.x = -Math.PI / 2;
-      scene.add(mesh);*/
-
-
       // Add Particles
       addParticles();
-      addFBO(new THREE.Vector3(-600,0,0));
-      addFBO(new THREE.Vector3(0,0,400));
-      addFBO(new THREE.Vector3(0,0,-400));
       addFBO(new THREE.Vector3(0,0,0));
+      addFBO(new THREE.Vector3(200,0,0));
+      addFBO(new THREE.Vector3(-400,0,0));
+      //addFBO(new THREE.Vector3(-200,-200,-600));
 
       setInterval(function() {
               var switchIndex = getRandomInt(0,fbos.length -1);
               switchFBO(switchIndex)
-      }, 5000);
+      }, 4000);
 
 
       window.addEventListener('resize', resize, false);
@@ -498,12 +472,6 @@
 
     function animateParticles() {
         var time = Date.now() * 0.0001;
-      /*  for ( i = 0; i < materials.length; i ++ ) {
-            color = parameters[i][0];
-            h = ( 360 * ( color[0] + time ) % 360 ) / 360;
-            materials[i].color.setHSL( h, color[1], color[2] );
-
-         }*/
         for ( i = 0; i < scene.children.length; i ++ ) {
             var object = scene.children[ i ];
             if ( object instanceof THREE.PointCloud ) {
