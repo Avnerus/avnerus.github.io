@@ -238,8 +238,6 @@ BrainController.prototype.initWorks = function() {
     this.info = require('./works/info')();
     this.info.init(this.opts, this.bgContainer);
 
-
-
     this.works = [
         new (require('./works/pulse'))(),
         new (require('./works/gamad'))(),
@@ -254,7 +252,8 @@ BrainController.prototype.initWorks = function() {
         new (require('./works/bass'))(),
         new (require('./works/biology'))(),
         new (require('./works/drone'))(),
-        new (require('./works/playbot'))()
+        new (require('./works/playbot'))(),
+        new (require('./works/tpv'))()
     ]
 
 
@@ -405,7 +404,7 @@ BrainController.prototype.spawnWork = function () {
     
 }
 
-},{"./event_manager":2,"./works/bass":5,"./works/biology":6,"./works/brain":7,"./works/cantenna":8,"./works/drone":9,"./works/equala":10,"./works/gamad":11,"./works/info":12,"./works/japan":13,"./works/koala":14,"./works/peace":15,"./works/playbot":16,"./works/pulse":17,"./works/security":18,"./works/train":19,"tween.js":20,"vue":41}],2:[function(require,module,exports){
+},{"./event_manager":2,"./works/bass":5,"./works/biology":6,"./works/brain":7,"./works/cantenna":8,"./works/drone":9,"./works/equala":10,"./works/gamad":11,"./works/info":12,"./works/japan":13,"./works/koala":14,"./works/peace":15,"./works/playbot":16,"./works/pulse":17,"./works/security":18,"./works/tpv":19,"./works/train":20,"tween.js":21,"vue":42}],2:[function(require,module,exports){
 "use strict"
 
 var events = require('events');
@@ -417,7 +416,7 @@ module.exports.getEmitter = function() {
 }
 
 
-},{"events":48}],3:[function(require,module,exports){
+},{"events":49}],3:[function(require,module,exports){
 // Support check
 var mobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 var msie = (window.navigator.userAgent.indexOf("MSIE ") != -1);
@@ -518,7 +517,8 @@ else {
         "assets/works/biology.png",
         "assets/works/bacteria.png",
         "assets/works/drone.png",
-        "assets/works/playbot.png"
+        "assets/works/playbot.png",
+        "assets/works/black_hole.png"
     ]);
 
     loader.onComplete = function() {
@@ -609,7 +609,7 @@ function parentScrollFix() {
 
 
 
-},{"./brain_controller":1,"./event_manager":2,"./video_controller":4,"tween.js":20}],4:[function(require,module,exports){
+},{"./brain_controller":1,"./event_manager":2,"./video_controller":4,"tween.js":21}],4:[function(require,module,exports){
 "use strict"
 
 module.exports = function(opts) {
@@ -1519,10 +1519,10 @@ Gamad.prototype.update = function() {
 
 Gamad.prototype.getData = function() {
     return {
-        name: "Gamad Anak",
+        name: "Secret Santa",
         description:[ 
             {
-                text: 'Hebrew for "Gnome-Giant": a gift-giving game traditionaly held in Israel during Purim holiday. In my gift I came up with a new way to share music - using a "Mixtape Game". Press Space-Bar along with the beat, to match the Hamman ears in their place - and crazy things start happening.',
+                text: 'A gift-giving game traditionaly held in Israel during Purim holiday. In my gift I came up with a new way to share music - using a "Mixtape Game". Press Space-Bar along with the beat, to match the Hamman ears in their place - and crazy things start happening.',
                 image: "images/works/gamadanak1.png",
 
             },
@@ -2223,6 +2223,83 @@ Security.prototype.getData = function() {
 "use strict"
 
 module.exports = function() {
+    return new TPV()
+}
+
+module.exports.TPV = TPV;
+
+function TPV() {
+    if (!(this instanceof TPV)) return new TPV()
+
+    this.loaded = false;
+    console.log("TPV work constructed");
+}
+
+TPV.prototype.init = function (opts, stage, clickHandler) {
+
+    console.log("TPV work initializing with opts", opts);
+    this.stage = stage;
+    this.opts = opts;
+    this.eventEmitter = require('../event_manager').getEmitter();
+
+    this.loadSprite();
+}
+
+
+TPV.prototype.loadSprite = function() {
+    var self = this;
+
+
+    var blackHole = new PIXI.Sprite.fromFrame("assets/works/black_hole.png");
+    blackHole.anchor.x = 0.5;
+    blackHole.anchor.y = 0.5;
+    blackHole.position.x = 1085;
+    blackHole.position.y = 490;
+    blackHole.scale = {x: 0.7, y: 0.7};
+
+    blackHole.buttonMode = true;
+    blackHole.setInteractive(true);
+
+    blackHole.click = function(mouseData){
+      console.log("TPV CLICK");
+      self.eventEmitter.emit('work_clicked', self);
+    }
+
+    this.stage.addChild(blackHole);
+}
+TPV.prototype.update = function() {
+    
+}
+
+TPV.prototype.getData = function() {
+    return {
+        name: "Total Perspective Vortex",
+        description: [
+            {
+                text: 'Admission project for Media Lab Helsinki - In my take on the Hitchiker\'s guide to the Galaxy Total Perspective Vortex, I try to visualize the Quantum Mechanical interpretation of the creation of the universe, as also suggested by Stephen Hawking. This interpretation sought to deal with the theological argument that claims there must be some kind of organizing force behind the starting conditions of the big bang, otherwise how did the universe evolve so perfectly? The proposed answer to that question is that there is in fact an infinite number of configurations for the physical structure of the universe, or an infinite number of universes - We just happen to be living and perceiving in one configuration that "worked".',
+                image: "images/works/tpv.png",
+                imageBig: "images/works/tpv_big.png"
+
+            },
+        ],
+        links: [
+            {
+                url: "http://avnerus.github.io/tpv",
+                description: "Enter the vortex (For Google Cardboard)"
+            },
+            {
+                url: "https://github.com/Avnerus/mlabhelsinki",
+                description: "View the source code"
+            }
+        ]
+    }
+}
+
+
+},{"../event_manager":2}],20:[function(require,module,exports){
+"use strict"
+
+module.exports = function() {
     return new Train()
 }
 
@@ -2348,7 +2425,7 @@ Train.prototype.getData = function() {
 }
 
 
-},{"../event_manager":2}],20:[function(require,module,exports){
+},{"../event_manager":2}],21:[function(require,module,exports){
 /**
  * Tween.js - Licensed under the MIT license
  * https://github.com/sole/tween.js
@@ -3106,7 +3183,7 @@ TWEEN.Interpolation = {
 };
 
 module.exports=TWEEN;
-},{}],21:[function(require,module,exports){
+},{}],22:[function(require,module,exports){
 var utils = require('./utils')
 
 function Batcher () {
@@ -3152,7 +3229,7 @@ BatcherProto.reset = function () {
 }
 
 module.exports = Batcher
-},{"./utils":46}],22:[function(require,module,exports){
+},{"./utils":47}],23:[function(require,module,exports){
 var Batcher        = require('./batcher'),
     bindingBatcher = new Batcher(),
     bindingId      = 1
@@ -3256,7 +3333,7 @@ BindingProto.unbind = function () {
 }
 
 module.exports = Binding
-},{"./batcher":21}],23:[function(require,module,exports){
+},{"./batcher":22}],24:[function(require,module,exports){
 var Emitter     = require('./emitter'),
     Observer    = require('./observer'),
     config      = require('./config'),
@@ -4294,7 +4371,7 @@ function getRoot (compiler) {
 }
 
 module.exports = Compiler
-},{"./binding":22,"./config":24,"./deps-parser":25,"./directive":26,"./emitter":37,"./exp-parser":38,"./observer":42,"./text-parser":44,"./utils":46,"./viewmodel":47}],24:[function(require,module,exports){
+},{"./binding":23,"./config":25,"./deps-parser":26,"./directive":27,"./emitter":38,"./exp-parser":39,"./observer":43,"./text-parser":45,"./utils":47,"./viewmodel":48}],25:[function(require,module,exports){
 var TextParser = require('./text-parser')
 
 module.exports = {
@@ -4314,7 +4391,7 @@ Object.defineProperty(module.exports, 'delimiters', {
         TextParser.setDelimiters(delimiters)
     }
 })
-},{"./text-parser":44}],25:[function(require,module,exports){
+},{"./text-parser":45}],26:[function(require,module,exports){
 var Emitter  = require('./emitter'),
     utils    = require('./utils'),
     Observer = require('./observer'),
@@ -4380,7 +4457,7 @@ module.exports = {
     }
     
 }
-},{"./emitter":37,"./observer":42,"./utils":46}],26:[function(require,module,exports){
+},{"./emitter":38,"./observer":43,"./utils":47}],27:[function(require,module,exports){
 var dirId           = 1,
     ARG_RE          = /^[\w\$-]+$/,
     FILTER_TOKEN_RE = /[^\s'"]+|'[^']+'|"[^"]+"/g,
@@ -4639,7 +4716,7 @@ function escapeQuote (v) {
 }
 
 module.exports = Directive
-},{"./text-parser":44}],27:[function(require,module,exports){
+},{"./text-parser":45}],28:[function(require,module,exports){
 var utils = require('../utils'),
     slice = [].slice
 
@@ -4681,7 +4758,7 @@ module.exports = {
         parent.insertBefore(frag, this.el)
     }
 }
-},{"../utils":46}],28:[function(require,module,exports){
+},{"../utils":47}],29:[function(require,module,exports){
 var utils    = require('../utils')
 
 /**
@@ -4738,7 +4815,7 @@ module.exports = {
         }
     }
 }
-},{"../utils":46}],29:[function(require,module,exports){
+},{"../utils":47}],30:[function(require,module,exports){
 var utils      = require('../utils'),
     config     = require('../config'),
     transition = require('../transition'),
@@ -4868,7 +4945,7 @@ directives.html    = require('./html')
 directives.style   = require('./style')
 directives.partial = require('./partial')
 directives.view    = require('./view')
-},{"../config":24,"../transition":45,"../utils":46,"./html":27,"./if":28,"./model":30,"./on":31,"./partial":32,"./repeat":33,"./style":34,"./view":35,"./with":36}],30:[function(require,module,exports){
+},{"../config":25,"../transition":46,"../utils":47,"./html":28,"./if":29,"./model":31,"./on":32,"./partial":33,"./repeat":34,"./style":35,"./view":36,"./with":37}],31:[function(require,module,exports){
 var utils = require('../utils'),
     isIE9 = navigator.userAgent.indexOf('MSIE 9.0') > 0,
     filter = [].filter
@@ -5043,7 +5120,7 @@ module.exports = {
         }
     }
 }
-},{"../utils":46}],31:[function(require,module,exports){
+},{"../utils":47}],32:[function(require,module,exports){
 var utils    = require('../utils')
 
 /**
@@ -5102,7 +5179,7 @@ module.exports = {
         this.el.removeEventListener('load', this.iframeBind)
     }
 }
-},{"../utils":46}],32:[function(require,module,exports){
+},{"../utils":47}],33:[function(require,module,exports){
 var utils = require('../utils')
 
 /**
@@ -5153,7 +5230,7 @@ module.exports = {
     }
 
 }
-},{"../utils":46}],33:[function(require,module,exports){
+},{"../utils":47}],34:[function(require,module,exports){
 var utils      = require('../utils'),
     config     = require('../config')
 
@@ -5400,7 +5477,7 @@ function indexOf (vms, obj) {
     }
     return -1
 }
-},{"../config":24,"../utils":46}],34:[function(require,module,exports){
+},{"../config":25,"../utils":47}],35:[function(require,module,exports){
 var prefixes = ['-webkit-', '-moz-', '-ms-']
 
 /**
@@ -5447,7 +5524,7 @@ module.exports = {
     }
 
 }
-},{}],35:[function(require,module,exports){
+},{}],36:[function(require,module,exports){
 /**
  *  Manages a conditional child VM using the
  *  binding's value as the component ID.
@@ -5504,7 +5581,7 @@ module.exports = {
     }
 
 }
-},{}],36:[function(require,module,exports){
+},{}],37:[function(require,module,exports){
 var utils = require('../utils')
 
 /**
@@ -5555,7 +5632,7 @@ module.exports = {
     }
 
 }
-},{"../utils":46}],37:[function(require,module,exports){
+},{"../utils":47}],38:[function(require,module,exports){
 var slice = [].slice
 
 function Emitter (ctx) {
@@ -5653,7 +5730,7 @@ EmitterProto.applyEmit = function (event) {
 }
 
 module.exports = Emitter
-},{}],38:[function(require,module,exports){
+},{}],39:[function(require,module,exports){
 var utils           = require('./utils'),
     STR_SAVE_RE     = /"(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'/g,
     STR_RESTORE_RE  = /"(\d+)"/g,
@@ -5844,7 +5921,7 @@ exports.eval = function (exp, compiler, data) {
     }
     return res
 }
-},{"./utils":46}],39:[function(require,module,exports){
+},{"./utils":47}],40:[function(require,module,exports){
 var utils    = require('./utils'),
     get      = utils.get,
     slice    = [].slice,
@@ -6036,7 +6113,7 @@ function stripQuotes (str) {
         return str.slice(1, -1)
     }
 }
-},{"./utils":46}],40:[function(require,module,exports){
+},{"./utils":47}],41:[function(require,module,exports){
 // string -> DOM conversion
 // wrappers originally from jQuery, scooped from component/domify
 var map = {
@@ -6104,7 +6181,7 @@ module.exports = function (templateString) {
     }
     return frag
 }
-},{}],41:[function(require,module,exports){
+},{}],42:[function(require,module,exports){
 var config      = require('./config'),
     ViewModel   = require('./viewmodel'),
     utils       = require('./utils'),
@@ -6293,7 +6370,7 @@ function inheritOptions (child, parent, topLevel) {
 }
 
 module.exports = ViewModel
-},{"./config":24,"./directives":29,"./filters":39,"./observer":42,"./transition":45,"./utils":46,"./viewmodel":47}],42:[function(require,module,exports){
+},{"./config":25,"./directives":30,"./filters":40,"./observer":43,"./transition":46,"./utils":47,"./viewmodel":48}],43:[function(require,module,exports){
 /* jshint proto:true */
 
 var Emitter  = require('./emitter'),
@@ -6740,7 +6817,7 @@ var pub = module.exports = {
     convert     : convert,
     convertKey  : convertKey
 }
-},{"./emitter":37,"./utils":46}],43:[function(require,module,exports){
+},{"./emitter":38,"./utils":47}],44:[function(require,module,exports){
 var toFragment = require('./fragment');
 
 /**
@@ -6788,7 +6865,7 @@ module.exports = function(template) {
     return toFragment(templateNode.outerHTML);
 }
 
-},{"./fragment":40}],44:[function(require,module,exports){
+},{"./fragment":41}],45:[function(require,module,exports){
 var openChar        = '{',
     endChar         = '}',
     ESCAPE_RE       = /[-.*+?^${}()|[\]\/\\]/g,
@@ -6885,7 +6962,7 @@ exports.parse         = parse
 exports.parseAttr     = parseAttr
 exports.setDelimiters = setDelimiters
 exports.delimiters    = [openChar, endChar]
-},{"./directive":26}],45:[function(require,module,exports){
+},{"./directive":27}],46:[function(require,module,exports){
 var endEvents  = sniffEndEvents(),
     config     = require('./config'),
     // batch enter animations so we only force the layout once
@@ -7114,7 +7191,7 @@ function sniffEndEvents () {
 // Expose some stuff for testing purposes
 transition.codes = codes
 transition.sniff = sniffEndEvents
-},{"./batcher":21,"./config":24}],46:[function(require,module,exports){
+},{"./batcher":22,"./config":25}],47:[function(require,module,exports){
 var config       = require('./config'),
     toString     = ({}).toString,
     win          = window,
@@ -7441,7 +7518,7 @@ function enableDebug () {
         }
     }
 }
-},{"./config":24,"./fragment":40,"./template-parser.js":43,"./viewmodel":47}],47:[function(require,module,exports){
+},{"./config":25,"./fragment":41,"./template-parser.js":44,"./viewmodel":48}],48:[function(require,module,exports){
 var Compiler   = require('./compiler'),
     utils      = require('./utils'),
     transition = require('./transition'),
@@ -7633,7 +7710,7 @@ function query (el) {
 
 module.exports = ViewModel
 
-},{"./batcher":21,"./compiler":23,"./transition":45,"./utils":46}],48:[function(require,module,exports){
+},{"./batcher":22,"./compiler":24,"./transition":46,"./utils":47}],49:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
