@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>TOTAL PERSPECTIVE VORTEX</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <style>
+      body {
+        margin: 0px;
+        background-color: #000000;
+        overflow: hidden;
+      }
+      #example {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+      }
+      #loading {
+          margin: auto;
+          color: white;
+          font-size: 36px;
+          left: 50%;
+          position: fixed;
+          top: 50%;
+          margin-left: -82px;
+          margin-top: -38px;
+      }
+      .loading-icon img {
+          position: relative;
+          left: 37%;
+      }
+      .start-button {
+          -webkit-border-radius: 0;
+          -moz-border-radius: 0;
+          border-radius: 0px;
+          font-size: 32px;
+          padding: 10px 20px 10px 20px;
+          border: solid #FFFFFF 2px;
+          text-decoration: none;
+          color: #FFFFFF;
+          position: relative;
+          top: 40px;          
+          left: 10px;
+      }
+
+      .start-button:hover {
+          background: #BABABA;
+          text-decoration: none;
+      }
+      #start-container {
+          display: none;
+          text-align: center;
+      }
+      
+    </style>
+  </head>
+  <body>
+    <div id="example"></div>
+    <div id="loading">
+        <div id="loading-container">
+            <div class="loading-icon">
+                <img src="ajax-loader.gif"></img>
+            </div>
+            <div class="loading-text">
+                LOADING
+            </div>
+        </div>
+        <div id="start-container">
+            <a target="_self" href="#" class="start-button" >ENTER</a>
+        </div>
+    </div>
+  <script src="js/third-party/threejs/three.js"></script>
+  <script src="js/third-party/threejs/StereoEffect.js"></script>
+  <script src="js/third-party/threejs/DeviceOrientationControls.js"></script>
+  <script src="js/third-party/threejs/OrbitControls.js"></script>
+  <script src="js/third-party/threejs/FBOUtils.js"></script>
+  <script src="js/third-party/threejs/GeometryUtils.js"></script>
+
+  <!--Soundcloud SDK-->
+  <script src="//connect.soundcloud.com/sdk.js"></script>
+
+
+
+  <script id="texture_vertex_simulation_shader" type="x-shader/x-vertex">
+            
+        varying vec2 vUv;
+
+        void main() {
+
+            vUv = vec2(uv.x, 1.0 - uv.y);
+            gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
+
+        }
+
+  </script>
+  <script id="texture_fragment_simulation_shader" type="x-shader/x-fragment">
+            
+        // simulation
+        varying vec2 vUv;
+        
+        uniform sampler2D tPositions;
+        uniform sampler2D origin;
+        
+        uniform float timer;
+        uniform float messFactor;
+
+
+        float rand(vec2 co){
+            return fract(sin(dot(co.xy ,vec2(12.9898,78.233))) * 43758.5453);
+        }
+    
+        void main() {
+
+
+            vec3 pos = texture2D( tPositions, vUv ).xyz;
+
+
+            if ( rand(vUv + timer ) > 0.97 ) {
+
+                pos = texture2D( origin, vUv ).xyz;
+
+
+            } else {
+
+                float x = pos.x + timer;
+                float y = pos.y;
+                float z = pos.z;
+
+                pos.x += sin( y * 7.0 ) * cos( z * 12.0 ) * messFactor;
+                pos.y += sin( x * 8.0 ) * cos( z * 13.0 ) * messFactor;
+                pos.z += sin( x * 9.0 ) * cos( y * 14.0 ) * messFactor;
+
+            }
+
+
+            // Write new position out
+            gl_FragColor = vec4(pos, 1.0);
+
+
+        }
+
+
+    </script>
+
+    <!-- zz85 - end simulations -->
+
+    <script id="vs-particles" type="x-shader/x-vertex">
+
+        uniform sampler2D map;
+
+        uniform float width;
+        uniform float height;
+
+        uniform float pointSize;
+
+        varying vec2 vUv;
+        varying vec4 vPosition;
+
+        void main() {
+
+            vUv = position.xy + vec2( 0.5 / width, 0.5 / height );
+
+            vec3 color = texture2D( map, vUv ).rgb * 200.0 - 100.0;
+
+            gl_PointSize = pointSize;
+            gl_Position = projectionMatrix * modelViewMatrix * vec4( color, 1.0 );
+            // gl_Position = projectionMatrix * modelViewMatrix * vec4( position * 200.0, 1.0 );
+
+        }
+
+    </script>
+
+    <script id="fs-particles" type="x-shader/x-fragment">
+
+        uniform sampler2D map;
+
+        varying vec2 vUv;
+        varying vec4 vPosition;
+
+        float rand(vec2 co){
+            return fract(sin(dot(co.xy ,vec2(12.9898,78.233))) * 43758.5453);
+        }
+
+        void main() {
+
+            float depth = smoothstep( 750.0, -10.0, gl_FragCoord.z / gl_FragCoord.w );
+            //gl_FragColor = vec4( texture2D( map, vUv ).xyz * 20.0 , depth );
+            gl_FragColor = vec4( 1.0,0,0, depth );
+
+        }
+
+    </script>
+  
+
+  <script>
+    var widget;
+    var widgetReady = false;
+    window.onload = function() {
+        preload();
+    }
+
+    var camera, scene, renderer;
+    var effect, controls;
+    var element, container;
+
+    var clock = new THREE.Clock();
+    var materials = [];
+    var paremeters = [];
+	var data, texture, points;
+    var rtTexturePos, rtTexturePos2
+    var fboWidth = 64, fboHeight = 64;
+    var fbos = [];
+
+    var fboObjectsData = [];
+
+    function getRandomArbitrary(min, max) {
+        return Math.random() * (max - min) + min;
+    }
+
+    function getRandomInt(min, max) {
+        return Math.round(Math.random() * (max - min)) + min;
+    }
+
+    function checkReady() {
+         if (fboObjectsData.length > 2 && widgetReady) {
+             console.log("Ready!");
+             document.getElementById("loading-container").style.display = "none";
+             document.getElementById("start-container").style.display = "block";
+
+             document.querySelector('.start-button').addEventListener('click', function () {
+                     start();
+           }, false);
+         }
+    }
+
+    function nowRotating(evt) {
+        // Scattered or complete
+        for (var i = 0; i < fbos.length; i++) {
+            var opt = getRandomArbitrary(0,1);
+            if (opt > 0.5) {
+                // messy
+                fbos[i].messFactor = getRandomArbitrary(0.01, 0.05);
+            } else {
+                // complete
+                fbos[i].messFactor = getRandomArbitrary(0.001, 0.005);
+            }
+        }
+    }
+
+    function loadFBO(path, translation) {
+        console.log("Load FBO! ", path);
+        var loader = new THREE.JSONLoader();
+        loader.load( path, function ( geometry, materials) {
+
+                    data = new Float32Array( fboWidth * fboHeight * 3 );
+
+                    console.log("Found geometry! ", geometry);
+                    var fboGeo = geometry;
+                    
+                    //THREE.GeometryUtils.scale(fboGeo, new THREE.Vector3(0.1, 0.1, 0.1));
+
+                    fboGeo.applyMatrix( new THREE.Matrix4().makeTranslation(translation.x, translation.y, translation.z) );
+                    //fboGeo.applyMatrix( new THREE.Matrix4().makeRotationZ(-20 * Math.PI / 180 ));
+                    fboGeo.applyMatrix( new THREE.Matrix4().makeRotationY(-90 * Math.PI / 180 ));
+
+                    console.log(data.length);
+                    points = THREE.GeometryUtils.randomPointsInGeometry( fboGeo, data.length / 3 );
+
+                    for ( var i = 0, j = 0, l = data.length; i < l; i += 3, j += 1 ) {
+
+                        data[ i ] = points[ j ].x;
+                        data[ i + 1 ] = points[ j ].y;
+                        data[ i + 2 ] = points[ j ].z;
+                    }
+
+                    fboObjectsData.push(data);                   
+
+                    checkReady();
+
+        });
+    }
+
+    function switchFBO(fboIndex) {
+
+        var index = getRandomInt(0,fboObjectsData.length -1);
+        console.log("Switch FBO!" ,fboIndex);
+        console.log(index);
+        var data = fboObjectsData[index];
+    
+        var texture = new THREE.DataTexture( data, fboWidth, fboHeight, THREE.RGBFormat, THREE.FloatType );
+        texture.minFilter = THREE.NearestFilter;
+        texture.magFilter = THREE.NearestFilter;
+        texture.needsUpdate = true;
+
+        // zz85 - fbo init
+
+        rtTexturePos = new THREE.WebGLRenderTarget(fboWidth, fboHeight, {
+            wrapS:THREE.RepeatWrapping,
+            wrapT:THREE.RepeatWrapping,
+            minFilter: THREE.NearestFilter,
+            magFilter: THREE.NearestFilter,
+            format: THREE.RGBFormat,
+            type:THREE.HalfFloatType,
+            stencilBuffer: false
+        });
+
+        rtTexturePos2 = rtTexturePos.clone();
+        var FBO = fbos[fboIndex];
+
+        FBO.simulationShader = new THREE.ShaderMaterial({
+
+            uniforms: {
+                tPositions: { type: "t", value: texture },
+                origin: { type: "t", value: texture },
+                timer: { type: "f", value: 0},
+                messFactor: {type: "f", value: 0.05}
+
+            },
+
+            vertexShader: document.getElementById('texture_vertex_simulation_shader').textContent,
+            fragmentShader:  document.getElementById('texture_fragment_simulation_shader').textContent
+
+        });
+
+        FBO.fboParticles = new THREE.FBOUtils( fboWidth, renderer, FBO.simulationShader );
+        FBO.fboParticles.renderToTexture(rtTexturePos, rtTexturePos2);
+
+        FBO.fboParticles.in = rtTexturePos;
+        FBO.fboParticles.out = rtTexturePos2;
+
+    }
+
+    function preload() {
+        SC.initialize({
+            client_id: "3b91ad88b17c054c9b04e95325489d66"
+        });
+        SC.stream("/tracks/182413775", function(sound) {
+                console.log("Got sound!", sound);
+                widget = sound;
+                widgetReady = true;
+                checkReady();
+        })
+
+        // LoadFBO FBO
+        loadFBO("models/human3.js", new THREE.Vector3(0, 0.3, 0.5));
+        loadFBO("models/tree.js", new THREE.Vector3(0, -0.5, 0.5));
+        loadFBO("models/cross.js", new THREE.Vector3(0, -0.5, 0.5));
+        
+        
+    }
+    function start(e) {
+        console.log("Start!");
+        widget.play();
+        document.getElementById("loading").style.display = "none";
+        init();
+        animate();
+    }
+
+    function init() {
+      renderer = new THREE.WebGLRenderer();
+      renderer.setClearColor( 0x000000, 1 );
+
+      element = renderer.domElement;
+      container = document.getElementById('example');
+      container.appendChild(element);
+
+      effect = new THREE.StereoEffect(renderer);
+
+      scene = new THREE.Scene();
+
+      camera = new THREE.PerspectiveCamera(90, 1, 0.001, 700);
+      camera.position.set(-100, 500, 0);
+      scene.add(camera);
+
+      controls = new THREE.OrbitControls(camera, element);
+      controls.nowRotating = nowRotating;
+      controls.rotateUp(Math.PI / 4);
+      controls.target.set(
+        camera.position.x + 0.1,
+        camera.position.y,
+        camera.position.z
+      );
+      //controls.noZoom = true;
+      controls.noPan = true;
+
+      console.log(element);
+      //element.addEventListener('click', fullscreen, false);
+
+      function setOrientationControls(e) {
+        if (!e.alpha) {
+          return;
+        }
+
+        controls = new THREE.DeviceOrientationControls(camera, true);
+        controls.setNowRotatingCallback(nowRotating);
+        controls.connect();
+        controls.update();
+
+
+        window.removeEventListener('deviceorientation', setOrientationControls, true);
+      }
+      window.addEventListener('deviceorientation', setOrientationControls, true);
+
+
+      // Add Particles
+      addParticles();
+      addFBO(new THREE.Vector3(0,0,0));
+      addFBO(new THREE.Vector3(200,0,0));
+      addFBO(new THREE.Vector3(-400,0,0));
+      //addFBO(new THREE.Vector3(-200,-200,-600));
+
+      setInterval(function() {
+              var switchIndex = getRandomInt(0,fbos.length -1);
+              switchFBO(switchIndex)
+      }, 4000);
+
+
+      window.addEventListener('resize', resize, false);
+      setTimeout(resize, 1);
+      //setTimeout(switchFBO, 3000);
+    }
+
+    function resize() {
+      var width = container.offsetWidth;
+      var height = container.offsetHeight;
+
+      camera.aspect = width / height;
+      camera.updateProjectionMatrix();
+
+      renderer.setSize(width, height);
+      effect.setSize(width, height);
+    }
+
+    function update(dt) {
+      resize();
+
+      camera.updateProjectionMatrix();
+
+      controls.update(dt);
+    }
+
+     var timer = 0;
+
+     function render(dt) {
+        if (fbos.length < 1 || !fbos[0].simulationShader) {
+             return;
+        }
+        animateParticles();
+        timer += 0.01;
+
+        // swap
+        for (var i = 0; i < fbos.length; i++) {
+
+            var FBO = fbos[i];
+            FBO.simulationShader.uniforms.timer.value = timer;
+            FBO.simulationShader.uniforms.messFactor.value = FBO.messFactor;
+            
+            var tmp = FBO.fboParticles.in;
+            FBO.fboParticles.in = FBO.fboParticles.out;
+            FBO.fboParticles.out = tmp;
+
+            FBO.simulationShader.uniforms.tPositions.value = FBO.fboParticles.in;
+            FBO.fboParticles.simulate(FBO.fboParticles.out);
+            FBO.material.uniforms.map.value = FBO.fboParticles.out;
+        }
+        
+        effect.render(scene, camera);
+    }
+
+    function animateParticles() {
+        var time = Date.now() * 0.0001;
+        for ( i = 0; i < scene.children.length; i ++ ) {
+            var object = scene.children[ i ];
+            if ( object instanceof THREE.PointCloud ) {
+                // && object != fboMesh ) {
+                object.rotation.y = time * ( i < 4 ? i + 1 : - ( i + 1 ) );
+
+            }
+        }
+    }
+
+    function animate(t) {
+      requestAnimationFrame(animate);
+
+      update(clock.getDelta());
+      render(clock.getDelta());
+    }
+
+    function fullscreen() {
+
+      if (container.requestFullscreen) {
+        container.requestFullscreen();
+      } else if (container.msRequestFullscreen) {
+        container.msRequestFullscreen();
+      } else if (container.mozRequestFullScreen) {
+        container.mozRequestFullScreen();
+      } else if (container.webkitRequestFullscreen) {
+        container.webkitRequestFullscreen();
+      }
+    }
+
+
+    function addFBO(location) {
+
+        if ( ! renderer.context.getExtension( 'OES_texture_float' ) ) {
+            alert( 'OES_texture_float is not :(' );
+        }
+        // Start Creation of DataTexture
+        // Could it be simplified with THREE.FBOUtils.createTextureFromData(textureWidth, textureWidth, data); ?
+
+        var FBO = {};
+
+        var data = fboObjectsData[0];
+
+        var texture = new THREE.DataTexture( data, fboWidth, fboHeight, THREE.RGBFormat, THREE.FloatType );
+        texture.minFilter = THREE.NearestFilter;
+        texture.magFilter = THREE.NearestFilter;
+        texture.needsUpdate = true;
+
+        // zz85 - fbo init
+
+        rtTexturePos = new THREE.WebGLRenderTarget(fboWidth, fboHeight, {
+            wrapS:THREE.RepeatWrapping,
+            wrapT:THREE.RepeatWrapping,
+            minFilter: THREE.NearestFilter,
+            magFilter: THREE.NearestFilter,
+            format: THREE.RGBFormat,
+            type:THREE.HalfFloatType,
+            stencilBuffer: false
+        });
+
+        rtTexturePos2 = rtTexturePos.clone();
+
+        FBO.simulationShader = new THREE.ShaderMaterial({
+
+            uniforms: {
+                tPositions: { type: "t", value: texture },
+                origin: { type: "t", value: texture },
+                timer: { type: "f", value: 0},
+                messFactor: {type: "f", value: 0.005}
+
+            },
+
+            vertexShader: document.getElementById('texture_vertex_simulation_shader').textContent,
+            fragmentShader:  document.getElementById('texture_fragment_simulation_shader').textContent
+
+        });
+
+        FBO.fboParticles = new THREE.FBOUtils( fboWidth, renderer, FBO.simulationShader);
+        FBO.fboParticles.renderToTexture(rtTexturePos, rtTexturePos2);
+
+        FBO.fboParticles.in = rtTexturePos;
+        FBO.fboParticles.out = rtTexturePos2;
+
+        FBO.messFactor = 0.005;
+
+
+        geometry = new THREE.Geometry();
+
+        for ( var i = 0, l = fboWidth * fboHeight; i < l; i ++ ) {
+
+            var vertex = new THREE.Vector3();
+            vertex.x = ( i % fboWidth ) / fboWidth ;
+            vertex.y = Math.floor( i / fboWidth ) / fboHeight;
+            geometry.vertices.push( vertex );
+
+        }
+
+        FBO.material = new THREE.ShaderMaterial( {
+
+            uniforms: {
+
+                "map": { type: "t", value: rtTexturePos },
+                "width": { type: "f", value: fboWidth },
+                "height": { type: "f", value: fboHeight },
+
+                "pointSize": { type: "f", value: 2.5 }
+
+            },
+            vertexShader: document.getElementById( 'vs-particles' ).textContent,
+            fragmentShader: document.getElementById( 'fs-particles' ).textContent,
+            depthTest: false,
+            transparent: true
+
+        } );
+
+        FBO.mesh = new THREE.PointCloud( geometry, FBO.material );
+        FBO.mesh.position.set(location.x, location.y, location.z);
+        FBO.mesh.frustumCulled = false;
+
+        fbos.push(FBO);
+
+        scene.add( FBO.mesh );
+    }
+
+    function addParticles() {
+      particleGeometry = new THREE.Geometry();
+
+      for ( i = 0; i < 200; i ++ ) {
+
+         var vertex = new THREE.Vector3();
+         vertex.x = Math.random() * 2000 - 1000;
+         vertex.y = Math.random() * 2000 - 1000;
+         vertex.z = Math.random() * 2000 - 1000;
+
+         particleGeometry.vertices.push( vertex );
+
+      }
+
+      parameters = [
+         [ [1, 1, 0.5], 5 ],
+         [ [0.95, 1, 0.5], 4 ],
+         [ [0.90, 1, 0.5], 3 ],
+         [ [0.85, 1, 0.5], 2 ],
+         [ [0.80, 1, 0.5], 1 ]
+      ];
+
+      for ( i = 0; i < parameters.length; i ++ ) {
+
+         color = parameters[i][0];
+         size  = parameters[i][1];
+
+         materials[i] = new THREE.PointCloudMaterial( { size: size } );
+
+         particles = new THREE.PointCloud( particleGeometry, materials[i] );
+
+         particles.rotation.x = Math.random() * 6;
+         particles.rotation.y = Math.random() * 6;
+         particles.rotation.z = Math.random() * 6;
+
+         scene.add( particles );
+
+      }
+}
+  </script>
+  
+  </body>
+</html>

@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Cardboard Example</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <style>
+      body {
+        margin: 0px;
+        overflow: hidden;
+      }
+      #example {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="example"></div>
+
+  <script src="js/third-party/threejs/three.js"></script>
+  <script src="js/third-party/threejs/StereoEffect.js"></script>
+  <script src="js/third-party/threejs/DeviceOrientationControls.js"></script>
+  <script src="js/third-party/threejs/OrbitControls.js"></script>
+  <script src="js/third-party/threejs/FBOUtils.js"></script>
+  <script src="js/third-party/threejs/GeometryUtils.js"></script>
+
+  <script src="js/helvetiker_bold.typeface.js"></script>
+
+    <script id="texture_vertex_simulation_shader" type="x-shader/x-vertex">
+            
+        varying vec2 vUv;
+
+        void main() {
+
+            vUv = vec2(uv.x, 1.0 - uv.y);
+            gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
+
+        }
+
+    </script>
+    <script id="texture_fragment_simulation_shader" type="x-shader/x-fragment">
+            
+        // simulation
+        varying vec2 vUv;
+        
+        uniform sampler2D tPositions;
+        uniform sampler2D origin;
+        
+        uniform float timer;
+
+
+        float rand(vec2 co){
+            return fract(sin(dot(co.xy ,vec2(12.9898,78.233))) * 43758.5453);
+        }
+    
+        void main() {
+
+
+            vec3 pos = texture2D( tPositions, vUv ).xyz;
+
+
+            if ( rand(vUv + timer ) > 0.97 ) {
+
+                pos = texture2D( origin, vUv ).xyz;
+
+
+            } else {
+
+                float x = pos.x + timer;
+                float y = pos.y;
+                float z = pos.z;
+
+                pos.x += sin( y * 7.0 ) * cos( z * 12.0 ) * 0.005;
+                pos.y += sin( x * 8.0 ) * cos( z * 13.0 ) * 0.005;
+                pos.z += sin( x * 9.0 ) * cos( y * 14.0 ) * 0.005;
+
+            }
+
+
+            // Write new position out
+            gl_FragColor = vec4(pos, 1.0);
+
+
+        }
+
+
+    </script>
+
+    <!-- zz85 - end simulations -->
+
+    <script id="vs-particles" type="x-shader/x-vertex">
+
+        uniform sampler2D map;
+
+        uniform float width;
+        uniform float height;
+
+        uniform float pointSize;
+
+        varying vec2 vUv;
+        varying vec4 vPosition;
+
+        void main() {
+
+            vUv = position.xy + vec2( 0.5 / width, 0.5 / height );
+
+            vec3 color = texture2D( map, vUv ).rgb * 200.0 - 100.0;
+
+            gl_PointSize = pointSize;
+            gl_Position = projectionMatrix * modelViewMatrix * vec4( color, 1.0 );
+            // gl_Position = projectionMatrix * modelViewMatrix * vec4( position * 200.0, 1.0 );
+
+        }
+
+    </script>
+
+    <script id="fs-particles" type="x-shader/x-fragment">
+
+        uniform sampler2D map;
+
+        varying vec2 vUv;
+        varying vec4 vPosition;
+
+        void main() {
+
+            float depth = smoothstep( 750.0, -500.0, gl_FragCoord.z / gl_FragCoord.w );
+            gl_FragColor = vec4( texture2D( map, vUv ).xyz, depth );
+
+        }
+
+    </script>
+    <script id="vs-copy" type="x-shader/x-vertex">
+
+        uniform sampler2D map;
+        varying vec2 vUv;
+
+        void main() {
+
+            vUv = position.xy;
+            gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
+
+        }
+
+    </script>
+
+    <script id="fs-copy" type="x-shader/x-fragment">
+
+        uniform sampler2D map;
+        varying vec2 vUv;
+
+        void main() {
+
+            gl_FragColor = texture2D( map, vUv );
+
+        }
+
+    </script>
+    
+
+
+  <script>
+    var camera, scene, renderer;
+    var effect, controls;
+    var element, container;
+
+    var clock = new THREE.Clock();
+    var material;
+    var fboParticles, rtTexturePos, rtTexturePos2, simulationShader;
+    
+
+    init();
+    animate();
+
+    function init() {
+      renderer = new THREE.WebGLRenderer( { antialias: false } );
+      renderer.setSize( window.innerWidth, window.innerHeight );
+      renderer.setClearColor( 0x000000, 1 );
+      
+
+      element = renderer.domElement;
+      container = document.getElementById('example');
+      container.appendChild(element);
+
+      effect = new THREE.StereoEffect(renderer);
+
+      scene = new THREE.Scene();
+
+      camera = new THREE.PerspectiveCamera(90, 1, 0.001, 700);
+      //camera = new THREE.PerspectiveCamera( 50, window.innerWidth / window.innerHeight, 1, 1000 );
+      
+      camera.position.set(0, 10, 0);
+      scene.add(camera);
+
+      controls = new THREE.OrbitControls(camera, element);
+      controls.rotateUp(Math.PI / 4);
+      controls.target.set(
+        camera.position.x + 0.1,
+        camera.position.y,
+        camera.position.z
+      );
+      controls.noZoom = true;
+      controls.noPan = true;
+
+      console.log(element);
+      //element.addEventListener('click', fullscreen, false);
+
+      function setOrientationControls(e) {
+        if (!e.alpha) {
+          return;
+        }
+
+        controls = new THREE.DeviceOrientationControls(camera, true);
+        controls.connect();
+        controls.update();
+
+
+        window.removeEventListener('deviceorientation', setOrientationControls, true);
+      }
+      window.addEventListener('deviceorientation', setOrientationControls, true);
+
+      // Add FBO Particles
+    var width = 512, height = 512;
+    // var width = 64, height = 64;
+    // var width = 128, height = 128;
+
+    if ( ! renderer.context.getExtension( 'OES_texture_float' ) ) {
+
+        alert( 'OES_texture_float is not :(' );
+
+    }
+
+    // Start Creation of DataTexture
+    // Could it be simplified with THREE.FBOUtils.createTextureFromData(textureWidth, textureWidth, data); ?
+
+    data = new Float32Array( width * height * 3 );
+
+    var textGeo = new THREE.TextGeometry( "AVNER", {
+
+        size: 0.6,
+        height: 0.5,
+        curveSegments: 0,
+
+        font: "helvetiker",
+        weight: "bold",
+        style: "normal",
+
+        bevelThickness: 2,
+        bevelSize: 5,
+        bevelEnabled: false
+
+    });
+
+    textGeo.applyMatrix( new THREE.Matrix4().makeTranslation( -0.9, 0, 0.2 ) );
+
+    points = THREE.GeometryUtils.randomPointsInGeometry( textGeo, data.length / 3 );
+
+    for ( var i = 0, j = 0, l = data.length; i < l; i += 3, j += 1 ) {
+
+        data[ i ] = points[ j ].x;
+        data[ i + 1 ] = points[ j ].y;
+        data[ i + 2 ] = points[ j ].z;
+
+    }
+
+    console.log( data.length / 3 );
+
+    texture = new THREE.DataTexture( data, width, height, THREE.RGBFormat, THREE.FloatType );
+    texture.minFilter = THREE.NearestFilter;
+    texture.magFilter = THREE.NearestFilter;
+    texture.needsUpdate = true;
+
+    // zz85 - fbo init
+
+    rtTexturePos = new THREE.WebGLRenderTarget(width, height, {
+        wrapS:THREE.RepeatWrapping,
+        wrapT:THREE.RepeatWrapping,
+        minFilter: THREE.NearestFilter,
+        magFilter: THREE.NearestFilter,
+        format: THREE.RGBFormat,
+        type:THREE.HalfFloatType,
+        stencilBuffer: false
+    });
+
+    rtTexturePos2 = rtTexturePos.clone();
+
+    simulationShader = new THREE.ShaderMaterial({
+
+        uniforms: {
+            tPositions: { type: "t", value: texture },
+            origin: { type: "t", value: texture },
+            timer: { type: "f", value: 0}
+        },
+
+        vertexShader: document.getElementById('texture_vertex_simulation_shader').textContent,
+        fragmentShader:  document.getElementById('texture_fragment_simulation_shader').textContent
+
+    });
+
+    fboParticles = new THREE.FBOUtils( width, renderer, simulationShader );
+    fboParticles.renderToTexture(rtTexturePos, rtTexturePos2);
+
+    fboParticles.in = rtTexturePos;
+    fboParticles.out = rtTexturePos2;
+
+
+    geometry = new THREE.Geometry();
+
+    for ( var i = 0, l = width * height; i < l; i ++ ) {
+
+        var vertex = new THREE.Vector3();
+        vertex.x = ( i % width ) / width ;
+        vertex.y = Math.floor( i / width ) / height;
+        geometry.vertices.push( vertex );
+
+    }
+
+    material = new THREE.ShaderMaterial( {
+
+        uniforms: {
+
+            "map": { type: "t", value: rtTexturePos },
+            "width": { type: "f", value: width },
+            "height": { type: "f", value: height },
+
+            "pointSize": { type: "f", value: 3 }
+
+        },
+        vertexShader: document.getElementById( 'vs-particles' ).textContent,
+        fragmentShader: document.getElementById( 'fs-particles' ).textContent,
+        depthTest: false,
+        transparent: true
+
+    } );
+
+    mesh = new THREE.ParticleSystem( geometry, material );
+    scene.add( mesh );
+
+      
+      
+
+
+
+      window.addEventListener('resize', resize, false);
+      setTimeout(resize, 1);
+    }
+
+    function resize() {
+      var width = container.offsetWidth;
+      var height = container.offsetHeight;
+
+      camera.aspect = width / height;
+      camera.updateProjectionMatrix();
+
+      renderer.setSize(width, height);
+      effect.setSize(width, height);
+    }
+
+    function update(dt) {
+      resize();
+
+      camera.updateProjectionMatrix();
+
+      controls.update(dt);
+    }
+
+	var timer = 0;
+
+    function render(dt) {
+        timer += 0.01;
+        simulationShader.uniforms.timer.value = timer;
+
+        // swap
+        var tmp = fboParticles.in;
+        fboParticles.in = fboParticles.out;
+        fboParticles.out = tmp;
+
+        simulationShader.uniforms.tPositions.value = fboParticles.in;
+        fboParticles.simulate(fboParticles.out);
+        material.uniforms.map.value = fboParticles.out;
+
+        
+        effect.render(scene, camera);
+    }
+
+    function animate(t) {
+      requestAnimationFrame(animate);
+
+      update(clock.getDelta());
+      render(clock.getDelta());
+    }
+
+    function fullscreen() {
+
+      if (container.requestFullscreen) {
+        container.requestFullscreen();
+      } else if (container.msRequestFullscreen) {
+        container.msRequestFullscreen();
+      } else if (container.mozRequestFullScreen) {
+        container.mozRequestFullScreen();
+      } else if (container.webkitRequestFullscreen) {
+        container.webkitRequestFullscreen();
+      }
+    }
+  </script>
+  </body>
+</html>
