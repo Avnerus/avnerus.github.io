@@ -1,1 +1,2 @@
-[] Tent
+- [ ] tent
+- [ ] Fruit
