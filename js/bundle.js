@@ -1,4 +1,4 @@
-(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 "use strict"
 
 module.exports = function(videoController) {
@@ -2023,9 +2023,13 @@ Playbot.prototype.getData = function() {
                 imageBig: "images/works/playbots_big.png"
             },
             {
-                text: "I've started protoyping using the Intel Edison",
+                text: "I've started protoyping using the Raspberry Pi2",
                 image: "images/works/playbots2.jpg",
                 imageBig: "images/works/playbots2_big.jpg"
+            },
+            {
+                image: "images/works/playbots3.jpg",
+                imageBig: "images/works/playbots3_big.jpg"
             }
         ],
         links: [
@@ -7858,7 +7862,10 @@ EventEmitter.prototype.addListener = function(type, listener) {
                     'leak detected. %d listeners added. ' +
                     'Use emitter.setMaxListeners() to increase limit.',
                     this._events[type].length);
-      console.trace();
+      if (typeof console.trace === 'function') {
+        // not supported in IE 10
+        console.trace();
+      }
     }
   }
 
@@ -8012,4 +8019,4 @@ function isUndefined(arg) {
   return arg === void 0;
 }
 
-},{}]},{},[3])
+},{}]},{},[3]);
