@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <title>Genotype</title>
+
+    <!-- Bootstrap -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+
+    <style>
+            @font-face {
+                    font-family: genotype;
+                    src: url(fonts/Genotype.ttf);
+            }
+
+
+            main {
+                text-align: center;
+                font-family: "genotype";
+            }
+            
+            h1 {
+                font-size: 128px;
+                color: black;
+            }
+
+            video#bgvid { 
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                min-width: 100%;
+                min-height: 100%;
+                width: auto;
+                height: auto;
+                z-index: -100;
+                -webkit-transform: translateX(-50%) translateY(-50%);
+                transform: translateX(-50%) translateY(-50%);
+                background-size: cover; 
+            }
+
+            #test-font {
+                width: 60%;
+                margin-top: 100px;
+                font-size: 20px;
+                color: white;
+                background-color:rgba(0, 0, 0, 0.5);
+            }
+
+    </style>
+
+  </head>
+  <body>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+    
+
+
+    <main class="container">
+        <video autoplay loop id="bgvid">
+            <source src="meiosis.mp4" type="video/mp4">
+        </video>
+        <section class="center-block">
+            <h1>Genotype</h1>
+            <article>
+                <textarea placeholder="Try it out..." id="test-font"  style="overflow: hidden; resize: none; word-wrap: break-word; height: 300px;"></textarea>
+            </article>
+        </section>
+        
+    </main>
+  </body>
+</html>
