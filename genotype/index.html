@@ -27,6 +27,8 @@
                 position: absolute;
                 top: 0;
                 height: 3000px;
+                width: 100%;
+                
             }
             
             #logo {
@@ -35,10 +37,11 @@
                 margin-right: auto;
                 left: 0;
                 right: 0;
-		margin-top: 100px;
+                margin-top: 100px;
+                height: 50%;
             }
 
-            video#bgvid { 
+            .bgvid { 
                 position: fixed;
                 top: 50%;
                 left: 50%;
@@ -54,7 +57,6 @@
 
             #test-font {
                 width: 60%;
-                margin-top: 100px;
                 font-size: 40px;
                 color: white;
                 background-color:rgba(0, 0, 0, 0.5);
@@ -62,28 +64,32 @@
                 -webkit-font-feature-settings: "liga" 1, "dlig" 1;
                 -moz-font-feature-settings: "liga" 1, "dlig" 1;
                 -ms-font-feature-settings: "liga" 1, "dlig" 1;
-                height: 300px;
                 left: 0;
                 margin-left: auto;
                 margin-right: auto;
                 position: absolute;
                 right: 0;
-                width: 40%;
-                top: 1000px;
+                top: 850px;
+                height: 300px;
+            }
+            @media screen and (min-width: 800px) {
+                #test-font {
+                    top: 750px;
+                }
             }
 
             #description {
                 position: relative;
                 top:3000px;
                 z-index: 0;
-                height: 500px;
+                height: 400px;
             }
             #description-text {
                 margin-bottom: 10px;
-                color: white;
+                color: black;
                 font-family: "droid";
                 font-size: 30px;
-                width: 800px;
+                width: 1000px;
             }
             #arrow {
                 position: fixed;
@@ -105,7 +111,7 @@
             }
             #download-button {
                 margin-bottom: 20px;
-                margin-top: 20px;
+                margin-top: 30px;
             }
 
     </style>
@@ -118,9 +124,10 @@
     
 
 
-    <video autoplay loop id="bgvid">
+    <!--video class="bgvid "autoplay loop id="bgvid">
         <source src="genotype_bg-video.mp4" type="video/mp4">
-    </video>
+    </video-->
+    <img class="bgvid" src="bgvid.gif"></img>
     <a href="">
         <img class="not-flipped" src="button.png" id="arrow"></img>
     </a>
@@ -129,7 +136,7 @@
             <div class="col-md-12">
                 <section class="center-block">
                     <article>
-                        <img src="logo.png" id="logo">
+                        <img class="img-responsive" src="logo.png" id="logo">
                     </article>
                 </section>
             </div>
