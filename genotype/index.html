@@ -15,16 +15,27 @@
                     font-family: genotype;
                     src: url(fonts/Genotype.ttf);
             }
+            @font-face {
+                    font-family: droid;
+                    src: url(fonts/DroidSans.ttf);
+            }
 
 
             main {
                 text-align: center;
                 font-family: "genotype";
+                position: absolute;
+                top: 0;
+                height: 3000px;
             }
             
-            h1 {
-                font-size: 128px;
-                color: black;
+            #logo {
+                position:fixed;
+                margin-left: auto;
+                margin-right: auto;
+                left: 0;
+                right: 0;
+		margin-top: 100px;
             }
 
             video#bgvid { 
@@ -44,13 +55,57 @@
             #test-font {
                 width: 60%;
                 margin-top: 100px;
-                font-size: 20px;
+                font-size: 40px;
                 color: white;
                 background-color:rgba(0, 0, 0, 0.5);
                 font-variant-ligatures: common-ligatures;
                 -webkit-font-feature-settings: "liga" 1, "dlig" 1;
                 -moz-font-feature-settings: "liga" 1, "dlig" 1;
                 -ms-font-feature-settings: "liga" 1, "dlig" 1;
+                height: 300px;
+                left: 0;
+                margin-left: auto;
+                margin-right: auto;
+                position: absolute;
+                right: 0;
+                width: 40%;
+                top: 1000px;
+            }
+
+            #description {
+                position: relative;
+                top:3000px;
+                z-index: 0;
+                height: 500px;
+            }
+            #description-text {
+                margin-bottom: 10px;
+                color: white;
+                font-family: "droid";
+                font-size: 30px;
+                width: 800px;
+            }
+            #arrow {
+                position: fixed;
+                bottom: 20px;
+                right: 70px;
+                z-index: 1;
+            }
+            .flipped {
+              -webkit-transform: rotate(180deg);
+              -moz-transform: rotate(180deg);
+               transform: rotate(180deg);
+               transition-duration: 1s;
+            }
+            .not-flipped {
+              -webkit-transform: rotate(0deg);
+              -moz-transform: rotate(0deg);
+               transform: rotate(0deg);
+               transition-duration: 1s;
+            }
+            #download-button {
+                margin-bottom: 20px;
+                margin-top: 20px;
             }
 
     </style>
@@ -63,17 +118,85 @@
     
 
 
-    <main class="container">
-        <video autoplay loop id="bgvid">
-            <source src="meiosis.mp4" type="video/mp4">
-        </video>
-        <section class="center-block">
-            <h1>Genotype</h1>
+    <video autoplay loop id="bgvid">
+        <source src="genotype_bg-video.mp4" type="video/mp4">
+    </video>
+    <a href="">
+        <img class="not-flipped" src="button.png" id="arrow"></img>
+    </a>
+    <main class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <section class="center-block">
+                    <article>
+                        <img src="logo.png" id="logo">
+                    </article>
+                </section>
+            </div>
+        </div>
             <article>
-                <textarea placeholder="Try it out..." id="test-font"  style="overflow: hidden; resize: none; word-wrap: break-word; height: 300px;"></textarea>
+                <textarea placeholder="Try it out..." id="test-font"  style="overflow: hidden; resize: none; word-wrap: break-word;"></textarea>
             </article>
-        </section>
+            <article class="center-block" id="description">
+                <div class="center-block" id="description-text">
+                    The notion of gender is continuously evolving, and what started as a clear product of our biological sex is now considered to be constructed by society and defined by discourse. 
+Genotype is a digital font that instantly replaces any words that are associated with gender with clear biological definitions, these are our genetic definitions of sex – The X and Y chromosomes.
+With Genotype, anyone can apply the font on his computer and experience the genderless web. 
+                </div>
+                <a href="fonts/Genotype.ttf"><img id="download-button" src="download.png"></img></a>
+            </article>
         
     </main>
+    <script>
+
+    var isFlipped = false;
+
+
+    var doFullscreen = function() {
+        console.log("Going full screen!")
+        var isInFullScreen = (document.fullScreenElement && document.fullScreenElement !==     null) ||    // alternative standard method  
+                (document.mozFullScreen || document.webkitIsFullScreen);
+
+        var docElm = document.documentElement;
+        if (!isInFullScreen) {
+
+            if (docElm.requestFullscreen) {
+                docElm.requestFullscreen();
+            }
+            else if (docElm.mozRequestFullScreen) {
+                docElm.mozRequestFullScreen();
+            }
+            else if (docElm.webkitRequestFullScreen) {
+                docElm.webkitRequestFullScreen();
+            }
+        }
+    }
+    $("body").on('keyup', function(e) { 
+        if (e.keyCode == 9) { // <- here confirm that tab is pressed.
+            doFullscreen();
+        }
+    });
+    $("#arrow").click(function(e) {
+        if (!isFlipped) {
+            $("html, body").animate({ scrollTop: $(document).height() }, "slow");
+        } else {
+            $("html, body").animate({ scrollTop: 0 }, "slow");
+             
+        }
+        e.preventDefault();
+        return false;
+    });
+    $(window).scroll(function() {
+            if(window.pageYOffset > 1000 && !isFlipped) {
+                isFlipped = true;
+                $("#arrow").removeClass("not-flipped");
+                $("#arrow").addClass("flipped");
+            } else if (window.pageYOffset < 300 && isFlipped) {
+                isFlipped = false;
+                $("#arrow").removeClass("flipped");
+                $("#arrow").addClass("not-flipped");
+            }
+    });
+    </script>
   </body>
 </html>
