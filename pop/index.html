@@ -1,0 +1,197 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui" />
+<title>Alona</title>
+<style>
+    body {
+        margin: 0;
+        padding: 0;
+    }
+    canvas {
+        position: absolute;
+    }
+</style>
+<body>
+<!-- Load PIXI 2D engine -->
+<script src="pixi.min.js"></script> 
+<script src="pixi-lights.min.js"></script> 
+<script src="TweenMax.min.js"></script> 
+<script>
+
+var HEIGHT = 720;
+var WIDTH = 1280;
+
+//Set renderer resolution and scale view to browser window size
+var renderer = new PIXI.lights.WebGLDeferredRenderer(WIDTH, HEIGHT);
+renderer.view.style.width = window.innerWidth + "px";
+renderer.view.style.height = window.innerHeight + "px";
+
+
+// Add renderer <canvas> tag to body
+document.body.appendChild(renderer.view);
+
+
+//---------------------GAME CODE-------------------
+
+
+// create the root of the scene graph
+var stage = new PIXI.Container();
+
+// Create a point light
+var light = new PIXI.lights.PointLight(0xED6205, 2);
+stage.addChild(light);
+stage.addChild(new PIXI.lights.AmbientLight(null, 3));
+
+// create a texture from an image path
+var texture = PIXI.Texture.fromImage('assets/pop.png');
+var normalTexture = PIXI.Texture.fromImage('assets/pop_n.png');
+var bgTexture = PIXI.Texture.fromImage('assets/bg.png');
+var bgNormal = PIXI.Texture.fromImage('assets/bg_n.png');
+var poppedTexture = PIXI.Texture.fromImage('assets/pop1.png');
+
+var distance = Infinity;
+var timeEntered = null;
+var wasPopped = false;
+
+
+// create a new Sprite using the texture
+var pop = new PIXI.Sprite(texture);
+var popped = new PIXI.Sprite(poppedTexture);
+popped.visible = false;
+
+pop.normalTexture = normalTexture;
+pop.scale.x = 0.8;
+pop.scale.y = 0.8;
+
+var bg = new PIXI.Sprite(bgTexture);
+bg.normalTexture = bgNormal;
+stage.addChild(bg);
+
+// center the sprite's anchor point
+pop.anchor.x = 0.5;
+pop.anchor.y = 0.5;
+// move the sprite to the center of the screen
+pop.position.x = WIDTH/2;
+pop.position.y = HEIGHT/2;
+
+popped.anchor.x = 0.5;
+popped.anchor.y = 0.5;
+// move the sprite to the center of the screen
+popped.position.x = WIDTH/2;
+popped.position.y = HEIGHT/2;
+
+popped.scale.x = 2.5;
+popped.scale.y = 2.5;
+
+stage.addChild(pop);
+stage.addChild(popped);
+
+
+shakeTween(pop.position);
+
+popped.interactive = true;
+popped.click = function(mouseData) {
+    popped.visible = false;
+    pop.visible = true;
+    wasPopped = false;
+}
+
+// start animating in a loop
+animate();
+
+
+function animate(timestamp) {
+    requestAnimationFrame(animate);
+
+    update(timestamp);
+
+
+    // render the container
+    renderer.render(stage);
+}
+
+renderer.view.addEventListener('mousemove', function (e) {
+    var rect = e.target.getBoundingClientRect();
+
+    light.position.x = e.clientX - rect.left;
+    light.position.y = e.clientY - rect.top;
+
+    distance = calculateDistance(light.position, pop.position);
+    shakeTween(pop.position, distance);
+    
+    //console.log(distance);
+});
+
+function update(timestamp) {
+    if (distance <= 50 && !wasPopped) {
+        if (timeEntered == null) {
+            timeEntered = timestamp;
+        }
+        var timeInside = timestamp - timeEntered;
+        //console.log(timeInside);
+
+        if (timeInside >= 5000) {
+            wasPopped = true;
+            pop.texture = poppedTexture;
+            pop.visible = false;
+            popped.visible = true;
+            console.log("Boom!");
+        }
+    } else {
+        timeEntered = null;
+    }
+    // just for fun, let's rotate mr rabbit a little
+    //pop.rotation += 0.01;
+}
+    //shake from http://stackoverflow.com/questions/15313312/how-to-create-a-wiggle-effect-using-greensock
+function shakeTween(item, distance){
+    var startX = WIDTH / 2;
+    var startY = HEIGHT / 2;
+    var max = 700 / distance;
+    var min = -700 / distance;
+    TweenMax.to(item,0.1,{repeat:-1, x: startX + Math.floor(Math.random() * (max - min + 1) + min), delay:.1});
+    TweenMax.to(item,0.1,{y:startY, x:startX});
+}
+
+function calculateDistance(point1, point2) {
+    var d = Math.sqrt( (point2.x-point1.x)*(point2.x - point1.x) + (point2.y-point1.y)*(point2.y - point1.y));
+    return d;
+}
+
+
+//--------------------------------------------------------------------------------------------------
+
+// resize image window 
+window.onresize = function() {
+    renderer.view.style.width = window.innerWidth + "px";
+    renderer.view.style.height = window.innerHeight + "px";
+}
+
+
+function doFullScreen() {
+    var isInFullScreen = (document.fullScreenElement && document.fullScreenElement !==     null) ||    // alternative standard method  
+            (document.mozFullScreen || document.webkitIsFullScreen);
+
+    var docElm = document.documentElement;
+    if (!isInFullScreen) {
+
+        if (docElm.requestFullscreen) {
+            docElm.requestFullscreen();
+        }
+        else if (docElm.mozRequestFullScreen) {
+            docElm.mozRequestFullScreen();
+        }
+        else if (docElm.webkitRequestFullScreen) {
+            docElm.webkitRequestFullScreen();
+        }
+    }
+}
+// TAB KEY FULLSCREEN
+document.addEventListener("keydown",function(e) {
+    if (e.keyCode == 9) {
+        doFullScreen();
+    }
+}, false);
+
+</script>
+</body>
