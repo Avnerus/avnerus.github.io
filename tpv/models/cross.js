@@ -23,7 +23,6 @@
 	"colorDiffuse" : [0.64, 0.64, 0.64],
 	"colorSpecular" : [0.5, 0.5, 0.5],
 	"illumination" : 2,
-	"mapDiffuse" : "CrossTexture1.png",
 	"opticalDensity" : 1.0,
 	"specularCoef" : 96.078431,
 	"transparency" : 1.0,
