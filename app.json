@@ -1,0 +1,119 @@
+{
+	"project": {
+		"shadows": true,
+		"vr": false
+	},
+	"camera": {
+		"metadata": {
+			"version": 4.4,
+			"type": "Object",
+			"generator": "Object3D.toJSON"
+		},
+		"object": {
+			"uuid": "93034394-D811-4B3B-B02F-53C148B846DF",
+			"type": "PerspectiveCamera",
+			"name": "Camera",
+			"matrix": [0.9996562004089355,-1.3373380527981205e-11,-0.026220781728625298,0,-0.0007493046578019857,0.999591588973999,-0.02856692299246788,0,0.02621007338166237,0.028576748445630074,0.9992479085922241,0,17.893936157226562,47.32645797729492,772.843994140625,1],
+			"zoom": 1,
+			"fov": 50,
+			"aspect": 3.074003795066414,
+			"near": 0.1,
+			"far": 100000
+		}
+	},
+	"scene": {
+		"metadata": {
+			"version": 4.4,
+			"type": "Object",
+			"generator": "Object3D.toJSON"
+		},
+		"geometries": [
+			{
+				"uuid": "EDE70ADE-A411-4732-86B6-35B372BE005A",
+				"type": "BoxGeometry",
+				"width": 100,
+				"height": 100,
+				"depth": 100,
+				"widthSegments": 1,
+				"heightSegments": 1,
+				"depthSegments": 1
+			}],
+		"materials": [
+			{
+				"uuid": "28C3C90F-1956-4874-9547-22FE428EFEB0",
+				"type": "ShaderMaterial",
+				"uniforms": {
+					"randNum": {
+						"type": "f",
+						"value": 0.9091308414162786
+					}
+				},
+				"vertexShader": "void main() {\n\tgl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );\n}",
+				"fragmentShader": "uniform float randNum;\n\nvoid main() {\n\tgl_FragColor = vec4( randNum, 1.0 - randNum, randNum, 1.0 );\n}"
+			}],
+		"object": {
+			"uuid": "288F4FE5-DE32-4ED0-B68E-EC787FD3C896",
+			"type": "Scene",
+			"name": "Scene",
+			"matrix": [1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1],
+			"children": [
+				{
+					"uuid": "0992F7E3-0876-4CE4-B60F-9F05DCAB9C52",
+					"type": "Group",
+					"name": "Group 2",
+					"matrix": [1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1]
+				},
+				{
+					"uuid": "9748AE5C-8BCB-4D18-A2E1-36593B304D2C",
+					"type": "Mesh",
+					"name": "Box 1",
+					"matrix": [1,0,0,0,0,1,0,0,0,0,1,0,-3.3708064556121826,24.141584396362305,-37.86528015136719,1],
+					"geometry": "EDE70ADE-A411-4732-86B6-35B372BE005A",
+					"material": "28C3C90F-1956-4874-9547-22FE428EFEB0"
+				},
+				{
+					"uuid": "44F942D1-8F22-4426-A52F-AB04B10895FB",
+					"type": "AmbientLight",
+					"name": "AmbientLight 1",
+					"matrix": [1,0,0,0,0,1,0,0,0,0,1,0,131.8699951171875,107.68000030517578,74.7300033569336,1],
+					"color": 11711154
+				},
+				{
+					"uuid": "89C0871E-7167-4777-96B7-DF29B1DB0A58",
+					"type": "PerspectiveCamera",
+					"name": "PerspectiveCamera 1",
+					"matrix": [1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1],
+					"zoom": 1,
+					"fov": 50,
+					"aspect": 1,
+					"near": 1,
+					"far": 10000
+				},
+				{
+					"uuid": "8A944F20-FFA5-446C-9303-27D9F1EA0EDA",
+					"type": "SpotLight",
+					"name": "SpotLight 2",
+					"matrix": [0.9954354166984558,-0.053864188492298126,0.0787845030426979,0,0.05062639340758324,0.9978115558624268,0.042533792555332184,0,-0.08090313524007797,-0.038351066410541534,0.995983898639679,0,100,313.9416198730469,601.6148071289062,1],
+					"color": 16777215,
+					"intensity": 1,
+					"distance": 0,
+					"angle": 0.3141592653589793,
+					"decay": 1,
+					"exponent": 10
+				}]
+		}
+	},
+	"scripts": {
+		"44F942D1-8F22-4426-A52F-AB04B10895FB": [],
+		"9748AE5C-8BCB-4D18-A2E1-36593B304D2C": [
+			{
+				"name": "",
+				"source": "var x = 0;\n\nfunction update( event ) {\n\tthis.rotation.x += 0.1;\t\n\tthis.rotation.y += 0.1;\t\n\tthis.rotation.z += 0.1;\t\n\t\n\tthis.position.z += 5.0;\n\t\n\tx+=1;\n\tconsole.log(x % 10);\n\tif (x % 3 == 0) {\n\t\tthis.material.uniforms.randNum.value = Math.random();\n\t}\n\t\n}"
+			}],
+		"0992F7E3-0876-4CE4-B60F-9F05DCAB9C52": [
+			{
+				"name": "",
+				"source": "function update( event ) {}"
+			}]
+	}
+}
