@@ -38,9 +38,9 @@ var Beam = function () {
         _classCallCheck(this, Beam);
 
         // Shaders
-        this.render_fs = "#define GLSLIFY 1\nhighp float random_1_0(vec2 co)\n{\n    highp float a = 12.9898;\n    highp float b = 78.233;\n    highp float c = 43758.5453;\n    highp float dt= dot(co.xy ,vec2(a,b));\n    highp float sn= mod(dt,3.14);\n    return fract(sin(sn) * c);\n}\n\n\nvoid main() {\n    gl_FragColor = vec4( vec3( 1., 1., 1. ), .35 );\n}\n";
-        this.render_vs = "#define GLSLIFY 1\n//float texture containing the positions of each particle\nuniform sampler2D positions;\n\n//size\nuniform float pointSize;\n\nvoid main() {\n\n    //the mesh is a nomrliazed square so the uvs = the xy positions of the vertices\n    vec3 pos = texture2D( positions, position.xy ).xyz;\n\n    //pos now contains the position of a point in space taht can be transformed\n    gl_Position = projectionMatrix * modelViewMatrix * vec4( pos, 1.0 );\n\n    gl_PointSize = pointSize;\n}\n";
-        this.simulation_fs = "#define GLSLIFY 1\nhighp float random_1_0(vec2 co)\n{\n    highp float a = 12.9898;\n    highp float b = 78.233;\n    highp float c = 43758.5453;\n    highp float dt= dot(co.xy ,vec2(a,b));\n    highp float sn= mod(dt,3.14);\n    return fract(sin(sn) * c);\n}\n\n\n//\n// Description : Array and textureless GLSL 2D/3D/4D simplex\n//               noise functions.\n//      Author : Ian McEwan, Ashima Arts.\n//  Maintainer : ijm\n//     Lastmod : 20110822 (ijm)\n//     License : Copyright (C) 2011 Ashima Arts. All rights reserved.\n//               Distributed under the MIT License. See LICENSE file.\n//               https://github.com/ashima/webgl-noise\n//\n\nvec3 mod289_3_1(vec3 x) {\n  return x - floor(x * (1.0 / 289.0)) * 289.0;\n}\n\nvec4 mod289_3_1(vec4 x) {\n  return x - floor(x * (1.0 / 289.0)) * 289.0;\n}\n\nvec4 permute_3_2(vec4 x) {\n     return mod289_3_1(((x*34.0)+1.0)*x);\n}\n\nvec4 taylorInvSqrt_3_3(vec4 r)\n{\n  return 1.79284291400159 - 0.85373472095314 * r;\n}\n\nfloat snoise_3_4(vec3 v)\n  {\n  const vec2  C = vec2(1.0/6.0, 1.0/3.0) ;\n  const vec4  D_3_5 = vec4(0.0, 0.5, 1.0, 2.0);\n\n// First corner\n  vec3 i  = floor(v + dot(v, C.yyy) );\n  vec3 x0 =   v - i + dot(i, C.xxx) ;\n\n// Other corners\n  vec3 g_3_6 = step(x0.yzx, x0.xyz);\n  vec3 l = 1.0 - g_3_6;\n  vec3 i1 = min( g_3_6.xyz, l.zxy );\n  vec3 i2 = max( g_3_6.xyz, l.zxy );\n\n  //   x0 = x0 - 0.0 + 0.0 * C.xxx;\n  //   x1 = x0 - i1  + 1.0 * C.xxx;\n  //   x2 = x0 - i2  + 2.0 * C.xxx;\n  //   x3 = x0 - 1.0 + 3.0 * C.xxx;\n  vec3 x1 = x0 - i1 + C.xxx;\n  vec3 x2 = x0 - i2 + C.yyy; // 2.0*C.x = 1/3 = C.y\n  vec3 x3 = x0 - D_3_5.yyy;      // -1.0+3.0*C.x = -0.5 = -D.y\n\n// Permutations\n  i = mod289_3_1(i);\n  vec4 p = permute_3_2( permute_3_2( permute_3_2(\n             i.z + vec4(0.0, i1.z, i2.z, 1.0 ))\n           + i.y + vec4(0.0, i1.y, i2.y, 1.0 ))\n           + i.x + vec4(0.0, i1.x, i2.x, 1.0 ));\n\n// Gradients: 7x7 points over a square, mapped onto an octahedron.\n// The ring size 17*17 = 289 is close to a multiple of 49 (49*6 = 294)\n  float n_ = 0.142857142857; // 1.0/7.0\n  vec3  ns = n_ * D_3_5.wyz - D_3_5.xzx;\n\n  vec4 j = p - 49.0 * floor(p * ns.z * ns.z);  //  mod(p,7*7)\n\n  vec4 x_ = floor(j * ns.z);\n  vec4 y_ = floor(j - 7.0 * x_ );    // mod(j,N)\n\n  vec4 x = x_ *ns.x + ns.yyyy;\n  vec4 y = y_ *ns.x + ns.yyyy;\n  vec4 h = 1.0 - abs(x) - abs(y);\n\n  vec4 b0 = vec4( x.xy, y.xy );\n  vec4 b1 = vec4( x.zw, y.zw );\n\n  //vec4 s0 = vec4(lessThan(b0,0.0))*2.0 - 1.0;\n  //vec4 s1 = vec4(lessThan(b1,0.0))*2.0 - 1.0;\n  vec4 s0 = floor(b0)*2.0 + 1.0;\n  vec4 s1 = floor(b1)*2.0 + 1.0;\n  vec4 sh = -step(h, vec4(0.0));\n\n  vec4 a0 = b0.xzyw + s0.xzyw*sh.xxyy ;\n  vec4 a1_3_7 = b1.xzyw + s1.xzyw*sh.zzww ;\n\n  vec3 p0_3_8 = vec3(a0.xy,h.x);\n  vec3 p1 = vec3(a0.zw,h.y);\n  vec3 p2 = vec3(a1_3_7.xy,h.z);\n  vec3 p3 = vec3(a1_3_7.zw,h.w);\n\n//Normalise gradients\n  vec4 norm = taylorInvSqrt_3_3(vec4(dot(p0_3_8,p0_3_8), dot(p1,p1), dot(p2, p2), dot(p3,p3)));\n  p0_3_8 *= norm.x;\n  p1 *= norm.y;\n  p2 *= norm.z;\n  p3 *= norm.w;\n\n// Mix final noise value\n  vec4 m = max(0.6 - vec4(dot(x0,x0), dot(x1,x1), dot(x2,x2), dot(x3,x3)), 0.0);\n  m = m * m;\n  return 42.0 * dot( m*m, vec4( dot(p0_3_8,x0), dot(p1,x1),\n                                dot(p2,x2), dot(p3,x3) ) );\n  }\n\n\n\n\nvec3 snoiseVec3_2_9( vec3 x ){\n\n  float s  = snoise_3_4(vec3( x ));\n  float s1 = snoise_3_4(vec3( x.y - 19.1 , x.z + 33.4 , x.x + 47.2 ));\n  float s2 = snoise_3_4(vec3( x.z + 74.2 , x.x - 124.5 , x.y + 99.4 ));\n  vec3 c = vec3( s , s1 , s2 );\n  return c;\n\n}\n\n\nvec3 curlNoise_2_10( vec3 p ){\n  \n  const float e = .1;\n  vec3 dx = vec3( e   , 0.0 , 0.0 );\n  vec3 dy = vec3( 0.0 , e   , 0.0 );\n  vec3 dz = vec3( 0.0 , 0.0 , e   );\n\n  vec3 p_x0 = snoiseVec3_2_9( p - dx );\n  vec3 p_x1 = snoiseVec3_2_9( p + dx );\n  vec3 p_y0 = snoiseVec3_2_9( p - dy );\n  vec3 p_y1 = snoiseVec3_2_9( p + dy );\n  vec3 p_z0 = snoiseVec3_2_9( p - dz );\n  vec3 p_z1 = snoiseVec3_2_9( p + dz );\n\n  float x = p_y1.z - p_y0.z - p_z1.y + p_z0.y;\n  float y = p_z1.x - p_z0.x - p_x1.z + p_x0.z;\n  float z = p_x1.y - p_x0.y - p_y1.x + p_y0.x;\n\n  const float divisor = 1.0 / ( 2.0 * e );\n  return normalize( vec3( x , y , z ) * divisor );\n\n}\n\n\n\n\nuniform sampler2D positions;\nuniform float timer;\nuniform float maxDepth;\nvarying vec2 vUv;\n\nvoid main() {\n    vec3 pos = texture2D( positions, vUv ).rgb;\n    vec3 velocity = curlNoise_2_10(pos * 0.02) * 0.5;\n    pos = pos + velocity;\n    pos.z -= (random_1_0(vUv) * 10.0);\n    if (pos.z < -1000.0) {\n        pos.z = 0.0;\n    }\n    \n    gl_FragColor = vec4( pos,1.0 );\n}\n";
+        this.render_fs = "#define GLSLIFY 1\nhighp float random_1_0(vec2 co)\n{\n    highp float a = 12.9898;\n    highp float b = 78.233;\n    highp float c = 43758.5453;\n    highp float dt= dot(co.xy ,vec2(a,b));\n    highp float sn= mod(dt,3.14);\n    return fract(sin(sn) * c);\n}\n\n\nvarying vec3 vColor;\nvoid main() {\n  //gl_FragColor = vec4( vec3( 1., .5, .5 ), .85 );\n  gl_FragColor = vec4( vColor, .85 );\n}\n";
+        this.render_vs = "#define GLSLIFY 1\n//float texture containing the positions of each particle\nuniform sampler2D positions;\nattribute vec2 reference;\nvarying vec3 vColor;\n\n//size\nuniform float pointSize;\n\nvoid main() {\n\n    vec3 newPosition = position; \n    newPosition = mat3( modelMatrix ) * newPosition;\n\n    //the mesh is a nomrliazed square so the uvs = the xy positions of the vertices\n    vec3 pos = texture2D( positions, reference).xyz;\n\n    newPosition += pos;\n\n    //pos now contains the position of a point in space taht can be transformed\n    //gl_Position = projectionMatrix * modelViewMatrix * vec4( pos, 1.0 );\n    vColor = newPosition;\n    gl_Position = projectionMatrix *  viewMatrix * vec4( newPosition, 1.0 );\n\n    gl_PointSize = pointSize;\n\n}\n";
+        this.simulation_fs = "#define GLSLIFY 1\nhighp float random_2_0(vec2 co)\n{\n    highp float a = 12.9898;\n    highp float b = 78.233;\n    highp float c = 43758.5453;\n    highp float dt= dot(co.xy ,vec2(a,b));\n    highp float sn= mod(dt,3.14);\n    return fract(sin(sn) * c);\n}\n\n\n//\n// Description : Array and textureless GLSL 2D/3D/4D simplex\n//               noise functions.\n//      Author : Ian McEwan, Ashima Arts.\n//  Maintainer : ijm\n//     Lastmod : 20110822 (ijm)\n//     License : Copyright (C) 2011 Ashima Arts. All rights reserved.\n//               Distributed under the MIT License. See LICENSE file.\n//               https://github.com/ashima/webgl-noise\n//\n\nvec3 mod289_4_1(vec3 x) {\n  return x - floor(x * (1.0 / 289.0)) * 289.0;\n}\n\nvec4 mod289_4_1(vec4 x) {\n  return x - floor(x * (1.0 / 289.0)) * 289.0;\n}\n\nvec4 permute_4_2(vec4 x) {\n     return mod289_4_1(((x*34.0)+1.0)*x);\n}\n\nvec4 taylorInvSqrt_4_3(vec4 r)\n{\n  return 1.79284291400159 - 0.85373472095314 * r;\n}\n\nfloat snoise_4_4(vec3 v)\n  {\n  const vec2  C = vec2(1.0/6.0, 1.0/3.0) ;\n  const vec4  D_4_5 = vec4(0.0, 0.5, 1.0, 2.0);\n\n// First corner\n  vec3 i  = floor(v + dot(v, C.yyy) );\n  vec3 x0 =   v - i + dot(i, C.xxx) ;\n\n// Other corners\n  vec3 g_4_6 = step(x0.yzx, x0.xyz);\n  vec3 l = 1.0 - g_4_6;\n  vec3 i1 = min( g_4_6.xyz, l.zxy );\n  vec3 i2 = max( g_4_6.xyz, l.zxy );\n\n  //   x0 = x0 - 0.0 + 0.0 * C.xxx;\n  //   x1 = x0 - i1  + 1.0 * C.xxx;\n  //   x2 = x0 - i2  + 2.0 * C.xxx;\n  //   x3 = x0 - 1.0 + 3.0 * C.xxx;\n  vec3 x1 = x0 - i1 + C.xxx;\n  vec3 x2 = x0 - i2 + C.yyy; // 2.0*C.x = 1/3 = C.y\n  vec3 x3 = x0 - D_4_5.yyy;      // -1.0+3.0*C.x = -0.5 = -D.y\n\n// Permutations\n  i = mod289_4_1(i);\n  vec4 p = permute_4_2( permute_4_2( permute_4_2(\n             i.z + vec4(0.0, i1.z, i2.z, 1.0 ))\n           + i.y + vec4(0.0, i1.y, i2.y, 1.0 ))\n           + i.x + vec4(0.0, i1.x, i2.x, 1.0 ));\n\n// Gradients: 7x7 points over a square, mapped onto an octahedron.\n// The ring size 17*17 = 289 is close to a multiple of 49 (49*6 = 294)\n  float n_ = 0.142857142857; // 1.0/7.0\n  vec3  ns = n_ * D_4_5.wyz - D_4_5.xzx;\n\n  vec4 j = p - 49.0 * floor(p * ns.z * ns.z);  //  mod(p,7*7)\n\n  vec4 x_ = floor(j * ns.z);\n  vec4 y_ = floor(j - 7.0 * x_ );    // mod(j,N)\n\n  vec4 x = x_ *ns.x + ns.yyyy;\n  vec4 y = y_ *ns.x + ns.yyyy;\n  vec4 h = 1.0 - abs(x) - abs(y);\n\n  vec4 b0 = vec4( x.xy, y.xy );\n  vec4 b1 = vec4( x.zw, y.zw );\n\n  //vec4 s0 = vec4(lessThan(b0,0.0))*2.0 - 1.0;\n  //vec4 s1 = vec4(lessThan(b1,0.0))*2.0 - 1.0;\n  vec4 s0 = floor(b0)*2.0 + 1.0;\n  vec4 s1 = floor(b1)*2.0 + 1.0;\n  vec4 sh = -step(h, vec4(0.0));\n\n  vec4 a0 = b0.xzyw + s0.xzyw*sh.xxyy ;\n  vec4 a1_4_7 = b1.xzyw + s1.xzyw*sh.zzww ;\n\n  vec3 p0_4_8 = vec3(a0.xy,h.x);\n  vec3 p1 = vec3(a0.zw,h.y);\n  vec3 p2 = vec3(a1_4_7.xy,h.z);\n  vec3 p3 = vec3(a1_4_7.zw,h.w);\n\n//Normalise gradients\n  vec4 norm = taylorInvSqrt_4_3(vec4(dot(p0_4_8,p0_4_8), dot(p1,p1), dot(p2, p2), dot(p3,p3)));\n  p0_4_8 *= norm.x;\n  p1 *= norm.y;\n  p2 *= norm.z;\n  p3 *= norm.w;\n\n// Mix final noise value\n  vec4 m = max(0.6 - vec4(dot(x0,x0), dot(x1,x1), dot(x2,x2), dot(x3,x3)), 0.0);\n  m = m * m;\n  return 42.0 * dot( m*m, vec4( dot(p0_4_8,x0), dot(p1,x1),\n                                dot(p2,x2), dot(p3,x3) ) );\n  }\n\n\n\n\nvec3 snoiseVec3_3_9( vec3 x ){\n\n  float s  = snoise_4_4(vec3( x ));\n  float s1 = snoise_4_4(vec3( x.y - 19.1 , x.z + 33.4 , x.x + 47.2 ));\n  float s2 = snoise_4_4(vec3( x.z + 74.2 , x.x - 124.5 , x.y + 99.4 ));\n  vec3 c = vec3( s , s1 , s2 );\n  return c;\n\n}\n\n\nvec3 curlNoise_3_10( vec3 p ){\n  \n  const float e = .1;\n  vec3 dx = vec3( e   , 0.0 , 0.0 );\n  vec3 dy = vec3( 0.0 , e   , 0.0 );\n  vec3 dz = vec3( 0.0 , 0.0 , e   );\n\n  vec3 p_x0 = snoiseVec3_3_9( p - dx );\n  vec3 p_x1 = snoiseVec3_3_9( p + dx );\n  vec3 p_y0 = snoiseVec3_3_9( p - dy );\n  vec3 p_y1 = snoiseVec3_3_9( p + dy );\n  vec3 p_z0 = snoiseVec3_3_9( p - dz );\n  vec3 p_z1 = snoiseVec3_3_9( p + dz );\n\n  float x = p_y1.z - p_y0.z - p_z1.y + p_z0.y;\n  float y = p_z1.x - p_z0.x - p_x1.z + p_x0.z;\n  float z = p_x1.y - p_x0.y - p_y1.x + p_y0.x;\n\n  const float divisor = 1.0 / ( 2.0 * e );\n  return normalize( vec3( x , y , z ) * divisor );\n\n}\n\n\n\nmat4 rotationMatrix_1_11(vec3 axis, float angle)\n{\n    axis = normalize(axis);\n    float s = sin(angle);\n    float c = cos(angle);\n    float oc = 1.0 - c;\n    \n    return mat4(oc * axis.x * axis.x + c,           oc * axis.x * axis.y - axis.z * s,  oc * axis.z * axis.x + axis.y * s,  0.0,\n                oc * axis.x * axis.y + axis.z * s,  oc * axis.y * axis.y + c,           oc * axis.y * axis.z - axis.x * s,  0.0,\n                oc * axis.z * axis.x - axis.y * s,  oc * axis.y * axis.z + axis.x * s,  oc * axis.z * axis.z + c,           0.0,\n                0.0,                                0.0,                                0.0,                                1.0);\n}\n\n\n\nuniform sampler2D positions;\nuniform float timer;\nuniform float maxDepth;\nvarying vec2 vUv;\n\nvoid main() {\n    vec3 pos = texture2D( positions, vUv ).rgb;\n    mat4 rotateY = rotationMatrix_1_11(vec3(0.0, 1.0, 0.0), random_2_0(vUv) * 0.01);\n    vec3 velocity = curlNoise_3_10(pos * 0.02) * 0.5;\n    pos = pos + velocity; \n    if (pos.y > 10.0) {\n        pos = velocity;\n    }\n    /*\n    pos.z -= (random(vUv) * 10.0);\n    if (pos.z < -1000.0) {\n        pos.z = velocity.z;\n    }*/\n    \n    gl_FragColor = vec4( pos, 1.0 ) * rotateY;\n}\n";
         this.simulation_vs = "#define GLSLIFY 1\nvarying vec2 vUv;\nvoid main() {\n    vUv = vec2(uv.x, uv.y);\n    gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );\n}\n";
 
         this.width = 128;
@@ -55,9 +55,9 @@ var Beam = function () {
     }
 
     _createClass(Beam, [{
-        key: 'init',
-        value: function init() {
-            var geometry = new THREE.CubeGeometry(10, 5, 10);
+        key: 'initCubeParticles',
+        value: function initCubeParticles() {
+            var geometry = new THREE.CubeGeometry(100, 20, 100);
             var data = new Float32Array(this.width * this.height * 3);
             //let data = Util.getSphere(this.width * this.height, 128);
             var points = THREE.GeometryUtils.randomPointsInGeometry(geometry, this.width * this.height);
@@ -68,6 +68,12 @@ var Beam = function () {
             }
             var positions = new THREE.DataTexture(data, this.width, this.height, THREE.RGBFormat, THREE.FloatType);
             positions.needsUpdate = true;
+            return positions;
+        }
+    }, {
+        key: 'init',
+        value: function init() {
+            var positions = this.initCubeParticles();
             this.rttIn = positions;
 
             this.simulationShader = new THREE.ShaderMaterial({
@@ -83,7 +89,7 @@ var Beam = function () {
             this.renderShader = new THREE.ShaderMaterial({
                 uniforms: {
                     positions: { type: "t", value: null },
-                    pointSize: { type: "f", value: 2 }
+                    pointSize: { type: "f", value: 16 }
                 },
                 vertexShader: this.render_vs,
                 fragmentShader: this.render_fs,
@@ -91,8 +97,12 @@ var Beam = function () {
                 blending: THREE.AdditiveBlending
             });
 
+            // Particle geometry? Just once particle
+            var particleGeometry = new THREE.Geometry();
+            particleGeometry.vertices.push(new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, -1, 0), new THREE.Vector3(0, -1, -1));
+
             this.fbo = new _fbo2.default();
-            this.fbo.init(this.width, this.height, this.renderer, this.simulationShader, this.renderShader);
+            this.fbo.init(this.width, this.height, this.renderer, this.simulationShader, this.renderShader, particleGeometry);
             this.fbo.particles.position.y = -10;
             this.fbo.particles.position.x = 30;
             this.fbo.particles.position.z = 270;
@@ -160,17 +170,21 @@ var Game = function () {
         key: 'init',
         value: function init() {
             this.renderer = new THREE.WebGLRenderer();
-            this.renderer.setClearColor(0x00000, 1);
+            this.renderer.setClearColor(0x0C0C30, 1);
+            //this.renderer.setClearColor( 0x000000, 1 );
             var element = this.renderer.domElement;
             var container = document.getElementById('game');
             container.appendChild(element);
 
             this.scene = new THREE.Scene();
             this.camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 10000);
-            this.camera.position.z = 300;
+            this.camera.position.z = 100;
+
             this.control = new THREE.OrbitControls(this.camera, element);
             this.scene.add(this.camera);
             this.clock = new THREE.Clock();
+
+            //this.camera.rotation.x = 0.22;
 
             // A Beam
             this.beam = new _beam2.default(this.scene, this.renderer);
@@ -276,7 +290,7 @@ var FBO = function () {
 
     _createClass(FBO, [{
         key: "init",
-        value: function init(width, height, renderer, simulationMaterial, renderMaterial) {
+        value: function init(width, height, renderer, simulationMaterial, renderMaterial, particleGeometry) {
 
             var gl = renderer.getContext();
 
@@ -314,24 +328,58 @@ var FBO = function () {
             geom.addAttribute('uv', new _three2.default.BufferAttribute(new Float32Array([0, 1, 1, 1, 1, 0, 0, 1, 1, 0, 0, 0]), 2));
             this.scene.add(new _three2.default.Mesh(geom, simulationMaterial));
 
-            //6 the particles:
-            //create a vertex buffer of size width * height with normalized coordinates
-            var l = width * height;
-            var vertices = new Float32Array(l * 3);
-            for (var i = 0; i < l; i++) {
+            var particleVertices = particleGeometry.vertices;
+            console.log(particleVertices.length + " Particle vertices in each 'particle' ");
 
-                var i3 = i * 3;
-                vertices[i3] = i % width / width;
-                vertices[i3 + 1] = i / width / height;
+            // l is the number of 'elements'
+            var l = width * height;
+            console.log("Surface of the FBO: " + l);
+
+            // Each element is either one particle or a collection of particle vertices
+            var points = l * particleVertices.length;
+            console.log("Number of points: " + points);
+
+            // Now let's fill up the vertices array
+            var vertices = new Float32Array(points * 3);
+
+            var v = 0;
+            for (var i = 0; i < l; i++) {
+                for (var j = 0; j < particleVertices.length; j++) {
+                    vertices[v++] = particleVertices[j].x;
+                    vertices[v++] = particleVertices[j].y;
+                    vertices[v++] = particleVertices[j].z;
+                }
+            }
+
+            console.log("Vertices array: ", vertices);
+
+            var references = new Float32Array(points * 2);
+            for (var vert = 0; vert < points; vert++) {
+
+                var i = ~ ~(vert / 3);
+                var x = i % width / width;
+                var y = ~ ~(i / width) / height;
+
+                references[vert * 2] = x;
+                references[vert * 2 + 1] = y;
             }
 
             //create the particles geometry
             var geometry = new _three2.default.BufferGeometry();
             geometry.addAttribute('position', new _three2.default.BufferAttribute(vertices, 3));
+            geometry.addAttribute('reference', new _three2.default.BufferAttribute(references, 2));
 
             //the rendermaterial is used to render the particles
-            this.particles = new _three2.default.Points(geometry, renderMaterial);
-            this.particles.frustumCulled = false;
+            if (particleVertices.length > 1) {
+                this.particles = new _three2.default.Mesh(geometry, renderMaterial);
+                this.particles.matrixAutoUpdate = false;
+                this.particles.rotation.z = Math.PI / 2;
+                this.particles.rotation.x = Math.PI / 2;
+                this.particles.updateMatrix();
+            } else {
+                this.particles = new _three2.default.Points(geometry, renderMaterial);
+                this.particles.frustumCulled = false;
+            }
             this.renderer = renderer;
 
             // First render
