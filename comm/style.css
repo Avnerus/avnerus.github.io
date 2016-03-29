@@ -1,0 +1,20 @@
+body {
+    background-color: black;
+}
+#main-container {
+    font-family: "DejaVu Sans Mono";
+    color: white;
+}
+h1 {
+    text-align: center;
+}
+
+#skeleton {
+    bottom: 20px;
+    left: 20px;
+    position: relative;
+}
+
+.category {
+    text-align: center;
+}
