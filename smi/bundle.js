@@ -65,8 +65,8 @@ var Game = function () {
             this.keyboard.keyDown = function (note, frequency) {
                 console.log(frequency);
                 self.sampler.player.playbackRate = frequency / 440;
-                self.sampler.triggerAttackWithOffset("A.1", 0, 1, self.offset);
-                //self.synth.triggerAttack(frequency);
+                self.sampler.triggerAttackWithOffset("A.1", null, 1, self.offset);
+                //self.sampler.triggerAttackWithOffset("A.1", null);
             };
             this.keyboard.keyUp = function () {
                 self.sampler.triggerRelease();
