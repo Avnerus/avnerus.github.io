@@ -1,6 +1,7 @@
 import QwertyHancock from 'qwerty-hancock'
 import Tone from 'tone'
 
+// Blash
 export default class Game {
     constructor() {
         console.log("Game constructed!")
