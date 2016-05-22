@@ -13947,7 +13947,6 @@ var updateIn = 5;
 var timer = null;
 
 function onInterval() {
-    console.log("oninterval!");
     updateIn -= 1;
     $('#update-in').text(updateIn);
     if (updateIn == 0) {
