@@ -740,8 +740,8 @@ var Client = function () {
     _createClass(Client, [{
         key: "init",
         value: function init() {
-            meSpeak.loadConfig("/mespeak_config.json");
-            meSpeak.loadVoice("/voices/en/en.json");
+            meSpeak.loadConfig("mespeak_config.json");
+            meSpeak.loadVoice("voices/en/en.json");
             var self = this;
 
             this.options = {};
