@@ -1,0 +1,26 @@
+body {
+    background-color: white;
+}
+
+.container-fluid {
+    padding: 0;
+}
+
+#client-local-video  {
+    display: none;
+}
+#client-remote-videos video {
+    display: none;
+}
+
+#guru-local-video  {
+    height: 150px;
+}
+#guru-remote-videos video {
+    height: 600px;
+}
+
+#nao-img {
+    margin: auto;
+    height: 800px;
+}
