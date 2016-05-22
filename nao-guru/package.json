@@ -1,0 +1,34 @@
+{
+  "name": "nao-guru",
+  "version": "1.0.0",
+  "description": "Telepresent Nao",
+  "main": "index.js",
+  "scripts": {
+    "start": "budo index.js:bundle.js -- -t [ babelify --presets [ es2015  ]  ] -t [ browserify-shim  ]"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Avnerus/nao-guru.git"
+  },
+  "devDependencies": {
+    "babel-preset-es2015": "^6.5.0",
+    "babelify": "^7.2.0",
+    "browserify": ">=3.20.0",
+    "browserify-shim": "^3.8.10"
+  },
+  "browserify-shim": {},
+  "babelify": {
+    "presets": [
+      "es2015"
+    ]
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Avnerus/nao-guru/issues"
+  },
+  "homepage": "https://github.com/Avnerus/nao-guru#readme",
+  "dependencies": {
+    "simplewebrtc": "^2.1.1"
+  }
+}

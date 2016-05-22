@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags always come first -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <title>Nao Meditations</title>
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="style.css">
+  </head>
+  <body>
+     <div id="main-container"class="container-fluid">
+         <h1>GURU Admin</h1>
+         <div class="row">
+            <div class="col-md-2">
+                <video id="guru-local-video"></video>
+            </div>
+            <div class="col-md-6">
+                <form id="guru-form">
+                      <fieldset class="form-group">
+                        <label for="Say">Say</label>
+                        <input type="text" class="form-control" id="sayInput" placeholder="Say something..">
+                      </fieldset>
+                      <button type="submit" class="btn btn-primary">Submit</button>
+                </form>
+            </div>
+         </div>
+         <div class="row">
+            <div id="guru-remote-videos"></div>
+         </div>
+    </div>
+
+    <!-- jQuery first, then Bootstrap JS. -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+    <script src="bootstrap/js/tether.min.js"></script>
+    <script src="bootstrap/js/bootstrap.min.js"></script>
+    <script src="bundle.js"></script>
+    <script>
+        console.log("NAO Meditations Guru");
+        var guru = new Guru();
+
+        window.onload = function() {
+            console.log("Loading...");
+            guru.init();
+        }
+    </script>
+  </body>
+</html>
