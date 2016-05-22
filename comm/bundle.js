@@ -360,120 +360,137 @@ var objectKeys = Object.keys || function (obj) {
 };
 
 },{"util/":54}],2:[function(require,module,exports){
-'use strict'
+;(function (exports) {
+  'use strict'
 
-exports.toByteArray = toByteArray
-exports.fromByteArray = fromByteArray
-
-var lookup = []
-var revLookup = []
-var Arr = typeof Uint8Array !== 'undefined' ? Uint8Array : Array
-
-function init () {
   var i
   var code = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'
-  var len = code.length
-
-  for (i = 0; i < len; i++) {
+  var lookup = []
+  for (i = 0; i < code.length; i++) {
     lookup[i] = code[i]
   }
+  var revLookup = []
 
-  for (i = 0; i < len; ++i) {
+  for (i = 0; i < code.length; ++i) {
     revLookup[code.charCodeAt(i)] = i
   }
   revLookup['-'.charCodeAt(0)] = 62
   revLookup['_'.charCodeAt(0)] = 63
-}
 
-init()
+  var Arr = (typeof Uint8Array !== 'undefined')
+    ? Uint8Array
+    : Array
 
-function toByteArray (b64) {
-  var i, j, l, tmp, placeHolders, arr
-  var len = b64.length
-
-  if (len % 4 > 0) {
-    throw new Error('Invalid string. Length must be a multiple of 4')
+  function decode (elt) {
+    var v = revLookup[elt.charCodeAt(0)]
+    return v !== undefined ? v : -1
   }
 
-  // the number of equal signs (place holders)
-  // if there are two placeholders, than the two characters before it
-  // represent one byte
-  // if there is only one, then the three characters before it represent 2 bytes
-  // this is just a cheap hack to not do indexOf twice
-  placeHolders = b64[len - 2] === '=' ? 2 : b64[len - 1] === '=' ? 1 : 0
+  function b64ToByteArray (b64) {
+    var i, j, l, tmp, placeHolders, arr
 
-  // base64 is 4/3 + up to two characters of the original data
-  arr = new Arr(len * 3 / 4 - placeHolders)
+    if (b64.length % 4 > 0) {
+      throw new Error('Invalid string. Length must be a multiple of 4')
+    }
 
-  // if there are placeholders, only get up to the last complete 4 chars
-  l = placeHolders > 0 ? len - 4 : len
+    // the number of equal signs (place holders)
+    // if there are two placeholders, than the two characters before it
+    // represent one byte
+    // if there is only one, then the three characters before it represent 2 bytes
+    // this is just a cheap hack to not do indexOf twice
+    var len = b64.length
+    placeHolders = b64.charAt(len - 2) === '=' ? 2 : b64.charAt(len - 1) === '=' ? 1 : 0
 
-  var L = 0
+    // base64 is 4/3 + up to two characters of the original data
+    arr = new Arr(b64.length * 3 / 4 - placeHolders)
 
-  for (i = 0, j = 0; i < l; i += 4, j += 3) {
-    tmp = (revLookup[b64.charCodeAt(i)] << 18) | (revLookup[b64.charCodeAt(i + 1)] << 12) | (revLookup[b64.charCodeAt(i + 2)] << 6) | revLookup[b64.charCodeAt(i + 3)]
-    arr[L++] = (tmp & 0xFF0000) >> 16
-    arr[L++] = (tmp & 0xFF00) >> 8
-    arr[L++] = tmp & 0xFF
+    // if there are placeholders, only get up to the last complete 4 chars
+    l = placeHolders > 0 ? b64.length - 4 : b64.length
+
+    var L = 0
+
+    function push (v) {
+      arr[L++] = v
+    }
+
+    for (i = 0, j = 0; i < l; i += 4, j += 3) {
+      tmp = (decode(b64.charAt(i)) << 18) | (decode(b64.charAt(i + 1)) << 12) | (decode(b64.charAt(i + 2)) << 6) | decode(b64.charAt(i + 3))
+      push((tmp & 0xFF0000) >> 16)
+      push((tmp & 0xFF00) >> 8)
+      push(tmp & 0xFF)
+    }
+
+    if (placeHolders === 2) {
+      tmp = (decode(b64.charAt(i)) << 2) | (decode(b64.charAt(i + 1)) >> 4)
+      push(tmp & 0xFF)
+    } else if (placeHolders === 1) {
+      tmp = (decode(b64.charAt(i)) << 10) | (decode(b64.charAt(i + 1)) << 4) | (decode(b64.charAt(i + 2)) >> 2)
+      push((tmp >> 8) & 0xFF)
+      push(tmp & 0xFF)
+    }
+
+    return arr
   }
 
-  if (placeHolders === 2) {
-    tmp = (revLookup[b64.charCodeAt(i)] << 2) | (revLookup[b64.charCodeAt(i + 1)] >> 4)
-    arr[L++] = tmp & 0xFF
-  } else if (placeHolders === 1) {
-    tmp = (revLookup[b64.charCodeAt(i)] << 10) | (revLookup[b64.charCodeAt(i + 1)] << 4) | (revLookup[b64.charCodeAt(i + 2)] >> 2)
-    arr[L++] = (tmp >> 8) & 0xFF
-    arr[L++] = tmp & 0xFF
+  function encode (num) {
+    return lookup[num]
   }
 
-  return arr
-}
-
-function tripletToBase64 (num) {
-  return lookup[num >> 18 & 0x3F] + lookup[num >> 12 & 0x3F] + lookup[num >> 6 & 0x3F] + lookup[num & 0x3F]
-}
-
-function encodeChunk (uint8, start, end) {
-  var tmp
-  var output = []
-  for (var i = start; i < end; i += 3) {
-    tmp = (uint8[i] << 16) + (uint8[i + 1] << 8) + (uint8[i + 2])
-    output.push(tripletToBase64(tmp))
-  }
-  return output.join('')
-}
-
-function fromByteArray (uint8) {
-  var tmp
-  var len = uint8.length
-  var extraBytes = len % 3 // if we have 1 byte left, pad 2 bytes
-  var output = ''
-  var parts = []
-  var maxChunkLength = 16383 // must be multiple of 3
-
-  // go through the array every three bytes, we'll deal with trailing stuff later
-  for (var i = 0, len2 = len - extraBytes; i < len2; i += maxChunkLength) {
-    parts.push(encodeChunk(uint8, i, (i + maxChunkLength) > len2 ? len2 : (i + maxChunkLength)))
+  function tripletToBase64 (num) {
+    return encode(num >> 18 & 0x3F) + encode(num >> 12 & 0x3F) + encode(num >> 6 & 0x3F) + encode(num & 0x3F)
   }
 
-  // pad the end with zeros, but make sure to not forget the extra bytes
-  if (extraBytes === 1) {
-    tmp = uint8[len - 1]
-    output += lookup[tmp >> 2]
-    output += lookup[(tmp << 4) & 0x3F]
-    output += '=='
-  } else if (extraBytes === 2) {
-    tmp = (uint8[len - 2] << 8) + (uint8[len - 1])
-    output += lookup[tmp >> 10]
-    output += lookup[(tmp >> 4) & 0x3F]
-    output += lookup[(tmp << 2) & 0x3F]
-    output += '='
+  function encodeChunk (uint8, start, end) {
+    var temp
+    var output = []
+    for (var i = start; i < end; i += 3) {
+      temp = (uint8[i] << 16) + (uint8[i + 1] << 8) + (uint8[i + 2])
+      output.push(tripletToBase64(temp))
+    }
+    return output.join('')
   }
 
-  parts.push(output)
+  function uint8ToBase64 (uint8) {
+    var i
+    var extraBytes = uint8.length % 3 // if we have 1 byte left, pad 2 bytes
+    var output = ''
+    var parts = []
+    var temp, length
+    var maxChunkLength = 16383 // must be multiple of 3
 
-  return parts.join('')
-}
+    // go through the array every three bytes, we'll deal with trailing stuff later
+
+    for (i = 0, length = uint8.length - extraBytes; i < length; i += maxChunkLength) {
+      parts.push(encodeChunk(uint8, i, (i + maxChunkLength) > length ? length : (i + maxChunkLength)))
+    }
+
+    // pad the end with zeros, but make sure to not forget the extra bytes
+    switch (extraBytes) {
+      case 1:
+        temp = uint8[uint8.length - 1]
+        output += encode(temp >> 2)
+        output += encode((temp << 4) & 0x3F)
+        output += '=='
+        break
+      case 2:
+        temp = (uint8[uint8.length - 2] << 8) + (uint8[uint8.length - 1])
+        output += encode(temp >> 10)
+        output += encode((temp >> 4) & 0x3F)
+        output += encode((temp << 2) & 0x3F)
+        output += '='
+        break
+      default:
+        break
+    }
+
+    parts.push(output)
+
+    return parts.join('')
+  }
+
+  exports.toByteArray = b64ToByteArray
+  exports.fromByteArray = uint8ToBase64
+}(typeof exports === 'undefined' ? (this.base64js = {}) : exports))
 
 },{}],3:[function(require,module,exports){
 
@@ -12126,16 +12143,10 @@ var IncomingMessage = exports.IncomingMessage = function (xhr, response, mode) {
 			var matches = header.match(/^([^:]+):\s*(.*)/)
 			if (matches) {
 				var key = matches[1].toLowerCase()
-				if (key === 'set-cookie') {
-					if (self.headers[key] === undefined) {
-						self.headers[key] = []
-					}
-					self.headers[key].push(matches[2])
-				} else if (self.headers[key] !== undefined) {
+				if (self.headers[key] !== undefined)
 					self.headers[key] += ', ' + matches[2]
-				} else {
+				else
 					self.headers[key] = matches[2]
-				}
 				self.rawHeaders.push(matches[1], matches[2])
 			}
 		})
@@ -13932,15 +13943,39 @@ function extend() {
 
 },{}],56:[function(require,module,exports){
 var fetch = require('node-fetch');
-console.log("Update account balance!");
-fetch('https://dl.dropboxusercontent.com/s/qawpeqy0v44agrz/balance.json?dl=1')
-.then(function(res) {
-    return res.json(); 
-})
-.then(function(json) {
-    console.log(json);
-    $('#current-balance').text(json.balance + " EUR");
-})
+var updateIn = 5;
+var timer = null;
+
+function onInterval() {
+    console.log("oninterval!");
+    updateIn -= 1;
+    $('#update-in').text(updateIn);
+    if (updateIn == 0) {
+        clearInterval(timer);
+        timer = null;
+        $('#current-balance').text("????");
+        updateBalance();
+    }
+}
+
+function updateBalance() {
+    fetch('https://dl.dropboxusercontent.com/s/qawpeqy0v44agrz/balance.json?dl=1')
+    .then(function(res) {
+        return res.json(); 
+    })
+    .then(function(json) {
+        $('#current-balance').text(json.balance + " EUR");
+
+        if (!timer) {
+            updateIn = 6;
+            timer = setInterval(onInterval, 1000);
+        }
+    })
+}
+
+
+updateBalance();
+
 
 },{"node-fetch":81}],57:[function(require,module,exports){
 (function (Buffer){
@@ -17953,15 +17988,19 @@ var isStream = module.exports = function (stream) {
 };
 
 isStream.writable = function (stream) {
-	return isStream(stream) && stream.writable !== false && typeof stream._write == 'function' && typeof stream._writableState == 'object';
+	return isStream(stream) && stream.writable !== false && typeof stream._write === 'function' && typeof stream._writableState === 'object';
 };
 
 isStream.readable = function (stream) {
-	return isStream(stream) && stream.readable !== false && typeof stream._read == 'function' && typeof stream._readableState == 'object';
+	return isStream(stream) && stream.readable !== false && typeof stream._read === 'function' && typeof stream._readableState === 'object';
 };
 
 isStream.duplex = function (stream) {
 	return isStream.writable(stream) && isStream.readable(stream);
+};
+
+isStream.transform = function (stream) {
+	return isStream.duplex(stream) && typeof stream._transform === 'function' && typeof stream._transformState === 'object';
 };
 
 },{}],81:[function(require,module,exports){
@@ -17984,6 +18023,7 @@ var Body = require('./lib/body');
 var Response = require('./lib/response');
 var Headers = require('./lib/headers');
 var Request = require('./lib/request');
+var FetchError = require('./lib/fetch-error');
 
 // commonjs
 module.exports = Fetch;
@@ -18041,7 +18081,7 @@ function Fetch(url, opts) {
 			headers.set('user-agent', 'node-fetch/1.0 (+https://github.com/bitinn/node-fetch)');
 		}
 
-		if (!headers.has('connection')) {
+		if (!headers.has('connection') && !options.agent) {
 			headers.set('connection', 'close');
 		}
 
@@ -18082,28 +18122,33 @@ function Fetch(url, opts) {
 			req.once('socket', function(socket) {
 				reqTimeout = setTimeout(function() {
 					req.abort();
-					reject(new Error('network timeout at: ' + options.url));
+					reject(new FetchError('network timeout at: ' + options.url, 'request-timeout'));
 				}, options.timeout);
 			});
 		}
 
 		req.on('error', function(err) {
 			clearTimeout(reqTimeout);
-			reject(new Error('request to ' + options.url + ' failed, reason: ' + err.message));
+			reject(new FetchError('request to ' + options.url + ' failed, reason: ' + err.message, 'system', err));
 		});
 
 		req.on('response', function(res) {
 			clearTimeout(reqTimeout);
 
 			// handle redirect
-			if (self.isRedirect(res.statusCode)) {
+			if (self.isRedirect(res.statusCode) && options.redirect !== 'manual') {
+				if (options.redirect === 'error') {
+					reject(new FetchError('redirect mode is set to error: ' + options.url, 'no-redirect'));
+					return;
+				}
+
 				if (options.counter >= options.follow) {
-					reject(new Error('maximum redirect reached at: ' + options.url));
+					reject(new FetchError('maximum redirect reached at: ' + options.url, 'max-redirect'));
 					return;
 				}
 
 				if (!res.headers.location) {
-					reject(new Error('redirect location header missing at: ' + options.url));
+					reject(new FetchError('redirect location header missing at: ' + options.url, 'invalid-redirect'));
 					return;
 				}
 
@@ -18134,6 +18179,11 @@ function Fetch(url, opts) {
 				} else if (name == 'deflate' || name == 'x-deflate') {
 					body = body.pipe(zlib.createInflate());
 				}
+			}
+
+			// normalize location header for manual redirect mode
+			if (options.redirect === 'manual' && headers.has('location')) {
+				headers.set('location', resolve_url(options.url, headers.get('location')));
 			}
 
 			// response object
@@ -18179,22 +18229,24 @@ Fetch.Headers = Headers;
 Fetch.Request = Request;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer)
-},{"./lib/body":82,"./lib/headers":83,"./lib/request":84,"./lib/response":85,"buffer":6,"http":44,"https":11,"stream":43,"url":50,"zlib":5}],82:[function(require,module,exports){
+},{"./lib/body":82,"./lib/fetch-error":83,"./lib/headers":84,"./lib/request":85,"./lib/response":86,"buffer":6,"http":44,"https":11,"stream":43,"url":50,"zlib":5}],82:[function(require,module,exports){
 (function (global,Buffer){
+
 /**
- * response.js
+ * body.js
  *
- * Response class provides content decoding
+ * Body interface provides common methods for Request and Response
  */
 
 var convert = require('encoding').convert;
 var bodyStream = require('is-stream');
 var PassThrough = require('stream').PassThrough;
+var FetchError = require('./fetch-error');
 
 module.exports = Body;
 
 /**
- * Response class
+ * Body class
  *
  * @param   Stream  body  Readable stream
  * @param   Object  opts  Response options
@@ -18274,13 +18326,13 @@ Body.prototype._decode = function() {
 		if (self.timeout) {
 			resTimeout = setTimeout(function() {
 				self._abort = true;
-				reject(new Error('response timeout at ' + self.url + ' over limit: ' + self.timeout));
+				reject(new FetchError('response timeout at ' + self.url + ' over limit: ' + self.timeout, 'body-timeout'));
 			}, self.timeout);
 		}
 
 		// handle stream error, such as incorrect content-encoding
 		self.body.on('error', function(err) {
-			reject(new Error('invalid response body at: ' + self.url + ' reason: ' + err.message));
+			reject(new FetchError('invalid response body at: ' + self.url + ' reason: ' + err.message, 'system', err));
 		});
 
 		self.body.on('data', function(chunk) {
@@ -18290,7 +18342,7 @@ Body.prototype._decode = function() {
 
 			if (self.size && self._bytes + chunk.length > self.size) {
 				self._abort = true;
-				reject(new Error('content size at ' + self.url + ' over limit: ' + self.size));
+				reject(new FetchError('content size at ' + self.url + ' over limit: ' + self.size, 'max-size'));
 				return;
 			}
 
@@ -18389,11 +18441,14 @@ Body.prototype._clone = function(instance) {
 	var pass;
 	var body = instance.body;
 
+	// don't allow cloning a used body
 	if (instance.bodyUsed) {
 		throw new Error('cannot clone body after it is used');
 	}
 
-	if (bodyStream(body)) {
+	// check that body is a stream and not form-data object
+	// note: we can't clone the form-data object without having it as a dependency
+	if (bodyStream(body) && typeof body.getBoundary !== 'function') {
 		pass = new PassThrough();
 		body.pipe(pass);
 		body = pass;
@@ -18406,7 +18461,44 @@ Body.prototype._clone = function(instance) {
 Body.Promise = global.Promise;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer)
-},{"buffer":6,"encoding":57,"is-stream":80,"stream":43}],83:[function(require,module,exports){
+},{"./fetch-error":83,"buffer":6,"encoding":57,"is-stream":80,"stream":43}],83:[function(require,module,exports){
+
+/**
+ * fetch-error.js
+ *
+ * FetchError interface for operational errors
+ */
+
+module.exports = FetchError;
+
+/**
+ * Create FetchError instance
+ *
+ * @param   String      message      Error message for human
+ * @param   String      type         Error type for machine
+ * @param   String      systemError  For Node.js system error
+ * @return  FetchError
+ */
+function FetchError(message, type, systemError) {
+
+	// hide custom error implementation details from end-users
+	Error.captureStackTrace(this, this.constructor);
+
+	this.name = this.constructor.name;
+	this.message = message;
+	this.type = type;
+
+	// when err.type is `system`, err.code contains system error code
+	if (systemError) {
+		this.code = this.errno = systemError.code;
+	}
+
+}
+
+require('util').inherits(FetchError, Error);
+
+},{"util":54}],84:[function(require,module,exports){
+
 /**
  * headers.js
  *
@@ -18548,7 +18640,8 @@ Headers.prototype.raw = function() {
 	return this._headers;
 };
 
-},{}],84:[function(require,module,exports){
+},{}],85:[function(require,module,exports){
+
 /**
  * request.js
  *
@@ -18594,6 +18687,7 @@ function Request(input, init) {
 
 	// fetch spec options
 	this.method = init.method || input.method || 'GET';
+	this.redirect = init.redirect || input.redirect || 'follow';
 	this.headers = new Headers(init.headers || input.headers || {});
 	this.url = url;
 
@@ -18605,7 +18699,7 @@ function Request(input, init) {
 		init.compress : input.compress !== undefined ?
 		input.compress : true;
 	this.counter = init.counter || input.counter || input.follow || 0;
-	this.agent = init.agent || input.agent || input.agent;
+	this.agent = init.agent || input.agent;
 
 	Body.call(this, init.body || this._clone(input), {
 		timeout: init.timeout || input.timeout || 0,
@@ -18631,7 +18725,8 @@ Request.prototype.clone = function() {
 	return new Request(this);
 };
 
-},{"./body":82,"./headers":83,"url":50}],85:[function(require,module,exports){
+},{"./body":82,"./headers":84,"url":50}],86:[function(require,module,exports){
+
 /**
  * response.js
  *
@@ -18682,4 +18777,4 @@ Response.prototype.clone = function() {
 	});
 };
 
-},{"./body":82,"./headers":83,"http":44}]},{},[56]);
+},{"./body":82,"./headers":84,"http":44}]},{},[56]);

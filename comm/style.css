@@ -18,3 +18,18 @@ h1 {
 .category {
     text-align: center;
 }
+
+.resources {
+    font-size: 20px;
+}
+
+.balance {
+    color: #CC00BB
+}
+.update {
+    color: red;
+}
+
+.resources .row {
+    margin-top: 10px;
+}
