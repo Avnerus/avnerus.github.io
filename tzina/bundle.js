@@ -7065,7 +7065,7 @@ var CollisionManager = function () {
 
             console.log("Add bounding boxes from ", obj);
             obj.traverse(function (child) {
-                if (child.type == "Object3D" && (child.name == "Object_1110" || child.name == "Object_1111")) {
+                if (child.type == "Object3D" && (child.name == "Object_1077" || child.name == "Object_1110" || child.name == "Object_1111")) {
                     console.log(child);
                     var bbox = new THREE.BoundingBoxHelper(child, 0x00ff00);
                     bbox.update();
@@ -7074,7 +7074,6 @@ var CollisionManager = function () {
                     _this.obstacles.push([bbox.box.min.x, bbox.box.min.y, bbox.box.min.z, bbox.box.max.x, bbox.box.max.y, bbox.box.max.z]);
                 }
             });
-            console.log(this.obstacles);
         }
     }, {
         key: "isClimbingStairs",
@@ -7152,7 +7151,7 @@ var Game = function () {
     _createClass(Game, [{
         key: 'init',
         value: function init() {
-            this.renderer = new THREE.WebGLRenderer();
+            this.renderer = new THREE.WebGLRenderer({ antialias: true });
             this.renderer.setClearColor(0, 1);
             //this.renderer.setClearColor( 0x000000, 1 );
 
