@@ -7008,7 +7008,7 @@ var Character = function () {
 
 exports.default = Character;
 
-},{"./util/video_rgbd":50}],41:[function(require,module,exports){
+},{"./util/video_rgbd":51}],41:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -7086,7 +7086,7 @@ var Clouds = function () {
 
 exports.default = Clouds;
 
-},{"./util/video360":49}],42:[function(require,module,exports){
+},{"./util/video360":50}],42:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -7267,6 +7267,10 @@ var _keyboard_controller = require('./keyboard_controller');
 
 var _keyboard_controller2 = _interopRequireDefault(_keyboard_controller);
 
+var _rain_shader = require('./rain_shader');
+
+var _rain_shader2 = _interopRequireDefault(_rain_shader);
+
 function _interopRequireDefault(obj) {
     return obj && obj.__esModule ? obj : { default: obj };
 }
@@ -7322,6 +7326,15 @@ var Game = function () {
                 position: [-496, 29, 157],
                 rotation: [0, 40, 0]
             });
+
+            // Post processing
+            this.composer = new THREE.EffectComposer(this.renderer);
+            var renderPass = new THREE.RenderPass(this.scene, this.camera);
+            this.composer.addPass(renderPass);
+
+            var effect = new THREE.ShaderPass(_rain_shader2.default);
+            effect.renderToScreen = true;
+            this.composer.addPass(effect);
 
             this.resize();
         }
@@ -7384,6 +7397,7 @@ var Game = function () {
     }, {
         key: 'render',
         value: function render(dt) {
+            // this.composer.render();
             this.renderer.render(this.scene, this.camera);
         }
     }, {
@@ -7394,6 +7408,7 @@ var Game = function () {
             this.camera.aspect = width / height;
             this.camera.updateProjectionMatrix();
             this.renderer.setSize(width, height);
+            this.composer.setSize(width, height);
         }
     }]);
 
@@ -7402,7 +7417,7 @@ var Game = function () {
 
 exports.default = Game;
 
-},{"./character":40,"./collision_manager":42,"./keyboard_controller":46,"./sky":47,"./square":48}],45:[function(require,module,exports){
+},{"./character":40,"./collision_manager":42,"./keyboard_controller":46,"./rain_shader":47,"./sky":48,"./square":49}],45:[function(require,module,exports){
 'use strict';
 
 var Game = require('./game').default;
@@ -7653,6 +7668,21 @@ var KeyboardController = function () {
 exports.default = KeyboardController;
 
 },{}],47:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+exports.default = {
+    uniforms: {
+        "tDiffuse": { type: "t", value: null }
+    },
+    vertexShader: "#define GLSLIFY 1\nvarying vec2 vUv;\n\nvoid main() {\n\n    vUv = uv;\n\n    gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0  );\n}\n",
+    fragmentShader: "#define GLSLIFY 1\nuniform sampler2D tDiffuse;\n\nvarying vec2 vUv;\n\nvoid main() {\n\n        vec4 color = texture2D( tDiffuse, vUv );\n\n        gl_FragColor = color;\n}\n"
+};
+
+},{}],48:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -7762,7 +7792,7 @@ var Sky = function () {
 
 exports.default = Sky;
 
-},{"./clouds":41}],48:[function(require,module,exports){
+},{"./clouds":41}],49:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -7786,6 +7816,7 @@ function _classCallCheck(instance, Constructor) {
 }
 
 var MODEL_PATH = "assets/square/scene.json";
+var TREES_PATH = "assets/trees/points.ply";
 
 var Square = function () {
     function Square() {
@@ -7813,6 +7844,17 @@ var Square = function () {
                 _this.squareCenter = new THREE.Vector3();
                 _this.squareCenter.setFromMatrixPosition(_this.squareMiddle.matrixWorld);
             });
+
+            var treesLoader = new THREE.PLYLoader(loadingManager);
+            treesLoader.load(TREES_PATH, function (geometry) {
+                console.log("Loaded trees ", geometry);
+                var material = new THREE.PointsMaterial({ size: 0.05, vertexColors: true });
+                var mesh = new THREE.Points(geometry, material);
+                mesh.position.set(-470, 22, 183);
+                mesh.rotateZ(90 * Math.PI / 180);
+
+                scene.add(mesh);
+            });
         }
     }, {
         key: "update",
@@ -7829,7 +7871,7 @@ var Square = function () {
 
 exports.default = Square;
 
-},{}],49:[function(require,module,exports){
+},{}],50:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -7899,7 +7941,7 @@ var Video360 = function () {
 
 exports.default = Video360;
 
-},{}],50:[function(require,module,exports){
+},{}],51:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
