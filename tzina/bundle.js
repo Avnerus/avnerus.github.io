@@ -6992,9 +6992,13 @@ var Character = function () {
             this.videoRGBD.rotation.set(this.props.rotation[0] * Math.PI / 180, this.props.rotation[1] * Math.PI / 180, this.props.rotation[2] * Math.PI / 180);
 
             this.videoRGBD.scale.set(0.02, 0.02, 0.02);
-            this.videoRGBD.play();
 
             scene.add(this.videoRGBD);
+        }
+    }, {
+        key: "play",
+        value: function play() {
+            this.videoRGBD.play();
         }
     }, {
         key: "update",
@@ -7310,11 +7314,6 @@ var Game = function () {
             this.loadingManager = new THREE.LoadingManager();
             this.collisionManager = new _collision_manager2.default(this.camera);
 
-            // SKY
-            this.sky = new _sky2.default();
-            this.sky.init();
-            this.scene.add(this.sky.mesh);
-
             // Square
             this.square = new _square2.default();
 
@@ -7341,9 +7340,15 @@ var Game = function () {
     }, {
         key: 'load',
         value: function load(onLoad) {
+            var _this = this;
+
             var objectReady = function objectReady(obj) {};
             this.loadingManager.onLoad = function () {
+
                 console.log("Done loading everything!");
+                _this.sky = new _sky2.default();
+                _this.sky.init();
+                _this.scene.add(_this.sky.mesh);
 
                 onLoad();
             };
@@ -7352,6 +7357,7 @@ var Game = function () {
             };
 
             this.square.init(this.scene, this.collisionManager, this.loadingManager);
+            this.testCharacter.init(this.scene);
         }
     }, {
         key: 'start',
@@ -7374,7 +7380,8 @@ var Game = function () {
             } else {
                 this.controls = new THREE.OrbitControls(this.camera, element);
             }
-            this.testCharacter.init(this.scene);
+
+            this.testCharacter.play();
         }
     }, {
         key: 'animate',
