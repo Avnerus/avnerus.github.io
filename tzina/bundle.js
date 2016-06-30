@@ -6978,8 +6978,9 @@ var Character = function () {
     function Character(props) {
         _classCallCheck(this, Character);
 
-        console.log("Character constructed!");
         this.videoRGBD = new _video_rgbd2.default(props);
+
+        console.log(props.name + " character constructed!");
 
         this.props = props;
     }
@@ -7012,7 +7013,7 @@ var Character = function () {
 
 exports.default = Character;
 
-},{"./util/video_rgbd":51}],41:[function(require,module,exports){
+},{"./util/video_rgbd":52}],41:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -7090,7 +7091,7 @@ var Clouds = function () {
 
 exports.default = Clouds;
 
-},{"./util/video360":50}],42:[function(require,module,exports){
+},{"./util/video360":51}],42:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -7235,6 +7236,84 @@ exports.default = {
 };
 
 },{}],44:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _createClass = function () {
+    function defineProperties(target, props) {
+        for (var i = 0; i < props.length; i++) {
+            var descriptor = props[i];descriptor.enumerable = descriptor.enumerable || false;descriptor.configurable = true;if ("value" in descriptor) descriptor.writable = true;Object.defineProperty(target, descriptor.key, descriptor);
+        }
+    }return function (Constructor, protoProps, staticProps) {
+        if (protoProps) defineProperties(Constructor.prototype, protoProps);if (staticProps) defineProperties(Constructor, staticProps);return Constructor;
+    };
+}();
+
+function _classCallCheck(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+        throw new TypeError("Cannot call a class as a function");
+    }
+}
+
+function _possibleConstructorReturn(self, call) {
+    if (!self) {
+        throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
+    }return call && (typeof call === "object" || typeof call === "function") ? call : self;
+}
+
+function _inherits(subClass, superClass) {
+    if (typeof superClass !== "function" && superClass !== null) {
+        throw new TypeError("Super expression must either be null or a function, not " + typeof superClass);
+    }subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } });if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass;
+}
+
+var MAX_FLOOD_HEIGHT = 13;
+
+var Flood = function (_THREE$Object3D) {
+    _inherits(Flood, _THREE$Object3D);
+
+    function Flood() {
+        _classCallCheck(this, Flood);
+
+        var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(Flood).call(this));
+
+        console.log("Flood constructed!");
+        return _this;
+    }
+
+    _createClass(Flood, [{
+        key: "init",
+        value: function init(scene) {
+            this.geometry = new THREE.PlaneBufferGeometry(100000, 100000);
+            var material = new THREE.MeshBasicMaterial({
+                color: new THREE.Color(0xfbdfd3),
+                opacity: 0.75,
+                transparent: true,
+                side: THREE.DoubleSide
+            });
+            this.mesh = new THREE.Mesh(this.geometry, material);
+            this.mesh.position.y = 0;
+            this.mesh.rotation.x = -Math.PI / 2;
+            this.add(this.mesh);
+        }
+    }, {
+        key: "update",
+        value: function update(dt) {
+            if (this.mesh.position.y < MAX_FLOOD_HEIGHT) {
+                this.mesh.position.y += 0.01;
+            }
+        }
+    }]);
+
+    return Flood;
+}(THREE.Object3D);
+
+exports.default = Flood;
+
+},{}],45:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -7271,9 +7350,13 @@ var _keyboard_controller = require('./keyboard_controller');
 
 var _keyboard_controller2 = _interopRequireDefault(_keyboard_controller);
 
-var _rain_shader = require('./rain_shader');
+var _post_shader = require('./post_shader');
 
-var _rain_shader2 = _interopRequireDefault(_rain_shader);
+var _post_shader2 = _interopRequireDefault(_post_shader);
+
+var _flood = require('./flood');
+
+var _flood2 = _interopRequireDefault(_flood);
 
 function _interopRequireDefault(obj) {
     return obj && obj.__esModule ? obj : { default: obj };
@@ -7323,7 +7406,8 @@ var Game = function () {
                 mindepth: 404.999969482,
                 maxdepth: 1111.719970703,
                 position: [-496, 29, 157],
-                rotation: [0, 40, 0]
+                rotation: [0, 40, 0],
+                name: 'test'
             });
 
             // Post processing
@@ -7331,7 +7415,7 @@ var Game = function () {
             var renderPass = new THREE.RenderPass(this.scene, this.camera);
             this.composer.addPass(renderPass);
 
-            var effect = new THREE.ShaderPass(_rain_shader2.default);
+            var effect = new THREE.ShaderPass(_post_shader2.default);
             effect.renderToScreen = true;
             this.composer.addPass(effect);
 
@@ -7358,6 +7442,10 @@ var Game = function () {
 
             this.square.init(this.scene, this.collisionManager, this.loadingManager);
             this.testCharacter.init(this.scene);
+
+            this.flood = new _flood2.default();
+            this.flood.init();
+            this.scene.add(this.flood);
         }
     }, {
         key: 'start',
@@ -7376,12 +7464,12 @@ var Game = function () {
                 this.collisionManager.setPlayer(controls.getObject());
 
                 // Get in the square
-                this.keyboardController.setPosition(-475, 30, 183);
+                //this.keyboardController.setPosition(-475, 30, 183);
             } else {
-                this.controls = new THREE.OrbitControls(this.camera, element);
-            }
+                    this.controls = new THREE.OrbitControls(this.camera, element);
+                }
 
-            this.testCharacter.play();
+            //this.testCharacter.play();
         }
     }, {
         key: 'animate',
@@ -7395,6 +7483,7 @@ var Game = function () {
             this.collisionManager.update(dt);
             this.sky.update(dt);
             this.square.update(dt);
+            this.flood.update(dt);
             this.testCharacter.update(dt);
             if (this.keyboardController) {
                 this.keyboardController.update(dt);
@@ -7404,7 +7493,7 @@ var Game = function () {
     }, {
         key: 'render',
         value: function render(dt) {
-            // this.composer.render();
+            // this.composer.render(); // For post processing
             this.renderer.render(this.scene, this.camera);
         }
     }, {
@@ -7424,7 +7513,7 @@ var Game = function () {
 
 exports.default = Game;
 
-},{"./character":40,"./collision_manager":42,"./keyboard_controller":46,"./rain_shader":47,"./sky":48,"./square":49}],45:[function(require,module,exports){
+},{"./character":40,"./collision_manager":42,"./flood":44,"./keyboard_controller":47,"./post_shader":48,"./sky":49,"./square":50}],46:[function(require,module,exports){
 'use strict';
 
 var Game = require('./game').default;
@@ -7490,7 +7579,7 @@ function resize() {
     game.resize();
 }
 
-},{"./config":43,"./game":44,"fullscreen":36,"pointer-lock":37,"stats.js":38}],46:[function(require,module,exports){
+},{"./config":43,"./game":45,"fullscreen":36,"pointer-lock":37,"stats.js":38}],47:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -7513,7 +7602,7 @@ function _classCallCheck(instance, Constructor) {
     }
 }
 
-var BASAL_HEIGHT = 10;
+var BASAL_HEIGHT = 15;
 
 var KeyboardController = function () {
     function KeyboardController(controls, square, collisionManager) {
@@ -7674,12 +7763,14 @@ var KeyboardController = function () {
 
 exports.default = KeyboardController;
 
-},{}],47:[function(require,module,exports){
+},{}],48:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
+// Post processing shaader
+// Current does nothing
 
 exports.default = {
     uniforms: {
@@ -7689,7 +7780,7 @@ exports.default = {
     fragmentShader: "#define GLSLIFY 1\nuniform sampler2D tDiffuse;\n\nvarying vec2 vUv;\n\nvoid main() {\n\n        vec4 color = texture2D( tDiffuse, vUv );\n\n        gl_FragColor = color;\n}\n"
 };
 
-},{}],48:[function(require,module,exports){
+},{}],49:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -7799,7 +7890,7 @@ var Sky = function () {
 
 exports.default = Sky;
 
-},{"./clouds":41}],49:[function(require,module,exports){
+},{"./clouds":41}],50:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -7878,7 +7969,7 @@ var Square = function () {
 
 exports.default = Square;
 
-},{}],50:[function(require,module,exports){
+},{}],51:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -7948,7 +8039,7 @@ var Video360 = function () {
 
 exports.default = Video360;
 
-},{}],51:[function(require,module,exports){
+},{}],52:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -7987,6 +8078,7 @@ function _inherits(subClass, superClass) {
  * @author mrdoob / http://mrdoob.com
  * @modified by obviousjim / http://specular.cc
  * @modified by avnerus / http://avner.js.org
+ * @modified by juniorxsound / http://orfleisher.com
  */
 var SEC_PER_RGBD_FRAME = 1 / 25;
 
@@ -8014,7 +8106,8 @@ var VideoRGBD = function (_THREE$Object3D) {
         key: 'init',
         value: function init() {
             this.video = document.createElement('video');
-            this.video.loop = true;
+            this.video.src = this.properties.basePath + '.webm';
+            this.video.loop = false;
             var imageTexture = new THREE.TextureLoader().load(this.properties.basePath + '.png');
 
             var precision = 3;
@@ -8094,7 +8187,6 @@ var VideoRGBD = function (_THREE$Object3D) {
         value: function play() {
             if (this.isPlaying === true) return;
 
-            this.video.src = this.properties.basePath + '.webm';
             this.video.play();
             this.isPlaying = true;
         }
@@ -8120,6 +8212,9 @@ var VideoRGBD = function (_THREE$Object3D) {
 
             this.video.pause();
 
+            this.linesMaterial.uniforms.map.value = this.imageTexture;
+            this.pointsMaterial.uniforms.map.value = this.imageTexture;
+
             this.isPlaying = false;
         }
     }, {
@@ -8135,4 +8230,4 @@ var VideoRGBD = function (_THREE$Object3D) {
 exports.default = VideoRGBD;
 ;
 
-},{}]},{},[45]);
+},{}]},{},[46]);
