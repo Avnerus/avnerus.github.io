@@ -7457,6 +7457,10 @@ var Game = function () {
 
             this.sky = new _sky2.default();
 
+            this.flood = new _flood2.default();
+            this.flood.init();
+            this.scene.add(this.flood);
+
             // Post processing
             this.composer = new THREE.EffectComposer(this.renderer);
             var renderPass = new THREE.RenderPass(this.scene, this.camera);
@@ -7473,7 +7477,6 @@ var Game = function () {
         value: function load(onLoad) {
             var _this = this;
 
-            var objectReady = function objectReady(obj) {};
             this.loadingManager.onLoad = function () {
 
                 console.log("Done loading everything!");
@@ -7488,10 +7491,6 @@ var Game = function () {
             //this.square.init(this.scene, this.collisionManager, this.loadingManager);
             this.sky.init(this.loadingManager);
             this.testCharacter.init(this.scene, this.loadingManager);
-
-            this.flood = new _flood2.default();
-            this.flood.init();
-            this.scene.add(this.flood);
         }
     }, {
         key: 'start',
