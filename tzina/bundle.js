@@ -7488,6 +7488,11 @@ var Game = function () {
                 console.log("Error during load", err);
             };
 
+            this.loadingManager.onProgress = function (url, itemsLoaded, itemsTotal) {
+
+                console.log("Loaded ", url, "(" + itemsLoaded + "/" + itemsTotal + ")");
+            };
+
             //this.square.init(this.scene, this.collisionManager, this.loadingManager);
             this.sky.init(this.loadingManager);
             this.testCharacter.init(this.scene, this.loadingManager);
