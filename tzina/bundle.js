@@ -7455,6 +7455,7 @@ var Game = function () {
             });
 
             this.sky = new _sky2.default();
+            this.sky.init();
 
             // Post processing
             this.composer = new THREE.EffectComposer(this.renderer);
@@ -7476,7 +7477,6 @@ var Game = function () {
             this.loadingManager.onLoad = function () {
 
                 console.log("Done loading everything!");
-                _this.sky.init();
                 _this.scene.add(_this.sky.mesh);
 
                 onLoad();
