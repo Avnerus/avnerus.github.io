@@ -7066,11 +7066,11 @@ var Clouds = function () {
 
     _createClass(Clouds, [{
         key: "init",
-        value: function init(targetShader) {
+        value: function init(targetShader, loadingManager) {
             this.cloudsVideo = new _video2.default(CLOUDS_SEQUENCE_PATH);
             this.cloudsVideo.init();
 
-            this.staticTexture = new THREE.TextureLoader().load(CLOUDS_STATIC_PATH);
+            this.staticTexture = new THREE.TextureLoader(loadingManager).load(CLOUDS_STATIC_PATH);
 
             this.targetShader = targetShader;
         }
@@ -7433,9 +7433,10 @@ var Game = function () {
             this.dirLight.color.setHSL(0.1, 1, 0.95);
             //dirLight.target.position.set(0,100,0);
             //
-            this.dirLight.shadowCameraFar = 3500;
-            this.dirLight.shadowBias = -0.000001;
-            this.dirLight.shadowDarkness = 0.35;
+            //
+            /*
+            this.dirLight.shadow.camera.far = 3500;
+            this.dirLight.shadow.bias = -0.000001;*/
             this.scene.add(this.dirLight);
 
             this.loadingManager = new THREE.LoadingManager();
@@ -7455,7 +7456,6 @@ var Game = function () {
             });
 
             this.sky = new _sky2.default();
-            this.sky.init();
 
             // Post processing
             this.composer = new THREE.EffectComposer(this.renderer);
@@ -7486,6 +7486,7 @@ var Game = function () {
             };
 
             //this.square.init(this.scene, this.collisionManager, this.loadingManager);
+            this.sky.init(this.loadingManager);
             this.testCharacter.init(this.scene, this.loadingManager);
 
             this.flood = new _flood2.default();
@@ -7876,7 +7877,7 @@ var Sky = function () {
 
     _createClass(Sky, [{
         key: 'init',
-        value: function init() {
+        value: function init(loadingManager) {
 
             //var imageTexture = THREE.ImageUtils.loadTexture('assets/test/venice.jpeg');
 
@@ -7897,6 +7898,7 @@ var Sky = function () {
                 fragmentShader: this.sky_fs,
                 side: THREE.BackSide
             });
+            this.clouds.init(this.shader, loadingManager);
 
             /*
             var geometry = new THREE.SphereBufferGeometry( 450000, 32, 32 );
@@ -7908,7 +7910,6 @@ var Sky = function () {
 
             this.updateSunPosition();
 
-            this.clouds.init(this.shader);
             this.a = true;
         }
     }, {
