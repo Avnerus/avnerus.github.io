@@ -6987,7 +6987,8 @@ var Character = function () {
 
     _createClass(Character, [{
         key: "init",
-        value: function init(scene) {
+        value: function init(scene, loadingManager) {
+            loadingManager.itemStart(this.props.basePath);
             this.videoRGBD.init();
             this.videoRGBD.position.set(this.props.position[0], this.props.position[1], this.props.position[2]);
             this.videoRGBD.rotation.set(this.props.rotation[0] * Math.PI / 180, this.props.rotation[1] * Math.PI / 180, this.props.rotation[2] * Math.PI / 180);
@@ -6995,6 +6996,8 @@ var Character = function () {
             this.videoRGBD.scale.set(0.02, 0.02, 0.02);
 
             scene.add(this.videoRGBD);
+
+            loadingManager.itemEnd(this.props.basePath);
         }
     }, {
         key: "play",
@@ -7281,30 +7284,53 @@ var Flood = function (_THREE$Object3D) {
         var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(Flood).call(this));
 
         console.log("Flood constructed!");
+
+        _this.waveSource = new THREE.Vector3(0, 10, 0);
+        _this.waveFrequencey = 0.5;
+        _this.waveHeight = 1.2;
+        _this.waveLength = 0.7;
         return _this;
     }
 
     _createClass(Flood, [{
         key: "init",
         value: function init(scene) {
-            this.geometry = new THREE.PlaneBufferGeometry(100000, 100000);
-            var material = new THREE.MeshBasicMaterial({
-                color: new THREE.Color(0xfbdfd3),
+            var geometry = new THREE.PlaneGeometry(1000, 1000, 24, 24);
+            console.log(geometry);
+            var material = new THREE.MeshPhongMaterial({
+                color: 0x99F9FF,
                 opacity: 0.75,
+                shininess: 20,
+                shading: THREE.FlatShading,
                 transparent: true,
-                side: THREE.DoubleSide
+                side: THREE.DoubleSide,
+                wireframe: false
             });
-            this.mesh = new THREE.Mesh(this.geometry, material);
+            this.mesh = new THREE.Mesh(geometry, material);
             this.mesh.position.y = 0;
             this.mesh.rotation.x = -Math.PI / 2;
             this.add(this.mesh);
+
+            this.time = 0;
         }
     }, {
         key: "update",
         value: function update(dt) {
-            if (this.mesh.position.y < MAX_FLOOD_HEIGHT) {
-                this.mesh.position.y += 0.01;
+            this.time += dt;
+            for (var i = 0; i < this.mesh.geometry.vertices.length; i++) {
+                var dist = this.mesh.geometry.vertices[i].distanceTo(this.waveSource);
+                dist = dist % this.waveLength / this.waveLength;
+                this.mesh.geometry.vertices[i].z = this.waveHeight * Math.sin(this.time * Math.PI * 2.0 * this.waveFrequencey + Math.PI * 2.0 * dist);
+                //console.log(this.mesh.geometry.vertices[i].z);
             }
+            /*this.mesh.geometry.computeFaceNormals();
+            this.mesh.geometry.computeVertexNormals; */
+            this.mesh.geometry.verticesNeedUpdate = true;
+
+            /* 
+             if (this.mesh.position.y < MAX_FLOOD_HEIGHT) {
+                 this.mesh.position.y += 0.01;
+             }*/
         }
     }]);
 
@@ -7391,8 +7417,26 @@ var Game = function () {
 
             //this.camera.rotation.x = 0.22;
 
-            var helper = new THREE.GridHelper(5000, 5000, 0xffffff, 0xffffff);
-            this.scene.add(helper);
+            //let helper = new THREE.GridHelper( 5000, 5000, 0xffffff, 0xffffff );
+            //this.scene.add( helper );
+            //
+
+            // LIGHT
+            this.hemiLight = new THREE.HemisphereLight(0xffffff, 0xffffff, 0.05);
+            this.hemiLight.color.setHSL(0.6, 1, 0.6);
+            this.hemiLight.groundColor.setHSL(0.095, 1, 0.75);
+            this.hemiLight.position.set(0, 500, 0);
+            this.scene.add(this.hemiLight);
+
+            this.dirLight = new THREE.DirectionalLight(0xFFFFFF, 1);
+            this.dirLight.position.set(0, 120, -200);
+            this.dirLight.color.setHSL(0.1, 1, 0.95);
+            //dirLight.target.position.set(0,100,0);
+            //
+            this.dirLight.shadowCameraFar = 3500;
+            this.dirLight.shadowBias = -0.000001;
+            this.dirLight.shadowDarkness = 0.35;
+            this.scene.add(this.dirLight);
 
             this.loadingManager = new THREE.LoadingManager();
             this.collisionManager = new _collision_manager2.default(this.camera);
@@ -7409,6 +7453,8 @@ var Game = function () {
                 rotation: [0, 40, 0],
                 name: 'test'
             });
+
+            this.sky = new _sky2.default();
 
             // Post processing
             this.composer = new THREE.EffectComposer(this.renderer);
@@ -7430,7 +7476,6 @@ var Game = function () {
             this.loadingManager.onLoad = function () {
 
                 console.log("Done loading everything!");
-                _this.sky = new _sky2.default();
                 _this.sky.init();
                 _this.scene.add(_this.sky.mesh);
 
@@ -7440,8 +7485,8 @@ var Game = function () {
                 console.log("Error during load", err);
             };
 
-            this.square.init(this.scene, this.collisionManager, this.loadingManager);
-            this.testCharacter.init(this.scene);
+            //this.square.init(this.scene, this.collisionManager, this.loadingManager);
+            this.testCharacter.init(this.scene, this.loadingManager);
 
             this.flood = new _flood2.default();
             this.flood.init();
@@ -7482,6 +7527,7 @@ var Game = function () {
         value: function update(dt) {
             this.collisionManager.update(dt);
             this.sky.update(dt);
+            this.dirLight.position.copy(this.sky.getSunPosition());
             this.square.update(dt);
             this.flood.update(dt);
             this.testCharacter.update(dt);
@@ -7824,6 +7870,8 @@ var Sky = function () {
         this.sky_vs = "#define GLSLIFY 1\nvarying vec3 vWorldPosition;\nvarying vec2 vUv;\n\nvoid main() {\n\n    vec4 worldPosition = modelMatrix * vec4( position, 1.0 );\n    vWorldPosition = worldPosition.xyz;\n\n    vUv = uv;\n\n    gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );\n\n}\n";
 
         this.clouds = new _clouds2.default();
+
+        this.sunPosition = new THREE.Vector3(0, 0, 0);
     }
 
     _createClass(Sky, [{
@@ -7866,8 +7914,8 @@ var Sky = function () {
     }, {
         key: 'update',
         value: function update(dt) {
-            this.azimuth += 0.00005;
-            this.inclination += 0.0005;
+            this.azimuth += 0.00002;
+            this.inclination += 0.0002;
             this.updateSunPosition();
 
             this.geo.rotateY(0.01 * Math.PI / 180);
@@ -7879,9 +7927,14 @@ var Sky = function () {
             var theta = Math.PI * (this.inclination - 0.5);
             var phi = 2 * Math.PI * (this.azimuth - 0.5);
 
-            var newPosition = new THREE.Vector3(SUN_DISTANCE * Math.cos(phi), SUN_DISTANCE * Math.sin(phi) * Math.sin(theta), SUN_DISTANCE * Math.sin(phi) * Math.cos(theta));
+            this.sunPosition.set(SUN_DISTANCE * Math.cos(phi), SUN_DISTANCE * Math.sin(phi) * Math.sin(theta), SUN_DISTANCE * Math.sin(phi) * Math.cos(theta));
 
-            this.shader.uniforms.sunPosition.value.copy(newPosition);
+            this.shader.uniforms.sunPosition.value.copy(this.sunPosition);
+        }
+    }, {
+        key: 'getSunPosition',
+        value: function getSunPosition() {
+            return this.sunPosition;
         }
     }]);
 
@@ -7913,7 +7966,7 @@ function _classCallCheck(instance, Constructor) {
     }
 }
 
-var MODEL_PATH = "assets/square/scene.json";
+var MODEL_PATH = "assets/square/scene_minus_trees.json";
 var TREES_PATH = "assets/trees/points.ply";
 
 var Square = function () {
@@ -7931,6 +7984,7 @@ var Square = function () {
             var loader = new THREE.ObjectLoader(loadingManager);
             loader.load(MODEL_PATH, function (obj) {
                 console.log("Loaded square ", obj);
+
                 obj.position.y = -1950;
                 obj.position.z = 1200;
 
@@ -7939,8 +7993,12 @@ var Square = function () {
                 collisionManager.addBoundingBoxes(obj, scene);
 
                 _this.squareMiddle = obj.getObjectByName("MB_PS");
-                _this.squareCenter = new THREE.Vector3();
-                _this.squareCenter.setFromMatrixPosition(_this.squareMiddle.matrixWorld);
+                if (_this.squareMiddle) {
+                    _this.squareCenter = new THREE.Vector3();
+                    _this.squareCenter.setFromMatrixPosition(_this.squareMiddle.matrixWorld);
+                } else {
+                    _this.squareCenter = new THREE.Vector3(0, 0, 0);
+                }
             });
 
             var treesLoader = new THREE.PLYLoader(loadingManager);
