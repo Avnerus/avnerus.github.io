@@ -18274,6 +18274,7 @@ THREE.XHRLoader.prototype = {
 
 			var response = event.target.response;
 
+            console.log("Load! ", this.status);
 			THREE.Cache.add( url, response );
 
 			if ( this.status === 200 ) {
@@ -18326,6 +18327,7 @@ THREE.XHRLoader.prototype = {
 
 		request.send( null );
 
+        console.log("Calling item start ", url);
 		scope.manager.itemStart( url );
 
 		return request;
