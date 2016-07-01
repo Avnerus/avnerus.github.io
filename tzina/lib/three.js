@@ -18274,6 +18274,7 @@ THREE.XHRLoader.prototype = {
 
 			var response = event.target.response;
 
+            console.log("Load! ", this.status);
 			THREE.Cache.add( url, response );
 
 			if ( this.status === 200 ) {
@@ -18326,6 +18327,7 @@ THREE.XHRLoader.prototype = {
 
 		request.send( null );
 
+        console.log("Calling item start ", url);
 		scope.manager.itemStart( url );
 
 		return request;
@@ -18455,7 +18457,6 @@ THREE.ImageLoader.prototype = {
 		var image = document.createElement( 'img' );
 
 		image.addEventListener( 'load', function ( event ) {
-            console.log("LOAD!",this);
 
 			THREE.Cache.add( url, this );
 
@@ -18485,12 +18486,9 @@ THREE.ImageLoader.prototype = {
 
 		if ( this.crossOrigin !== undefined ) image.crossOrigin = this.crossOrigin;
 
-        console.log("START!",url);
-
 		scope.manager.itemStart( url );
 
 		image.src = url;
-        console.log(image);
 
 		return image;
 
