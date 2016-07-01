@@ -7072,6 +7072,7 @@ var Clouds = function () {
             this.cloudsVideo = new _video2.default(CLOUDS_SEQUENCE_PATH);
             this.cloudsVideo.init();
 
+            console.log(this.loadingManager);
             this.staticTexture = new THREE.TextureLoader(this.loadingManager).load(CLOUDS_STATIC_PATH);
 
             this.targetShader = targetShader;
