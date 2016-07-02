@@ -7454,6 +7454,7 @@ var Game = function () {
         value: function init() {
             this.renderer = new THREE.WebGLRenderer({ antialias: true });
             this.renderer.setClearColor(0, 1);
+            this.renderer.setPixelRatio(window.devicePixelRatio);
             //this.renderer.setClearColor( 0x000000, 1 );
 
             this.scene = new THREE.Scene();
@@ -7541,6 +7542,16 @@ var Game = function () {
             //this.square.init(this.scene, this.collisionManager, this.loadingManager);
             this.sky.init();
             this.testCharacter.init(this.scene, this.loadingManager);
+
+            // WebVR
+            var vrEffect = new THREE.VREffect(this.renderer);
+            vrEffect.setSize(window.innerWidth, window.innerHeight);
+
+            var params = {
+                hideButton: false, // Default: false.
+                isUndistorted: false // Default: false.
+            };
+            this.vrManager = new WebVRManager(this.renderer, vrEffect, params);
         }
     }, {
         key: 'start',
@@ -7548,15 +7559,22 @@ var Game = function () {
             var element = this.renderer.domElement;
             this.container = document.getElementById('game');
             this.container.appendChild(element);
+            console.log("VR Compatible?", this.vrManager.isVRCompatible);
             if (this.config.controls == "locked") {
-                var controls = new THREE.PointerLockControls(this.camera);
-                this.scene.add(controls.getObject());
-                controls.enabled = true;
 
-                this.keyboardController = new _keyboard_controller2.default(controls, this.square, this.collisionManager);
-                this.keyboardController.init();
+                if (this.vrManager.isVRCompatible) {
+                    this.vrControls = new THREE.VRControls(this.camera);
+                    this.vrControls.standing = true;
+                } else {
+                    var controls = new THREE.PointerLockControls(this.camera);
+                    this.scene.add(controls.getObject());
+                    controls.enabled = true;
 
-                this.collisionManager.setPlayer(controls.getObject());
+                    this.keyboardController = new _keyboard_controller2.default(controls.getObject(), this.square, this.collisionManager);
+                    this.keyboardController.init();
+                }
+
+                this.collisionManager.setPlayer(this.camera);
 
                 // Get in the square
                 //this.keyboardController.setPosition(-475, 30, 183);
@@ -7582,6 +7600,9 @@ var Game = function () {
             this.square.update(dt);
             this.flood.update(dt);
             this.testCharacter.update(dt);
+            if (this.vrControls) {
+                this.vrControls.update();
+            }
             if (this.keyboardController) {
                 this.keyboardController.update(dt);
             }
@@ -7591,7 +7612,8 @@ var Game = function () {
         key: 'render',
         value: function render(dt) {
             // this.composer.render(); // For post processing
-            this.renderer.render(this.scene, this.camera);
+            //this.renderer.render(this.scene, this.camera);
+            this.vrManager.render(this.scene, this.camera);
         }
     }, {
         key: 'resize',
@@ -7626,6 +7648,11 @@ var lock = require('pointer-lock-chrome-tolerant');
 
 console.log("Touch? ", Modernizr.touchevents);
 
+var FPS = 30;
+var FPS_INTERVAL = 1000 / FPS;
+var elapsed = 0;
+var lastTimestamp = 0;
+
 window.onload = function () {
     console.log("Loading...");
     game.init();
@@ -7648,6 +7675,8 @@ window.onload = function () {
         } else {
             start();
         }
+
+        //start();
     });
 
     if (!Modernizr.touchevents && config.controls == "locked" && lock.available()) {
@@ -7670,15 +7699,21 @@ function start() {
     document.getElementById('game').appendChild(stats.dom);
     game.start();
     window.addEventListener('resize', resize, false);
+    window.addEventListener('vrdisplaypresentchange', resize, true);
     game.resize();
+    stats.begin();
     animate();
 }
 
 function animate(t) {
-    stats.begin();
-    game.animate(t);
-    stats.end();
     requestAnimationFrame(animate);
+    elapsed = t - lastTimestamp;
+    if (elapsed >= FPS_INTERVAL) {
+        lastTimestamp = t - elapsed % FPS_INTERVAL;
+        game.animate(t);
+        stats.end();
+        stats.begin();
+    }
 }
 
 function resize() {
@@ -7711,7 +7746,7 @@ function _classCallCheck(instance, Constructor) {
 var BASAL_HEIGHT = 15;
 
 var KeyboardController = function () {
-    function KeyboardController(controls, square, collisionManager) {
+    function KeyboardController(camera, square, collisionManager) {
         _classCallCheck(this, KeyboardController);
 
         this.moveForward = false;
@@ -7721,7 +7756,7 @@ var KeyboardController = function () {
         this.isOnObject = false;
 
         this.velocity = new THREE.Vector3();
-        this.controls = controls;
+        this.camera = camera;
         this.square = square;
         this.collisionManager = collisionManager;
 
@@ -7837,14 +7872,14 @@ var KeyboardController = function () {
                 this.canJump = true;
             }
 
-            this.controls.getObject().translateX(this.velocity.x * delta);
-            this.controls.getObject().translateY(this.velocity.y * delta);
-            this.controls.getObject().translateZ(this.velocity.z * delta);
+            this.camera.translateX(this.velocity.x * delta);
+            this.camera.translateY(this.velocity.y * delta);
+            this.camera.translateZ(this.velocity.z * delta);
 
-            if (this.controls.getObject().position.y < this.height) {
+            if (this.camera.position.y < this.height) {
 
                 this.velocity.y = 0;
-                this.controls.getObject().position.y = this.height;
+                this.camera.position.y = this.height;
 
                 this.canJump = true;
             }
@@ -7852,7 +7887,7 @@ var KeyboardController = function () {
     }, {
         key: 'climbStairs',
         value: function climbStairs() {
-            var distanceToCenter = this.controls.getObject().position.distanceTo(this.square.getCenterPosition());
+            var distanceToCenter = this.camera.position.distanceTo(this.square.getCenterPosition());
             var distanceInStairs = Math.max(0, 260 - distanceToCenter);
             this.height = Math.max(Math.min(30, distanceInStairs), BASAL_HEIGHT);
         }
@@ -7860,7 +7895,7 @@ var KeyboardController = function () {
         key: 'setPosition',
         value: function setPosition(x, y, z) {
             this.height = y;
-            this.controls.getObject().position.set(x, y, z);
+            this.camera.position.set(x, y, z);
         }
     }]);
 
