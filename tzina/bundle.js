@@ -7032,16 +7032,17 @@ var Character = function () {
     _createClass(Character, [{
         key: "init",
         value: function init(scene, loadingManager) {
-            loadingManager.itemStart(this.props.basePath);
-            this.videoRGBD.init();
-            this.videoRGBD.position.set(this.props.position[0], this.props.position[1], this.props.position[2]);
-            this.videoRGBD.rotation.set(this.props.rotation[0] * Math.PI / 180, this.props.rotation[1] * Math.PI / 180, this.props.rotation[2] * Math.PI / 180);
+            var _this = this;
 
-            this.videoRGBD.scale.set(0.02, 0.02, 0.02);
+            setTimeout(function () {
+                _this.videoRGBD.init(loadingManager);
+                _this.videoRGBD.position.set(_this.props.position[0], _this.props.position[1], _this.props.position[2]);
+                _this.videoRGBD.rotation.set(_this.props.rotation[0] * Math.PI / 180, _this.props.rotation[1] * Math.PI / 180, _this.props.rotation[2] * Math.PI / 180);
 
-            scene.add(this.videoRGBD);
+                _this.videoRGBD.scale.set(0.005, 0.005, 0.005);
 
-            loadingManager.itemEnd(this.props.basePath);
+                scene.add(_this.videoRGBD);
+            }, 0);
         }
     }, {
         key: "play",
@@ -7124,7 +7125,6 @@ var Clouds = function () {
     }, {
         key: "update",
         value: function update(dt) {
-            //TODO : Only 25 FPS
             if (this.currentState === States.TRANSITON) {
                 if (this.cloudsVideo.isReady()) {
                     this.targetShader.uniforms.cloudsMap.value = this.cloudsVideo.texture;
@@ -7354,7 +7354,7 @@ var Flood = function (_THREE$Object3D) {
                 wireframe: false
             });
             this.mesh = new THREE.Mesh(geometry, material);
-            this.mesh.position.y = 0;
+            this.mesh.position.y = 10;
             this.mesh.rotation.x = -Math.PI / 2;
             this.add(this.mesh);
 
@@ -7498,7 +7498,7 @@ var Game = function () {
                 basePath: 'assets/characters/take_1',
                 mindepth: 404.999969482,
                 maxdepth: 1111.719970703,
-                position: [-496, 29, 157],
+                position: [-153, 15, -2],
                 rotation: [0, 40, 0],
                 name: 'test'
             });
@@ -7539,7 +7539,7 @@ var Game = function () {
                 console.log("Loaded ", url, "(" + itemsLoaded + "/" + itemsTotal + ")");
             };
 
-            //this.square.init(this.scene, this.collisionManager, this.loadingManager);
+            this.square.init(this.scene, this.collisionManager, this.loadingManager);
             this.sky.init();
             this.testCharacter.init(this.scene, this.loadingManager);
 
@@ -7577,10 +7577,10 @@ var Game = function () {
                 this.collisionManager.setPlayer(this.camera);
 
                 // Get in the square
-                //this.keyboardController.setPosition(-475, 30, 183);
+                this.keyboardController.setPosition(-155, 15, 0);
             } else {
-                    this.controls = new THREE.OrbitControls(this.camera, element);
-                }
+                this.controls = new THREE.OrbitControls(this.camera, element);
+            }
             this.resize();
 
             //this.testCharacter.play();
@@ -7856,11 +7856,11 @@ var KeyboardController = function () {
 
             this.velocity.y -= 9.8 * 100.0 * delta; // 100.0 = mass
 
-            if (this.moveForward) this.velocity.z -= 400.0 * delta;
-            if (this.moveBackward) this.velocity.z += 400.0 * delta;
+            if (this.moveForward) this.velocity.z -= 100.0 * delta;
+            if (this.moveBackward) this.velocity.z += 100.0 * delta;
 
-            if (this.moveLeft) this.velocity.x -= 400.0 * delta;
-            if (this.moveRight) this.velocity.x += 400.0 * delta;
+            if (this.moveLeft) this.velocity.x -= 100.0 * delta;
+            if (this.moveRight) this.velocity.x += 100.0 * delta;
 
             if (this.collisionManager.isClimbingStairs() && this.velocity.z != 0) {
                 this.climbStairs();
@@ -7883,6 +7883,8 @@ var KeyboardController = function () {
 
                 this.canJump = true;
             }
+
+            //    console.log(this.camera.position);
         }
     }, {
         key: 'climbStairs',
@@ -7972,6 +7974,7 @@ var Sky = function () {
     _createClass(Sky, [{
         key: 'init',
         value: function init() {
+            var _this = this;
 
             //var imageTexture = THREE.ImageUtils.loadTexture('assets/test/venice.jpeg');
 
@@ -7992,7 +7995,11 @@ var Sky = function () {
                 fragmentShader: this.sky_fs,
                 side: THREE.BackSide
             });
-            this.clouds.init(this.shader);
+
+            // Chrome Linux workaround
+            setTimeout(function () {
+                _this.clouds.init(_this.shader);
+            }, 0);
 
             /*
             var geometry = new THREE.SphereBufferGeometry( 450000, 32, 32 );
@@ -8061,7 +8068,7 @@ function _classCallCheck(instance, Constructor) {
     }
 }
 
-var MODEL_PATH = "assets/square/scene_minus_trees.json";
+var MODEL_PATH = "assets/square/scene.json";
 var TREES_PATH = "assets/trees/points.ply";
 
 var Square = function () {
@@ -8080,8 +8087,15 @@ var Square = function () {
             loader.load(MODEL_PATH, function (obj) {
                 console.log("Loaded square ", obj);
 
+                /*
                 obj.position.y = -1950;
                 obj.position.z = 1200;
+                */
+
+                obj.position.y = -210;
+                obj.position.z = -370;
+                obj.position.x = 0;
+                obj.scale.set(2, 2, 2);
 
                 scene.add(obj);
                 obj.updateMatrixWorld();
@@ -8101,7 +8115,7 @@ var Square = function () {
                 console.log("Loaded trees ", geometry);
                 var material = new THREE.PointsMaterial({ size: 0.05, vertexColors: true });
                 var mesh = new THREE.Points(geometry, material);
-                mesh.position.set(-470, 22, 183);
+                mesh.position.set(-100, 12, -20);
                 mesh.rotateZ(90 * Math.PI / 180);
 
                 scene.add(mesh);
@@ -8257,11 +8271,11 @@ var VideoRGBD = function (_THREE$Object3D) {
 
     _createClass(VideoRGBD, [{
         key: 'init',
-        value: function init() {
+        value: function init(loadingManager) {
             this.video = document.createElement('video');
             this.video.src = this.properties.basePath + '.webm';
             this.video.loop = false;
-            var imageTexture = new THREE.TextureLoader().load(this.properties.basePath + '.png');
+            var imageTexture = new THREE.TextureLoader(loadingManager).load(this.properties.basePath + '.png');
 
             var precision = 3;
             var linesGeometry = new THREE.Geometry();
