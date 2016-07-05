@@ -7565,6 +7565,8 @@ var Game = function () {
                 if (this.vrManager.isVRCompatible) {
                     this.vrControls = new THREE.VRControls(this.camera);
                     this.vrControls.standing = true;
+
+                    this.camera.position.set(-155, 15, 0);
                 } else {
                     var controls = new THREE.PointerLockControls(this.camera);
                     this.scene.add(controls.getObject());
@@ -7572,12 +7574,12 @@ var Game = function () {
 
                     this.keyboardController = new _keyboard_controller2.default(controls.getObject(), this.square, this.collisionManager);
                     this.keyboardController.init();
+                    //
+                    // Get in the square
+                    this.keyboardController.setPosition(-155, 15, 0);
                 }
 
                 this.collisionManager.setPlayer(this.camera);
-
-                // Get in the square
-                this.keyboardController.setPosition(-155, 15, 0);
             } else {
                 this.controls = new THREE.OrbitControls(this.camera, element);
             }
