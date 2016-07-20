@@ -17132,9 +17132,6 @@ var Game = function () {
                 _this.scene.add(_this.testCharacter);
 
                 onLoad();
-                setTimeout(function () {
-                    _this.testCharacter.play();
-                }, 5000);
             };
             this.loadingManager.onError = function (err) {
                 console.log("Error during load", err);
@@ -17162,6 +17159,8 @@ var Game = function () {
     }, {
         key: 'start',
         value: function start() {
+            var _this2 = this;
+
             this.started = true;
             var element = this.renderer.domElement;
             this.container = document.getElementById('game');
@@ -17193,7 +17192,9 @@ var Game = function () {
             this.collisionManager.setPlayer(this.camera);
             this.resize();
 
-            //this.testCharacter.play();
+            setTimeout(function () {
+                _this2.testCharacter.play();
+            }, 5000);
         }
     }, {
         key: 'animate',
@@ -17646,6 +17647,7 @@ var Sky = function () {
     }, {
         key: 'applyToMesh',
         value: function applyToMesh(mesh) {
+            console.log("Apply sky to", mesh);
             if (mesh) {
                 mesh.material = this.shader;
                 this.geo = mesh.geometry;
@@ -17741,8 +17743,6 @@ var Square = function (_THREE$Object3D) {
                 obj.position.z = 100;
                 obj.position.x = 0;
                 obj.scale.set(4, 4, 4);
-
-                console.log(obj.getObjectByName("tarmac_remod").children[0]);
 
                 _this2.add(obj);
                 obj.updateMatrixWorld();
