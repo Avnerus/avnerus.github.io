@@ -17731,6 +17731,7 @@ var Square = function (_THREE$Object3D) {
             var _this2 = this;
 
             var loader = new THREE.ObjectLoader(loadingManager);
+            loadingManager.itemStart("Square");
             loader.load(MODEL_PATH, function (obj) {
                 console.log("Loaded square ", obj);
 
@@ -17759,6 +17760,7 @@ var Square = function (_THREE$Object3D) {
 
                 _this2.sphereMesh = obj.getObjectByName("SkySphere").children[0];
                 console.log("Sky sphere", _this2.sphereMesh);
+                loadingManager.itemEnd("Square");
             });
 
             var treesLoader = new THREE.PLYLoader(loadingManager);
