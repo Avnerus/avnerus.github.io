@@ -4541,6 +4541,35 @@ function config (name) {
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{}],26:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+exports.default = {
+    types: [{
+        name: "Test",
+        fileName: "points.ply"
+    }],
+    instances: [{
+        type: "Test",
+        position: [10, 21, 5],
+        rotateX: 0,
+        scale: 1
+    }, {
+        type: "Test",
+        position: [10, 21, 10],
+        rotateX: 15,
+        scale: 0.5
+    }, {
+        type: "Test",
+        position: [15, 21, 10],
+        rotateX: 45,
+        scale: 0.8
+    }]
+};
+
+},{}],27:[function(require,module,exports){
 addEventListener.removeEventListener = removeEventListener
 addEventListener.addEventListener = addEventListener
 
@@ -4588,7 +4617,7 @@ function oldIEDetach(el, eventName, listener, useCapture) {
   el.detachEvent('on' + eventName, listener)
 }
 
-},{}],27:[function(require,module,exports){
+},{}],28:[function(require,module,exports){
 /**
  * Bit twiddling hacks for JavaScript.
  *
@@ -4794,7 +4823,7 @@ exports.nextCombination = function(v) {
 }
 
 
-},{}],28:[function(require,module,exports){
+},{}],29:[function(require,module,exports){
 'use strict'
 
 module.exports = boxIntersectWrapper
@@ -4933,7 +4962,7 @@ function boxIntersectWrapper(arg0, arg1, arg2) {
       throw new Error('box-intersect: Invalid arguments')
   }
 }
-},{"./lib/intersect":30,"./lib/sweep":34,"typedarray-pool":41}],29:[function(require,module,exports){
+},{"./lib/intersect":31,"./lib/sweep":35,"typedarray-pool":42}],30:[function(require,module,exports){
 'use strict'
 
 var DIMENSION   = 'd'
@@ -5078,7 +5107,7 @@ function bruteForcePlanner(full) {
 
 exports.partial = bruteForcePlanner(false)
 exports.full    = bruteForcePlanner(true)
-},{}],30:[function(require,module,exports){
+},{}],31:[function(require,module,exports){
 'use strict'
 
 module.exports = boxIntersectIter
@@ -5573,7 +5602,7 @@ function boxIntersectIter(
     }
   }
 }
-},{"./brute":29,"./median":31,"./partition":32,"./sweep":34,"bit-twiddle":27,"typedarray-pool":41}],31:[function(require,module,exports){
+},{"./brute":30,"./median":32,"./partition":33,"./sweep":35,"bit-twiddle":28,"typedarray-pool":42}],32:[function(require,module,exports){
 'use strict'
 
 module.exports = findMedian
@@ -5716,7 +5745,7 @@ function findMedian(d, axis, start, end, boxes, ids) {
     start, mid, boxes, ids,
     boxes[elemSize*mid+axis])
 }
-},{"./partition":32}],32:[function(require,module,exports){
+},{"./partition":33}],33:[function(require,module,exports){
 'use strict'
 
 module.exports = genPartition
@@ -5737,7 +5766,7 @@ function genPartition(predicate, args) {
         .replace('$', predicate))
   return Function.apply(void 0, fargs)
 }
-},{}],33:[function(require,module,exports){
+},{}],34:[function(require,module,exports){
 'use strict';
 
 //This code is extracted from ndarray-sort
@@ -5974,7 +6003,7 @@ function quickSort(left, right, data) {
     quickSort(less, great, data);
   }
 }
-},{}],34:[function(require,module,exports){
+},{}],35:[function(require,module,exports){
 'use strict'
 
 module.exports = {
@@ -6409,7 +6438,7 @@ red_loop:
     }
   }
 }
-},{"./sort":33,"bit-twiddle":27,"typedarray-pool":41}],35:[function(require,module,exports){
+},{"./sort":34,"bit-twiddle":28,"typedarray-pool":42}],36:[function(require,module,exports){
 "use strict"
 
 function dupe_array(count, value, i) {
@@ -6459,7 +6488,7 @@ function dupe(count, value) {
 }
 
 module.exports = dupe
-},{}],36:[function(require,module,exports){
+},{}],37:[function(require,module,exports){
 module.exports = fullscreen
 fullscreen.available = available
 fullscreen.enabled = enabled
@@ -6571,7 +6600,7 @@ function shim(el) {
     el.msRequestFullscreen);
 }
 
-},{"add-event-listener":26,"events":6}],37:[function(require,module,exports){
+},{"add-event-listener":27,"events":6}],38:[function(require,module,exports){
 // Uses Node, AMD or browser globals to create a module.
 
 // If you want something that will work in other stricter CommonJS environments,
@@ -15905,7 +15934,7 @@ return jQuery;
 
 })( window ); }));
 
-},{}],38:[function(require,module,exports){
+},{}],39:[function(require,module,exports){
 /*!
  * jQuery Mousewheel 3.1.13
  *
@@ -16128,7 +16157,7 @@ return jQuery;
 
 }));
 
-},{}],39:[function(require,module,exports){
+},{}],40:[function(require,module,exports){
 module.exports = pointer
 
 pointer.available = available
@@ -16337,14 +16366,14 @@ function shim(el) {
     null
 }
 
-},{"events":6,"stream":23}],40:[function(require,module,exports){
+},{"events":6,"stream":23}],41:[function(require,module,exports){
 // stats.js - http://github.com/mrdoob/stats.js
 var Stats=function(){function h(a){c.appendChild(a.dom);return a}function k(a){for(var d=0;d<c.children.length;d++)c.children[d].style.display=d===a?"block":"none";l=a}var l=0,c=document.createElement("div");c.style.cssText="position:fixed;top:0;left:0;cursor:pointer;opacity:0.9;z-index:10000";c.addEventListener("click",function(a){a.preventDefault();k(++l%c.children.length)},!1);var g=(performance||Date).now(),e=g,a=0,r=h(new Stats.Panel("FPS","#0ff","#002")),f=h(new Stats.Panel("MS","#0f0","#020"));
 if(self.performance&&self.performance.memory)var t=h(new Stats.Panel("MB","#f08","#201"));k(0);return{REVISION:16,dom:c,addPanel:h,showPanel:k,begin:function(){g=(performance||Date).now()},end:function(){a++;var c=(performance||Date).now();f.update(c-g,200);if(c>e+1E3&&(r.update(1E3*a/(c-e),100),e=c,a=0,t)){var d=performance.memory;t.update(d.usedJSHeapSize/1048576,d.jsHeapSizeLimit/1048576)}return c},update:function(){g=this.end()},domElement:c,setMode:k}};
 Stats.Panel=function(h,k,l){var c=Infinity,g=0,e=Math.round,a=e(window.devicePixelRatio||1),r=80*a,f=48*a,t=3*a,u=2*a,d=3*a,m=15*a,n=74*a,p=30*a,q=document.createElement("canvas");q.width=r;q.height=f;q.style.cssText="width:80px;height:48px";var b=q.getContext("2d");b.font="bold "+9*a+"px Helvetica,Arial,sans-serif";b.textBaseline="top";b.fillStyle=l;b.fillRect(0,0,r,f);b.fillStyle=k;b.fillText(h,t,u);b.fillRect(d,m,n,p);b.fillStyle=l;b.globalAlpha=.9;b.fillRect(d,m,n,p);return{dom:q,update:function(f,
 v){c=Math.min(c,f);g=Math.max(g,f);b.fillStyle=l;b.globalAlpha=1;b.fillRect(0,0,r,m);b.fillStyle=k;b.fillText(e(f)+" "+h+" ("+e(c)+"-"+e(g)+")",t,u);b.drawImage(q,d+a,m,n-a,p,d,m,n-a,p);b.fillRect(d+n-a,m,a,p);b.fillStyle=l;b.globalAlpha=.9;b.fillRect(d+n-a,m,a,e((1-f/v)*p))}}};"object"===typeof module&&(module.exports=Stats);
 
-},{}],41:[function(require,module,exports){
+},{}],42:[function(require,module,exports){
 (function (global,Buffer){
 'use strict'
 
@@ -16561,8 +16590,8 @@ exports.clearCache = function clearCache() {
   }
 }
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer)
-},{"bit-twiddle":27,"buffer":3,"dup":35}],42:[function(require,module,exports){
-"use strict";
+},{"bit-twiddle":28,"buffer":3,"dup":36}],43:[function(require,module,exports){
+'use strict';
 
 Object.defineProperty(exports, "__esModule", {
     value: true
@@ -16578,9 +16607,13 @@ var _createClass = function () {
     };
 }();
 
-var _video_rgbd = require("./util/video_rgbd");
+var _improved_noise = require('../util/improved_noise');
 
-var _video_rgbd2 = _interopRequireDefault(_video_rgbd);
+var _improved_noise2 = _interopRequireDefault(_improved_noise);
+
+var _texture_animator = require('../util/texture_animator');
+
+var _texture_animator2 = _interopRequireDefault(_texture_animator);
 
 function _interopRequireDefault(obj) {
     return obj && obj.__esModule ? obj : { default: obj };
@@ -16604,47 +16637,410 @@ function _inherits(subClass, superClass) {
     }subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } });if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass;
 }
 
-var Character = function (_THREE$Object3D) {
-    _inherits(Character, _THREE$Object3D);
+var HannahAnimation = function (_THREE$Object3D) {
+    _inherits(HannahAnimation, _THREE$Object3D);
 
-    function Character(props) {
-        _classCallCheck(this, Character);
+    function HannahAnimation() {
+        _classCallCheck(this, HannahAnimation);
 
-        var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(Character).call(this));
+        var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(HannahAnimation).call(this));
 
-        _this.videoRGBD = new _video_rgbd2.default(props);
-
-        console.log(props.name + " character constructed!");
-
-        _this.props = props;
+        _this.BASE_PATH = 'assets/animations/hannah';
         return _this;
     }
 
-    _createClass(Character, [{
-        key: "init",
+    _createClass(HannahAnimation, [{
+        key: 'init',
         value: function init(loadingManager) {
-            this.videoRGBD.init(loadingManager);
-            this.position.set(this.props.position[0], this.props.position[1], this.props.position[2]);
-            this.add(this.videoRGBD.mesh);
+            this.loadingManager = loadingManager;
+            this.setupAnim();
         }
     }, {
-        key: "play",
-        value: function play() {
-            this.videoRGBD.play();
+        key: 'setupAnim',
+        value: function setupAnim() {
+            var _this2 = this;
+
+            this.loadingManager.itemStart("HannahAnim");
+            this.domeMorphTargets = [];
+            this.perlin = new _improved_noise2.default();
+
+            var hannahRoomFiles = [this.BASE_PATH + "/models/hannah_room/hr_bookshelf.js", this.BASE_PATH + "/models/hannah_room/hr_chair.js", this.BASE_PATH + "/models/hannah_room/hr_door.js", this.BASE_PATH + "/models/hannah_room/hr_fireplace.js", this.BASE_PATH + "/models/hannah_room/hr_photo1.js", this.BASE_PATH + "/models/hannah_room/hr_photo2.js", this.BASE_PATH + "/models/hannah_room/hr_photo3.js", this.BASE_PATH + "/models/hannah_room/hr_photo4.js", this.BASE_PATH + "/models/hannah_room/hr_photo5.js", this.BASE_PATH + "/models/hannah_room/hr_room2.js", this.BASE_PATH + "/models/hannah_room/hr_shelf.js", this.BASE_PATH + "/models/hannah_room/hr_sidewall.js", this.BASE_PATH + "/models/hannah_room/hr_sofa.js", this.BASE_PATH + "/models/hannah_room/hr_sofa2.js", this.BASE_PATH + "/models/hannah_room/hr_table.js", this.BASE_PATH + "/models/hannah_room/hr_window.js"];
+
+            var doodleMenTexFiles = [this.BASE_PATH + "/images/doodleMen1.png", this.BASE_PATH + "/images/doodleMen2.png", this.BASE_PATH + "/images/doodleMen3.png"];
+            var doodleMenTex = [],
+                doodleMen = [];
+            this.doodleMenAnimators = [];
+
+            var p_tex_loader = new THREE.TextureLoader(this.loadingManager);
+
+            var twigGeo = void 0,
+                leafGeo = void 0,
+                evilGeo = void 0,
+                twigMat = void 0,
+                leafMat = void 0,
+                evilMat = void 0;
+
+            leafMat = new THREE.MeshBasicMaterial({ vertexColors: THREE.VertexColors, wireframe: true });
+
+            var evilTex = p_tex_loader.load(this.BASE_PATH + '/images/spike3.jpg');
+
+            twigMat = new THREE.MeshBasicMaterial({ color: 0x985a17, wireframe: true });
+
+            evilTex.wrapS = THREE.RepeatWrapping;
+            evilTex.wrapT = THREE.RepeatWrapping;
+            evilTex.repeat.set(1, 4);
+            evilMat = new THREE.MeshLambertMaterial({ map: evilTex });
+
+            var loader = new THREE.JSONLoader(this.loadingManager);
+            loader.load(this.BASE_PATH + "/models/spike_curvey.js", function (geometry, material) {
+                evilGeo = geometry;
+            });
+            loader.load(this.BASE_PATH + "/models/leavesss_less.js", function (geometry, material) {
+                leafGeo = geometry;
+
+                // ref: https://stemkoski.github.io/Three.js/Vertex-Colors.html
+                var face = void 0,
+                    numberOfSides = void 0,
+                    vertexIndex = void 0,
+                    point = void 0,
+                    color = void 0;
+                var faceIndices = ['a', 'b', 'c', 'd'];
+                // vertex color
+                for (var _i = 0; _i < leafGeo.faces.length; _i++) {
+                    face = leafGeo.faces[_i];
+                    numberOfSides = face instanceof THREE.Face3 ? 3 : 4;
+                    // assign color to each vertex of current face
+                    for (var j = 0; j < numberOfSides; j++) {
+                        vertexIndex = face[faceIndices[j]];
+                        //store coordinates of vertex
+                        point = leafGeo.vertices[vertexIndex];
+                        // initialize color variable
+                        color = new THREE.Color();
+                        color.setRGB(0.1 + (10 + point.x) / ((j + 4) * 5), 0.5 + (10 + point.y) / ((j + 4) * 15), 0.2 + (10 + point.z) / ((j + 4) * 5));
+                        face.vertexColors[j] = color;
+                    }
+                }
+            });
+
+            loader.load(this.BASE_PATH + "/models/twig.js", function (geometry, material) {
+                twigGeo = geometry;
+            });
+
+            this.loadModelDome(this.BASE_PATH + '/models/shield.js', this.BASE_PATH + '/models/dome.js', this.BASE_PATH + '/models/collapse.js').then(function (dome) {
+                _this2.add(dome);
+                console.log("Loaded dome, setting up 'things'", dome);
+                var centerV = new THREE.Vector3();
+                var upp = new THREE.Vector3(0, -1, 0);
+
+                for (var _i2 = 0; _i2 < dome.geometry.vertices.length; _i2++) {
+                    var fMesh = new Thing(dome.geometry.vertices[_i2], twigGeo, leafGeo, evilGeo, twigMat, leafMat, evilMat);
+
+                    _this2.add(fMesh.mesh);
+
+                    var m1 = new THREE.Matrix4();
+                    m1.lookAt(centerV, dome.geometry.vertices[_i2], upp);
+                    fMesh.mesh.quaternion.setFromRotationMatrix(m1);
+
+                    _this2.domeMorphTargets.push(fMesh);
+                }
+                _this2.initParticles();
+            });
+            var hannahRoom = new THREE.Object3D();
+
+            // DOODLE_MEN
+            var menGeometry = new THREE.PlaneGeometry(5, 10);
+            for (var _i3 = 0; _i3 < doodleMenTexFiles.length; _i3++) {
+                var mTex = p_tex_loader.load(doodleMenTexFiles[_i3]);
+
+                var mAni = new _texture_animator2.default(mTex, 2, 1, 2, 60, [0, 1]);
+                this.doodleMenAnimators.push(mAni);
+
+                var mMat = new THREE.MeshBasicMaterial({ map: mTex, side: THREE.DoubleSide, transparent: true });
+                var mMesh = new THREE.Mesh(menGeometry, mMat);
+                mMesh.position.x = -15 - _i3 * 6;
+                mMesh.position.y = 7.5;
+                hannahRoom.add(mMesh);
+                doodleMen.push(mMesh);
+            }
+
+            for (var i = 0; i < hannahRoomFiles.length; i++) {
+                loader.load(hannahRoomFiles[i], function (geometry) {
+                    var colorValue = Math.random() * 0xFF | 0;
+                    var colorString = "rgb(" + colorValue + "," + colorValue + "," + colorValue + ")";
+                    var mat = new THREE.MeshLambertMaterial({ color: colorString });
+                    var meshhh = new THREE.Mesh(geometry, mat);
+                    hannahRoom.add(meshhh);
+                });
+            }
+            hannahRoom.scale.set(8, 8, 8);
+            hannahRoom.rotation.y = Math.PI;
+            hannahRoom.position.y = 400;
+            this.add(hannahRoom);
+
+            this.loadingManager.itemEnd("HannahAnim");
         }
     }, {
-        key: "update",
-        value: function update(dt) {
-            this.videoRGBD.update(dt);
+        key: 'initParticles',
+        value: function initParticles() {
+            var p_tex_loader = new THREE.TextureLoader(this.loadingManager);
+            var particleTex = p_tex_loader.load(this.BASE_PATH + '/images/dandelion_particle.jpg');
+
+            this.particleGroup = new SPE.Group({
+                texture: {
+                    value: particleTex
+                },
+                depthTest: false
+            });
+
+            // reduce emitter amount to be 1/5 of domeMorphTargets.length
+            for (var i = 0; i < this.domeMorphTargets.length - 6; i += 6) {
+                var emitter = new SPE.Emitter({
+                    type: SPE.distributions.SPHERE,
+                    // duration: 10,
+                    maxAge: {
+                        value: 10,
+                        spread: 2
+                    },
+                    position: {
+                        value: this.domeMorphTargets[i].mesh.position,
+                        spread: new THREE.Vector3(20, 20, 20),
+                        radiusScale: new THREE.Vector3(3, 3, 3),
+                        distribution: SPE.distributions.SPHERE
+                    },
+                    acceleration: {
+                        value: new THREE.Vector3(0, -5, 0),
+                        spread: new THREE.Vector3(2, -5, 2)
+                    },
+                    velocity: {
+                        value: new THREE.Vector3(1, -1, 1)
+                        // distribution: SPE.distributions.SPHERE
+                    },
+                    rotation: {
+                        angle: 1
+                    },
+                    angle: {
+                        value: [0, 1, -1],
+                        spread: [0, -1, 1]
+                    },
+                    // color: {
+                    // 	value: new THREE.Color( 0xAA4488 )
+                    // },
+                    opacity: {
+                        value: [0, 1, 1, 1, 0]
+                    },
+                    size: {
+                        value: [10, 50, 50, 50, 30]
+                        // spread: [1,3]
+                    },
+                    particleCount: 1,
+                    drag: 0.5
+                    // wiggle: 15
+                    // isStatic: true
+                });
+                this.particleGroup.addEmitter(emitter);
+            }
+            this.add(this.particleGroup.mesh);
+        }
+    }, {
+        key: 'loadModelDome',
+        value: function loadModelDome(modelS, modelD, modelC) {
+            var _this3 = this;
+
+            var promise = new Promise(function (resolve, reject) {
+                var loader = new THREE.JSONLoader(_this3.loadingManager);
+                var domeMat = new THREE.MeshBasicMaterial({ morphTargets: true, color: 0xAA4488, wireframe: true, visible: false });
+                var followMat = new THREE.MeshBasicMaterial({ color: 0xffff00 });
+                var followMesh = new THREE.Mesh(new THREE.SphereGeometry(10), followMat);
+
+                loader.load(modelS, function (geometry, material) {
+
+                    _this3.shieldGeo = geometry;
+
+                    loader.load(modelD, function (geometryD, materialD) {
+                        var domeGeo = geometryD;
+
+                        loader.load(modelC, function (geometryC, materialC) {
+                            var collapseGeo = geometryC;
+
+                            var tempDome = new THREE.Mesh(domeGeo, followMat);
+                            tempDome.rotation.y = Math.PI;
+                            tempDome.scale.multiplyScalar(90);
+                            tempDome.updateMatrix();
+
+                            domeGeo.applyMatrix(tempDome.matrix);
+                            _this3.shieldGeo.applyMatrix(tempDome.matrix);
+                            collapseGeo.applyMatrix(tempDome.matrix);
+
+                            _this3.shieldGeo.morphTargets[0] = { name: 't1', vertices: domeGeo.vertices };
+                            _this3.shieldGeo.morphTargets[1] = { name: 't2', vertices: collapseGeo.vertices };
+                            _this3.shieldGeo.computeMorphNormals();
+
+                            var dome = new THREE.Mesh(_this3.shieldGeo, domeMat);
+                            resolve(dome);
+                        });
+                    });
+                });
+            });
+            return promise;
+        }
+    }, {
+        key: 'update',
+        value: function update(dt, et) {
+            if (this.particleGroup) {
+                this.particleGroup.tick(dt);
+            }
+            for (var _i4 = 0; _i4 < this.shieldGeo.vertices.length; _i4++) {
+                var h = this.perlin.noise(et * 0.1, _i4, 1) / 2;
+                this.domeMorphTargets[_i4].mesh.position.addScalar(h);
+
+                if (_i4 % 6 == 0) {
+                    if (_i4 / 6 != 63) this.particleGroup.emitters[_i4 / 6].position.value = this.particleGroup.emitters[_i4 / 6].position.value.addScalar(h);
+                }
+            }
+
+            // DOODLE_MEN
+            if (this.doodleMenAnimators.length > 0) {
+                for (var i = 0; i < this.doodleMenAnimators.length; i++) {
+                    this.doodleMenAnimators[i].updateWithOrder(300 * dt);
+                }
+            }
         }
     }]);
 
-    return Character;
+    return HannahAnimation;
+}(THREE.Object3D);
+
+exports.default = HannahAnimation;
+
+function Thing(pos, geoTwig, geoLeaf, geoEvil, twigMat, leafMat, evilMat) {
+
+    this.position = pos.clone();
+    this.acceleration = new THREE.Vector3(0, 0, 0);
+    this.velocity = new THREE.Vector3(0, 0, 0);
+
+    this.r = 15; // 0.6
+    this.maxSpeed = 2; //0.3
+    this.maxForce = 0.005; //0.01
+    this.maxForceSelf = 0.00001; //0.0001
+    this.toChase = true;
+
+    this.neighbordist = 10;
+
+    var lightDis = 20;
+
+    this.separateSingleScalar = 0.1;
+    this.arriveScalar = 1;
+
+    this.mesh = new THREE.Object3D();
+
+    // v.2
+    this.twig = new THREE.Mesh(geoTwig, twigMat);
+    this.leaf = new THREE.Mesh(geoLeaf, leafMat);
+    this.evil = new THREE.Mesh(geoEvil, evilMat);
+
+    this.mesh.add(this.twig);
+    this.mesh.add(this.leaf);
+    this.mesh.add(this.evil);
+
+    this.mesh.position.copy(this.position);
+
+    this.mesh.children[1].scale.set(0.01, 0.01, 0.01);
+    this.mesh.children[2].scale.set(0.01, 0.01, 0.01);
+}
+
+function map_range(value, low1, high1, low2, high2) {
+    return low2 + (high2 - low2) * (value - low1) / (high1 - low1);
+}
+
+},{"../util/improved_noise":57,"../util/texture_animator":58}],44:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+        value: true
+});
+
+var _createClass = function () {
+        function defineProperties(target, props) {
+                for (var i = 0; i < props.length; i++) {
+                        var descriptor = props[i];descriptor.enumerable = descriptor.enumerable || false;descriptor.configurable = true;if ("value" in descriptor) descriptor.writable = true;Object.defineProperty(target, descriptor.key, descriptor);
+                }
+        }return function (Constructor, protoProps, staticProps) {
+                if (protoProps) defineProperties(Constructor.prototype, protoProps);if (staticProps) defineProperties(Constructor, staticProps);return Constructor;
+        };
+}();
+
+var _video_rgbd = require("./util/video_rgbd");
+
+var _video_rgbd2 = _interopRequireDefault(_video_rgbd);
+
+function _interopRequireDefault(obj) {
+        return obj && obj.__esModule ? obj : { default: obj };
+}
+
+function _classCallCheck(instance, Constructor) {
+        if (!(instance instanceof Constructor)) {
+                throw new TypeError("Cannot call a class as a function");
+        }
+}
+
+function _possibleConstructorReturn(self, call) {
+        if (!self) {
+                throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
+        }return call && (typeof call === "object" || typeof call === "function") ? call : self;
+}
+
+function _inherits(subClass, superClass) {
+        if (typeof superClass !== "function" && superClass !== null) {
+                throw new TypeError("Super expression must either be null or a function, not " + typeof superClass);
+        }subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } });if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass;
+}
+
+var Character = function (_THREE$Object3D) {
+        _inherits(Character, _THREE$Object3D);
+
+        function Character(props) {
+                _classCallCheck(this, Character);
+
+                var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(Character).call(this));
+
+                _this.videoRGBD = new _video_rgbd2.default(props);
+
+                console.log(props.name + " character constructed!");
+
+                _this.props = props;
+                return _this;
+        }
+
+        _createClass(Character, [{
+                key: "init",
+                value: function init(loadingManager, animations) {
+                        this.videoRGBD.init(loadingManager);
+                        this.position.fromArray(this.props.position);
+                        this.add(this.videoRGBD.mesh);
+                        this.animation = animations[this.props.animation];
+                        //this.add(this.animation);
+                        this.animation.scale.set(0.01, 0.01, 0.01);
+                        this.animation.position.z = -5;
+                }
+        }, {
+                key: "play",
+                value: function play() {
+                        this.videoRGBD.play();
+                }
+        }, {
+                key: "update",
+                value: function update(dt, et) {
+                        this.videoRGBD.update(dt);
+                        //this.animation.update(dt,et)
+                }
+        }]);
+
+        return Character;
 }(THREE.Object3D);
 
 exports.default = Character;
 
-},{"./util/video_rgbd":54}],43:[function(require,module,exports){
+},{"./util/video_rgbd":60}],45:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -16723,7 +17119,7 @@ var Clouds = function () {
 
 exports.default = Clouds;
 
-},{"./util/video360":53}],44:[function(require,module,exports){
+},{"./util/video360":59}],46:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -16857,7 +17253,7 @@ var CollisionManager = function () {
 
 exports.default = CollisionManager;
 
-},{"box-intersect":28}],45:[function(require,module,exports){
+},{"box-intersect":29}],47:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -16868,7 +17264,7 @@ exports.default = {
     basalHeight: 10
 };
 
-},{}],46:[function(require,module,exports){
+},{}],48:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -16969,7 +17365,7 @@ var Flood = function (_THREE$Object3D) {
 
 exports.default = Flood;
 
-},{}],47:[function(require,module,exports){
+},{}],49:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -16985,6 +17381,12 @@ var _createClass = function () {
         if (protoProps) defineProperties(Constructor.prototype, protoProps);if (staticProps) defineProperties(Constructor, staticProps);return Constructor;
     };
 }();
+
+// Animations
+
+var _events = require('events');
+
+var _events2 = _interopRequireDefault(_events);
 
 var _sky = require('./sky');
 
@@ -17018,8 +17420,28 @@ var _zoom_controller = require('./zoom_controller');
 
 var _zoom_controller2 = _interopRequireDefault(_zoom_controller);
 
+var _tzina_vr_controls = require('./tzina_vr_controls');
+
+var _tzina_vr_controls2 = _interopRequireDefault(_tzina_vr_controls);
+
+var _hannah = require('./animations/hannah');
+
+var _hannah2 = _interopRequireDefault(_hannah);
+
 function _interopRequireDefault(obj) {
     return obj && obj.__esModule ? obj : { default: obj };
+}
+
+function _possibleConstructorReturn(self, call) {
+    if (!self) {
+        throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
+    }return call && (typeof call === "object" || typeof call === "function") ? call : self;
+}
+
+function _inherits(subClass, superClass) {
+    if (typeof superClass !== "function" && superClass !== null) {
+        throw new TypeError("Super expression must either be null or a function, not " + typeof superClass);
+    }subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } });if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass;
 }
 
 function _classCallCheck(instance, Constructor) {
@@ -17040,6 +17462,20 @@ var Game = function () {
     _createClass(Game, [{
         key: 'init',
         value: function init() {
+            var TzinaEmitter = function (_EventEmitter) {
+                _inherits(TzinaEmitter, _EventEmitter);
+
+                function TzinaEmitter() {
+                    _classCallCheck(this, TzinaEmitter);
+
+                    return _possibleConstructorReturn(this, Object.getPrototypeOf(TzinaEmitter).apply(this, arguments));
+                }
+
+                return TzinaEmitter;
+            }(_events2.default);
+
+            this.emitter = new TzinaEmitter();
+
             this.renderer = new THREE.WebGLRenderer({ antialias: true });
             this.renderer.setClearColor(0, 1);
             this.renderer.setPixelRatio(window.devicePixelRatio);
@@ -17100,36 +17536,43 @@ var Game = function () {
                 maxdepth: 3446.559326172,
                 position: [30, 6, 42],
                 rotation: [0, 170, 0],
-                name: 'Lupo'
+                name: 'Lupo',
+                animation: 'Hannah'
             });
 
             this.sky = new _sky2.default(this.loadingManager);
+
+            // animations
+            this.animations = {
+                'Hannah': new _hannah2.default()
+            };
 
             /*
             this.flood = new Flood();
             this.flood.init();
             this.scene.add(this.flood); */
 
-            // Post processing
+            /*
+            // Post processing 
             this.composer = new THREE.EffectComposer(this.renderer);
-            var renderPass = new THREE.RenderPass(this.scene, this.camera);
+            let renderPass = new THREE.RenderPass(this.scene, this.camera);
             this.composer.addPass(renderPass);
-
-            var effect = new THREE.ShaderPass(_post_shader2.default);
+             let effect = new THREE.ShaderPass(PostShader);
             effect.renderToScreen = true;
-            this.composer.addPass(effect);
+            this.composer.addPass( effect );
+            */
         }
     }, {
         key: 'load',
         value: function load(onLoad) {
-            var _this = this;
+            var _this2 = this;
 
             this.loadingManager.onLoad = function () {
 
                 console.log("Done loading everything!");
-                _this.scene.add(_this.square);
-                _this.sky.applyToMesh(_this.square.getSphereMesh());
-                _this.scene.add(_this.testCharacter);
+                _this2.scene.add(_this2.square);
+                _this2.sky.applyToMesh(_this2.square.getSphereMesh());
+                _this2.scene.add(_this2.testCharacter);
 
                 onLoad();
             };
@@ -17143,8 +17586,13 @@ var Game = function () {
             };
 
             this.sky.init();
-            this.testCharacter.init(this.loadingManager);
+            this.testCharacter.init(this.loadingManager, this.animations);
             this.square.init(this.collisionManager, this.loadingManager);
+
+            // Animations init
+            Object.keys(this.animations).forEach(function (key) {
+                _this2.animations[key].init(_this2.loadingManager);
+            });
 
             // WebVR
             var vrEffect = new THREE.VREffect(this.renderer);
@@ -17159,32 +17607,24 @@ var Game = function () {
     }, {
         key: 'start',
         value: function start() {
-            var _this2 = this;
-
             this.started = true;
             var element = this.renderer.domElement;
             this.container = document.getElementById('game');
             this.container.appendChild(element);
             console.log("VR Compatible?", this.vrManager.isVRCompatible);
             if (this.config.controls == "locked") {
+                this.vrControls = new _tzina_vr_controls2.default(this.emitter, this.camera);
+                this.vrControls.standing = true;
+                this.keyboardController = new _keyboard_controller2.default(this.config, this.emitter, this.camera, this.square, this.collisionManager);
+                this.keyboardController.init();
+                this.zoomController = new _zoom_controller2.default(this.config, this.emitter, this.camera, this.square);
+                this.zoomController.init();
+                this.keyboardController.setPosition(40, 10, 65);
 
-                if (this.vrManager.isVRCompatible) {
-                    this.vrControls = new THREE.VRControls(this.camera);
-                    this.vrControls.standing = true;
-                } else {
-                    var controls = new THREE.PointerLockControls(this.camera);
-                    controls.enabled = true;
-
-                    this.scene.add(controls.getObject());
-                    this.keyboardController = new _keyboard_controller2.default(this.config, controls.getObject(), this.square, this.collisionManager);
-                    this.keyboardController.init();
-
-                    this.zoomController = new _zoom_controller2.default(this.config, this.camera, this.square);
-                    this.zoomController.init();
-                }
-
-                // Get in the square
-                this.keyboardController.setPosition(35, 10, 65);
+                /*
+                let controls = new THREE.PointerLockControls( this.camera );
+                controls.enabled = true;
+                this.scene.add(controls.getObject());*/
             } else {
                 this.controls = new THREE.OrbitControls(this.camera, element);
             }
@@ -17193,18 +17633,18 @@ var Game = function () {
             this.resize();
 
             setTimeout(function () {
-                _this2.testCharacter.play();
+                //    this.testCharacter.play();
             }, 5000);
         }
     }, {
         key: 'animate',
         value: function animate(t) {
-            this.update(this.clock.getDelta());
+            this.update(this.clock.getDelta(), this.clock.getElapsedTime());
             this.render();
         }
     }, {
         key: 'update',
-        value: function update(dt) {
+        value: function update(dt, et) {
             this.sky.update(dt);
             this.dirLight.position.copy(this.sky.getSunPosition());
             if (this.keyboardController) {
@@ -17214,7 +17654,7 @@ var Game = function () {
             if (this.vrControls) {
                 this.vrControls.update();
             }
-            this.testCharacter.update(dt);
+            this.testCharacter.update(dt, et);
             //this.flood.update(dt);
             /*
             this.collisionManager.update(dt);
@@ -17235,7 +17675,7 @@ var Game = function () {
             this.camera.aspect = width / height;
             this.camera.updateProjectionMatrix();
             this.renderer.setSize(width, height);
-            this.composer.setSize(width, height);
+            //this.composer.setSize(width, height);
         }
     }]);
 
@@ -17244,7 +17684,7 @@ var Game = function () {
 
 exports.default = Game;
 
-},{"./character":42,"./collision_manager":44,"./flood":46,"./keyboard_controller":49,"./post_shader":50,"./sky":51,"./square":52,"./zoom_controller":55}],48:[function(require,module,exports){
+},{"./animations/hannah":43,"./character":44,"./collision_manager":46,"./flood":48,"./keyboard_controller":51,"./post_shader":52,"./sky":53,"./square":54,"./tzina_vr_controls":56,"./zoom_controller":61,"events":6}],50:[function(require,module,exports){
 'use strict';
 
 var Game = require('./game').default;
@@ -17343,8 +17783,8 @@ function resize() {
     game.resize();
 }
 
-},{"./config":45,"./game":47,"fullscreen":36,"pointer-lock-chrome-tolerant":39,"stats.js":40}],49:[function(require,module,exports){
-'use strict';
+},{"./config":47,"./game":49,"fullscreen":37,"pointer-lock-chrome-tolerant":40,"stats.js":41}],51:[function(require,module,exports){
+"use strict";
 
 Object.defineProperty(exports, "__esModule", {
     value: true
@@ -17367,8 +17807,10 @@ function _classCallCheck(instance, Constructor) {
 }
 
 var KeyboardController = function () {
-    function KeyboardController(config, camera, square, collisionManager) {
+    function KeyboardController(config, emitter, camera, square, collisionManager) {
         _classCallCheck(this, KeyboardController);
+
+        this.emitter = emitter;
 
         this.moveForward = false;
         this.moveLeft = false;
@@ -17385,14 +17827,20 @@ var KeyboardController = function () {
         this.walkingDirection = new THREE.Vector3();
 
         this.height = config.basalHeight;
+
+        this.active = true;
     }
 
     _createClass(KeyboardController, [{
-        key: 'init',
+        key: "init",
         value: function init() {
             var _this = this;
 
             console.log("Keyboard controller init");
+
+            this.emitter.on("start_zoom", function () {
+                _this.active = false;
+            });
 
             document.addEventListener('keydown', function (event) {
                 switch (event.keyCode) {
@@ -17469,53 +17917,59 @@ var KeyboardController = function () {
             }, false);
         }
     }, {
-        key: 'update',
+        key: "update",
         value: function update(dt) {
-            var delta = dt;
-            this.velocity.x -= this.velocity.x * 10.0 * delta;
-            this.velocity.z -= this.velocity.z * 10.0 * delta;
+            if (this.active) {
+                var delta = dt;
+                this.velocity.x -= this.velocity.x * 10.0 * delta;
+                this.velocity.z -= this.velocity.z * 10.0 * delta;
 
-            this.velocity.y -= 9.8 * 100.0 * delta; // 100.0 = mass
+                this.velocity.y -= 9.8 * 100.0 * delta; // 100.0 = mass
 
-            if (this.moveForward) this.velocity.z -= 100.0 * delta;
-            if (this.moveBackward) this.velocity.z += 100.0 * delta;
+                if (this.moveForward) this.velocity.z -= 100.0 * delta;
+                if (this.moveBackward) this.velocity.z += 100.0 * delta;
 
-            if (this.moveLeft) this.velocity.x -= 100.0 * delta;
-            if (this.moveRight) this.velocity.x += 100.0 * delta;
+                if (this.moveLeft) this.velocity.x -= 100.0 * delta;
+                if (this.moveRight) this.velocity.x += 100.0 * delta;
 
-            if (this.collisionManager.isClimbingStairs() && this.velocity.z != 0) {
-                this.climbStairs();
+                if (this.collisionManager.isClimbingStairs() && this.velocity.z != 0) {
+                    this.climbStairs();
+                }
+
+                if (this.isOnObject === true) {
+                    this.velocity.y = Math.max(0, this.velocity.y);
+
+                    this.canJump = true;
+                }
+
+                this.camera.translateX(this.velocity.x * delta);
+                this.camera.position.y += this.velocity.y * delta;
+                this.camera.translateZ(this.velocity.z * delta);
+
+                if (this.camera.position.y < this.height) {
+                    if (this.camera.position.y < this.height) {
+
+                        this.velocity.y = 0;
+                        this.camera.position.y = this.height;
+
+                        this.canJump = true;
+                    }
+
+                    this.canJump = true;
+                }
+
+                //console.log(this.camera.position);*/
             }
-
-            if (this.isOnObject === true) {
-                this.velocity.y = Math.max(0, this.velocity.y);
-
-                this.canJump = true;
-            }
-
-            this.camera.translateX(this.velocity.x * delta);
-            this.camera.translateY(this.velocity.y * delta);
-            this.camera.translateZ(this.velocity.z * delta);
-
-            if (this.camera.position.y < this.height) {
-
-                this.velocity.y = 0;
-                this.camera.position.y = this.height;
-
-                this.canJump = true;
-            }
-
-            //    console.log(this.camera.position);
         }
     }, {
-        key: 'climbStairs',
+        key: "climbStairs",
         value: function climbStairs() {
             var distanceToCenter = this.camera.position.distanceTo(this.square.getCenterPosition());
             var distanceInStairs = Math.max(0, 260 - distanceToCenter);
             this.height = Math.max(Math.min(30, distanceInStairs), this.config.basalHeight);
         }
     }, {
-        key: 'setPosition',
+        key: "setPosition",
         value: function setPosition(x, y, z) {
             this.height = y;
             this.camera.position.set(x, y, z);
@@ -17527,7 +17981,7 @@ var KeyboardController = function () {
 
 exports.default = KeyboardController;
 
-},{}],50:[function(require,module,exports){
+},{}],52:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -17544,7 +17998,7 @@ exports.default = {
     fragmentShader: "#define GLSLIFY 1\nuniform sampler2D tDiffuse;\n\nvarying vec2 vUv;\n\nvoid main() {\n\n        vec4 color = texture2D( tDiffuse, vUv );\n\n        gl_FragColor = color;\n}\n"
 };
 
-},{}],51:[function(require,module,exports){
+},{}],53:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -17675,7 +18129,7 @@ var Sky = function () {
 
 exports.default = Sky;
 
-},{"./clouds":43}],52:[function(require,module,exports){
+},{"./clouds":45}],54:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -17691,6 +18145,14 @@ var _createClass = function () {
         if (protoProps) defineProperties(Constructor.prototype, protoProps);if (staticProps) defineProperties(Constructor, staticProps);return Constructor;
     };
 }();
+
+var _trees = require("./trees");
+
+var _trees2 = _interopRequireDefault(_trees);
+
+function _interopRequireDefault(obj) {
+    return obj && obj.__esModule ? obj : { default: obj };
+}
 
 function _classCallCheck(instance, Constructor) {
     if (!(instance instanceof Constructor)) {
@@ -17711,7 +18173,6 @@ function _inherits(subClass, superClass) {
 }
 
 var MODEL_PATH = "assets/square/scene.json";
-var TREES_PATH = "assets/trees/points.ply";
 
 var Square = function (_THREE$Object3D) {
     _inherits(Square, _THREE$Object3D);
@@ -17728,55 +18189,52 @@ var Square = function (_THREE$Object3D) {
     _createClass(Square, [{
         key: "init",
         value: function init(collisionManager, loadingManager) {
-            var _this2 = this;
-
-            var loader = new THREE.ObjectLoader(loadingManager);
             loadingManager.itemStart("Square");
-            loader.load(MODEL_PATH, function (obj) {
-                console.log("Loaded square ", obj);
-
-                /*
-                obj.position.y = -1950;
-                obj.position.z = 1200;
-                */
-
-                obj.position.y = -80;
-                obj.position.z = 100;
-                obj.position.x = 0;
-                obj.scale.set(4, 4, 4);
-
-                _this2.add(obj);
-                obj.updateMatrixWorld();
-                collisionManager.addBoundingBoxes(obj, _this2);
-
-                _this2.squareMiddle = obj.getObjectByName("MB_PS");
-                if (_this2.squareMiddle) {
-                    _this2.squareCenter = new THREE.Vector3();
-                    _this2.squareCenter.setFromMatrixPosition(_this2.squareMiddle.matrixWorld);
-                    console.log("Square center", _this2.squareCenter);
-                } else {
-                    _this2.squareCenter = new THREE.Vector3(0, 0, 0);
-                }
-
-                _this2.sphereMesh = obj.getObjectByName("SkySphere").children[0];
-                console.log("Sky sphere", _this2.sphereMesh);
+            var trees = new _trees2.default();
+            Promise.all([this.loadSquare(loadingManager), trees.init(loadingManager)]).then(function (results) {
+                console.log("Load results", results);
+                var obj = results[0];
+                obj.add(trees);
                 loadingManager.itemEnd("Square");
-            });
-
-            var treesLoader = new THREE.PLYLoader(loadingManager);
-            treesLoader.load(TREES_PATH, function (geometry) {
-                console.log("Loaded trees ", geometry);
-                var material = new THREE.PointsMaterial({ size: 0.05, vertexColors: true });
-                var mesh = new THREE.Points(geometry, material);
-                mesh.position.set(-100, 12, -20);
-                mesh.rotateZ(90 * Math.PI / 180);
-
-                _this2.add(mesh);
             });
         }
     }, {
         key: "update",
         value: function update(dt) {}
+    }, {
+        key: "loadSquare",
+        value: function loadSquare(loadingManager) {
+            var _this2 = this;
+
+            return new Promise(function (resolve, reject) {
+                var loader = new THREE.ObjectLoader(loadingManager);
+                loader.load(MODEL_PATH, function (obj) {
+                    console.log("Loaded square ", obj);
+
+                    obj.position.y = -80;
+                    obj.position.z = 100;
+                    obj.position.x = 0;
+                    obj.scale.set(4, 4, 4);
+
+                    _this2.add(obj);
+                    obj.updateMatrixWorld();
+                    //collisionManager.addBoundingBoxes(obj,this);
+
+                    _this2.squareMiddle = obj.getObjectByName("MB_PS");
+                    if (_this2.squareMiddle) {
+                        _this2.squareCenter = new THREE.Vector3();
+                        _this2.squareCenter.setFromMatrixPosition(_this2.squareMiddle.matrixWorld);
+                        console.log("Square center", _this2.squareCenter);
+                    } else {
+                        _this2.squareCenter = new THREE.Vector3(0, 0, 0);
+                    }
+
+                    _this2.sphereMesh = obj.getObjectByName("SkySphere").children[0];
+                    console.log("Sky sphere", _this2.sphereMesh);
+                    resolve(obj);
+                });
+            });
+        }
     }, {
         key: "getSphereMesh",
         value: function getSphereMesh() {
@@ -17794,7 +18252,396 @@ var Square = function (_THREE$Object3D) {
 
 exports.default = Square;
 
-},{}],53:[function(require,module,exports){
+},{"./trees":55}],55:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _createClass = function () {
+    function defineProperties(target, props) {
+        for (var i = 0; i < props.length; i++) {
+            var descriptor = props[i];descriptor.enumerable = descriptor.enumerable || false;descriptor.configurable = true;if ("value" in descriptor) descriptor.writable = true;Object.defineProperty(target, descriptor.key, descriptor);
+        }
+    }return function (Constructor, protoProps, staticProps) {
+        if (protoProps) defineProperties(Constructor.prototype, protoProps);if (staticProps) defineProperties(Constructor, staticProps);return Constructor;
+    };
+}();
+
+var _trees_def = require("../assets/trees/trees_def");
+
+var _trees_def2 = _interopRequireDefault(_trees_def);
+
+function _interopRequireDefault(obj) {
+    return obj && obj.__esModule ? obj : { default: obj };
+}
+
+function _classCallCheck(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+        throw new TypeError("Cannot call a class as a function");
+    }
+}
+
+function _possibleConstructorReturn(self, call) {
+    if (!self) {
+        throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
+    }return call && (typeof call === "object" || typeof call === "function") ? call : self;
+}
+
+function _inherits(subClass, superClass) {
+    if (typeof superClass !== "function" && superClass !== null) {
+        throw new TypeError("Super expression must either be null or a function, not " + typeof superClass);
+    }subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } });if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass;
+}
+
+var TREES_PATH = "assets/trees";
+
+var Trees = function (_THREE$Object3D) {
+    _inherits(Trees, _THREE$Object3D);
+
+    function Trees() {
+        _classCallCheck(this, Trees);
+
+        return _possibleConstructorReturn(this, Object.getPrototypeOf(Trees).call(this));
+    }
+
+    _createClass(Trees, [{
+        key: "init",
+        value: function init(loadingManager) {
+            var _this2 = this;
+
+            var treeTypes = {};
+            this.treesLoader = new THREE.PLYLoader(loadingManager);
+
+            return new Promise(function (resolve, reject) {
+                console.log("Loading trees", _trees_def2.default);
+                var typePromises = _trees_def2.default.types.map(function (type) {
+                    return _this2.loadType(type, treeTypes);
+                });
+                Promise.all(typePromises).then(function (results) {
+                    var material = new THREE.PointsMaterial({ size: 0.13, vertexColors: true });
+                    _trees_def2.default.instances.forEach(function (instance) {
+                        var mesh = new THREE.Points(treeTypes[instance.type], material);
+                        mesh.position.fromArray(instance.position);
+                        mesh.scale.set(0.25 * instance.scale, 0.25 * instance.scale, 0.25 * instance.scale);
+                        mesh.rotateZ(90 * Math.PI / 180);
+                        mesh.rotateX(instance.rotateX * Math.PI / 180);
+                        _this2.add(mesh);
+                        resolve();
+                    });
+                });
+            });
+        }
+    }, {
+        key: "loadType",
+        value: function loadType(props, store) {
+            var _this3 = this;
+
+            return new Promise(function (resolve, reject) {
+                console.log("Loading tree type ", props);
+                _this3.treesLoader.load(TREES_PATH + "/" + props.fileName, function (geometry) {
+                    store[props.name] = geometry;
+                    resolve();
+                });
+            });
+        }
+    }]);
+
+    return Trees;
+}(THREE.Object3D);
+
+exports.default = Trees;
+
+},{"../assets/trees/trees_def":26}],56:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+	value: true
+});
+
+exports.default = function (emitter, object, onError) {
+
+	var scope = this;
+
+	var vrInput;
+
+	var standingMatrix = new THREE.Matrix4();
+
+	function gotVRDevices(devices) {
+
+		for (var i = 0; i < devices.length; i++) {
+
+			if ('VRDisplay' in window && devices[i] instanceof VRDisplay || 'PositionSensorVRDevice' in window && devices[i] instanceof PositionSensorVRDevice) {
+
+				vrInput = devices[i];
+				break; // We keep the first we encounter
+			}
+		}
+
+		if (!vrInput) {
+
+			if (onError) onError('VR input not available.');
+		}
+	}
+
+	if (navigator.getVRDisplays) {
+
+		navigator.getVRDisplays().then(gotVRDevices);
+	} else if (navigator.getVRDevices) {
+
+		// Deprecated API.
+		navigator.getVRDevices().then(gotVRDevices);
+	}
+
+	// the Rift SDK returns the position in meters
+	// this scale factor allows the user to define how meters
+	// are converted to scene units.
+
+	this.scale = 1;
+
+	// If true will use "standing space" coordinate system where y=0 is the
+	// floor and x=0, z=0 is the center of the room.
+	this.standing = false;
+
+	// Distance from the users eyes to the floor in meters. Used when
+	// standing=true but the VRDisplay doesn't provide stageParameters.
+	this.userHeight = 1.6;
+
+	this.update = function () {
+
+		if (vrInput) {
+
+			if (vrInput.getPose) {
+
+				var pose = vrInput.getPose();
+
+				if (pose.orientation !== null) {
+
+					object.quaternion.fromArray(pose.orientation);
+				}
+
+				if (pose.position !== null) {
+
+					object.position.fromArray(pose.position);
+
+					if (this.standing) {
+
+						if (vrInput.stageParameters) {
+
+							object.updateMatrix();
+
+							standingMatrix.fromArray(vrInput.stageParameters.sittingToStandingTransform);
+							object.applyMatrix(standingMatrix);
+						} else {
+
+							object.position.setY(object.position.y + this.userHeight);
+						}
+					}
+
+					object.position.multiplyScalar(scope.scale);
+				}
+			} else {
+
+				// Deprecated API.
+				var state = vrInput.getState();
+
+				if (state.orientation !== null) {
+
+					object.quaternion.copy(state.orientation);
+				}
+
+				if (state.position !== null) {
+
+					object.position.copy(state.position);
+				}
+			}
+		}
+	};
+
+	this.resetPose = function () {
+
+		if (vrInput) {
+
+			if (vrInput.resetPose !== undefined) {
+
+				vrInput.resetPose();
+			} else if (vrInput.resetSensor !== undefined) {
+
+				// Deprecated API.
+				vrInput.resetSensor();
+			} else if (vrInput.zeroSensor !== undefined) {
+
+				// Really deprecated API.
+				vrInput.zeroSensor();
+			}
+		}
+	};
+
+	this.resetSensor = function () {
+
+		console.warn('THREE.VRControls: .resetSensor() is now .resetPose().');
+		this.resetPose();
+	};
+
+	this.zeroSensor = function () {
+
+		console.warn('THREE.VRControls: .zeroSensor() is now .resetPose().');
+		this.resetPose();
+	};
+
+	this.dispose = function () {
+
+		vrInput = null;
+	};
+};
+
+; /**
+   * @author dmarcos / https://github.com/dmarcos
+   * @author mrdoob / http://mrdoob.com
+   * @author avnerus / http://avner.js.org
+   */
+
+},{}],57:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+exports.default = ImprovedNoise;
+function ImprovedNoise() {
+
+    var p = [151, 160, 137, 91, 90, 15, 131, 13, 201, 95, 96, 53, 194, 233, 7, 225, 140, 36, 103, 30, 69, 142, 8, 99, 37, 240, 21, 10, 23, 190, 6, 148, 247, 120, 234, 75, 0, 26, 197, 62, 94, 252, 219, 203, 117, 35, 11, 32, 57, 177, 33, 88, 237, 149, 56, 87, 174, 20, 125, 136, 171, 168, 68, 175, 74, 165, 71, 134, 139, 48, 27, 166, 77, 146, 158, 231, 83, 111, 229, 122, 60, 211, 133, 230, 220, 105, 92, 41, 55, 46, 245, 40, 244, 102, 143, 54, 65, 25, 63, 161, 1, 216, 80, 73, 209, 76, 132, 187, 208, 89, 18, 169, 200, 196, 135, 130, 116, 188, 159, 86, 164, 100, 109, 198, 173, 186, 3, 64, 52, 217, 226, 250, 124, 123, 5, 202, 38, 147, 118, 126, 255, 82, 85, 212, 207, 206, 59, 227, 47, 16, 58, 17, 182, 189, 28, 42, 223, 183, 170, 213, 119, 248, 152, 2, 44, 154, 163, 70, 221, 153, 101, 155, 167, 43, 172, 9, 129, 22, 39, 253, 19, 98, 108, 110, 79, 113, 224, 232, 178, 185, 112, 104, 218, 246, 97, 228, 251, 34, 242, 193, 238, 210, 144, 12, 191, 179, 162, 241, 81, 51, 145, 235, 249, 14, 239, 107, 49, 192, 214, 31, 181, 199, 106, 157, 184, 84, 204, 176, 115, 121, 50, 45, 127, 4, 150, 254, 138, 236, 205, 93, 222, 114, 67, 29, 24, 72, 243, 141, 128, 195, 78, 66, 215, 61, 156, 180];
+
+    for (var i = 0; i < 256; i++) {
+
+        p[256 + i] = p[i];
+    }
+
+    function fade(t) {
+
+        return t * t * t * (t * (t * 6 - 15) + 10);
+    }
+
+    function lerp(t, a, b) {
+
+        return a + t * (b - a);
+    }
+
+    function grad(hash, x, y, z) {
+
+        var h = hash & 15;
+        var u = h < 8 ? x : y,
+            v = h < 4 ? y : h == 12 || h == 14 ? x : z;
+        return ((h & 1) == 0 ? u : -u) + ((h & 2) == 0 ? v : -v);
+    }
+
+    return {
+
+        noise: function noise(x, y, z) {
+
+            var floorX = ~~x,
+                floorY = ~~y,
+                floorZ = ~~z;
+
+            var X = floorX & 255,
+                Y = floorY & 255,
+                Z = floorZ & 255;
+
+            x -= floorX;
+            y -= floorY;
+            z -= floorZ;
+
+            var xMinus1 = x - 1,
+                yMinus1 = y - 1,
+                zMinus1 = z - 1;
+
+            var u = fade(x),
+                v = fade(y),
+                w = fade(z);
+
+            var A = p[X] + Y,
+                AA = p[A] + Z,
+                AB = p[A + 1] + Z,
+                B = p[X + 1] + Y,
+                BA = p[B] + Z,
+                BB = p[B + 1] + Z;
+
+            return lerp(w, lerp(v, lerp(u, grad(p[AA], x, y, z), grad(p[BA], xMinus1, y, z)), lerp(u, grad(p[AB], x, yMinus1, z), grad(p[BB], xMinus1, yMinus1, z))), lerp(v, lerp(u, grad(p[AA + 1], x, y, zMinus1), grad(p[BA + 1], xMinus1, y, z - 1)), lerp(u, grad(p[AB + 1], x, yMinus1, zMinus1), grad(p[BB + 1], xMinus1, yMinus1, zMinus1))));
+        }
+    };
+}
+
+},{}],58:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+exports.default = TextureAnimator;
+// function built based on Stemkoski's
+// http://stemkoski.github.io/Three.js/Texture-Animation.html
+
+function TextureAnimator(texture, tilesHoriz, tilesVert, numTiles, tileDispDuration, order) {
+    // note: texture passed by reference, will be updated by the update function.
+
+    this.tilesHorizontal = tilesHoriz;
+    this.tilesVertical = tilesVert;
+    // how many images does this spritesheet contain?
+    //  usually equals tilesHoriz * tilesVert, but not necessarily,
+    //  if there at blank tiles at the bottom of the spritesheet.
+    this.numberOfTiles = numTiles;
+    texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+    texture.repeat.set(1 / this.tilesHorizontal, 1 / this.tilesVertical);
+
+    // how long should each image be displayed?
+    this.tileDisplayDuration = tileDispDuration;
+
+    // how long has the current image been displayed?
+    this.currentDisplayTime = 0;
+
+    // which image is currently being displayed?
+    this.currentTile = 0;
+
+    // order of the pic
+    this.displayOrder = order;
+
+    this.updateWithOrder = function (milliSec) {
+        this.currentDisplayTime += milliSec;
+        while (this.currentDisplayTime > this.tileDisplayDuration) {
+            var currentColumn = this.displayOrder[this.currentTile] % this.tilesHorizontal;
+            texture.offset.x = currentColumn / this.tilesHorizontal;
+            var currentRow = Math.floor(this.displayOrder[this.currentTile] / this.tilesHorizontal);
+            texture.offset.y = currentRow / this.tilesVertical;
+
+            this.currentDisplayTime -= this.tileDisplayDuration;
+            this.currentTile++;
+
+            if (this.currentTile == this.numberOfTiles) this.currentTile = 0;
+
+            // console.log(this.displayOrder[ this.currentTile ]);
+        }
+    };
+
+    this.update = function (milliSec) {
+        this.currentDisplayTime += milliSec;
+        while (this.currentDisplayTime > this.tileDisplayDuration) {
+            this.currentDisplayTime -= this.tileDisplayDuration;
+            this.currentTile++;
+
+            if (this.currentTile == this.numberOfTiles) this.currentTile = 0;
+
+            var currentColumn = this.currentTile % this.tilesHorizontal;
+            texture.offset.x = currentColumn / this.tilesHorizontal;
+            var currentRow = Math.floor(this.currentTile / this.tilesHorizontal);
+            texture.offset.y = currentRow / this.tilesVertical;
+
+            console.log('currentTile: ' + this.currentTile + ', offset.x: ' + texture.offset.x);
+        }
+    };
+}
+
+},{}],59:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -17863,7 +18710,7 @@ var Video360 = function () {
 
 exports.default = Video360;
 
-},{}],54:[function(require,module,exports){
+},{}],60:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -18019,7 +18866,7 @@ var VideoRGBD = function () {
 exports.default = VideoRGBD;
 ;
 
-},{}],55:[function(require,module,exports){
+},{}],61:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -18055,13 +18902,17 @@ function _classCallCheck(instance, Constructor) {
 }
 
 var ZoomController = function () {
-    function ZoomController(config, camera, square) {
+    function ZoomController(config, emitter, camera, square) {
         _classCallCheck(this, ZoomController);
 
         this.camera = camera;
         this.square = square;
         this.inZoomMode = false;
         this.velocityZ = 0;
+        this.emitter = emitter;
+        this.zoomVector = new THREE.Vector3();
+
+        this.MAX_DISTANCE = 100;
     }
 
     _createClass(ZoomController, [{
@@ -18091,6 +18942,10 @@ var ZoomController = function () {
             if (this.velocityZ != 0) {
                 if (!this.inZoomMode) {
                     this.inZoomMode = true;
+                    console.log("What?");
+                    this.zoomVector.copy(new THREE.Vector3(0, 0, 1)).applyQuaternion(this.camera.quaternion);
+
+                    this.emitter.emit("start_zoom");
                     this.startZ = this.camera.position.z;
                     this.startY = this.camera.position.y;
 
@@ -18098,8 +18953,9 @@ var ZoomController = function () {
 
                     //TweenMax.to(this.camera.position, 1, {x:zoomPosition.x, y: zoomPosition.y, z:zoomPosition.z});
                 }
-                this.camera.translateZ(this.velocityZ * -3.0 * dt);
-                //this.camera.translateY( this.velocityZ * -0.5 * dt );
+                var movement = new THREE.Vector3();
+                movement.copy(this.zoomVector).multiplyScalar(this.velocityZ * -3.5 * dt);
+                this.camera.position.add(movement);
                 this.camera.updateProjectionMatrix();
                 if (this.velocityZ > 0) {
                     this.velocityZ = Math.max(0, this.velocityZ - 10 * dt);
@@ -18115,4 +18971,4 @@ var ZoomController = function () {
 
 exports.default = ZoomController;
 
-},{"jquery-browserify":37,"jquery-mousewheel":38}]},{},[48]);
+},{"jquery-browserify":38,"jquery-mousewheel":39}]},{},[50]);
