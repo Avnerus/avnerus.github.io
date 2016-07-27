@@ -17730,7 +17730,7 @@ var Fountain = function (_THREE$Object3D) {
 
         var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(Fountain).call(this));
 
-        _this.BASE_PATH = '/assets/fountain/';
+        _this.BASE_PATH = 'assets/fountain/';
         console.log("Fountain constructed!");
 
         return _this;
