@@ -4962,7 +4962,7 @@ function boxIntersectWrapper(arg0, arg1, arg2) {
       throw new Error('box-intersect: Invalid arguments')
   }
 }
-},{"./lib/intersect":31,"./lib/sweep":35,"typedarray-pool":42}],30:[function(require,module,exports){
+},{"./lib/intersect":31,"./lib/sweep":35,"typedarray-pool":43}],30:[function(require,module,exports){
 'use strict'
 
 var DIMENSION   = 'd'
@@ -5602,7 +5602,7 @@ function boxIntersectIter(
     }
   }
 }
-},{"./brute":30,"./median":32,"./partition":33,"./sweep":35,"bit-twiddle":28,"typedarray-pool":42}],32:[function(require,module,exports){
+},{"./brute":30,"./median":32,"./partition":33,"./sweep":35,"bit-twiddle":28,"typedarray-pool":43}],32:[function(require,module,exports){
 'use strict'
 
 module.exports = findMedian
@@ -6438,7 +6438,7 @@ red_loop:
     }
   }
 }
-},{"./sort":34,"bit-twiddle":28,"typedarray-pool":42}],36:[function(require,module,exports){
+},{"./sort":34,"bit-twiddle":28,"typedarray-pool":43}],36:[function(require,module,exports){
 "use strict"
 
 function dupe_array(count, value, i) {
@@ -6489,6 +6489,326 @@ function dupe(count, value) {
 
 module.exports = dupe
 },{}],37:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+exports.linear = linear;
+exports.easeInSine = easeInSine;
+exports.easeOutSine = easeOutSine;
+exports.easeInOutSine = easeInOutSine;
+exports.easeInQuad = easeInQuad;
+exports.easeOutQuad = easeOutQuad;
+exports.easeInOutQuad = easeInOutQuad;
+exports.easeInCubic = easeInCubic;
+exports.easeOutCubic = easeOutCubic;
+exports.easeInOutCubic = easeInOutCubic;
+exports.easeInQuart = easeInQuart;
+exports.easeOutQuart = easeOutQuart;
+exports.easeInOutQuart = easeInOutQuart;
+exports.easeInQuint = easeInQuint;
+exports.easeOutQuint = easeOutQuint;
+exports.easeInOutQuint = easeInOutQuint;
+exports.easeInExpo = easeInExpo;
+exports.easeOutExpo = easeOutExpo;
+exports.easeInOutExpo = easeInOutExpo;
+exports.easeInCirc = easeInCirc;
+exports.easeOutCirc = easeOutCirc;
+exports.easeInOutCirc = easeInOutCirc;
+exports.easeInBack = easeInBack;
+exports.easeOutBack = easeOutBack;
+exports.easeInOutBack = easeInOutBack;
+exports.easeInElastic = easeInElastic;
+exports.easeOutElastic = easeOutElastic;
+exports.easeInOutElastic = easeInOutElastic;
+exports.easeOutBounce = easeOutBounce;
+exports.easeInBounce = easeInBounce;
+exports.easeInOutBounce = easeInOutBounce;
+// Based on https://gist.github.com/gre/1650294
+
+// No easing, no acceleration
+function linear(t) {
+    return t;
+}
+
+// Slight acceleration from zero to full speed
+function easeInSine(t) {
+    return -1 * Math.cos(t * (Math.PI / 2)) + 1;
+}
+
+// Slight deceleration at the end
+function easeOutSine(t) {
+    return Math.sin(t * (Math.PI / 2));
+}
+
+// Slight acceleration at beginning and slight deceleration at end
+function easeInOutSine(t) {
+    return -0.5 * (Math.cos(Math.PI * t) - 1);
+}
+
+// Accelerating from zero velocity
+function easeInQuad(t) {
+    return t * t;
+}
+
+// Decelerating to zero velocity
+function easeOutQuad(t) {
+    return t * (2 - t);
+}
+
+// Acceleration until halfway, then deceleration
+function easeInOutQuad(t) {
+    return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
+}
+
+// Accelerating from zero velocity
+function easeInCubic(t) {
+    return t * t * t;
+}
+
+// Decelerating to zero velocity
+function easeOutCubic(t) {
+    var t1 = t - 1;
+    return t1 * t1 * t1 + 1;
+}
+
+// Acceleration until halfway, then deceleration
+function easeInOutCubic(t) {
+    return t < 0.5 ? 4 * t * t * t : (t - 1) * (2 * t - 2) * (2 * t - 2) + 1;
+}
+
+// Accelerating from zero velocity
+function easeInQuart(t) {
+    return t * t * t * t;
+}
+
+// Decelerating to zero velocity
+function easeOutQuart(t) {
+    var t1 = t - 1;
+    return 1 - t1 * t1 * t1 * t1;
+}
+
+// Acceleration until halfway, then deceleration
+function easeInOutQuart(t) {
+    var t1 = t - 1;
+    return t < 0.5 ? 8 * t * t * t * t : 1 - 8 * t1 * t1 * t1 * t1;
+}
+
+// Accelerating from zero velocity
+function easeInQuint(t) {
+    return t * t * t * t * t;
+}
+
+// Decelerating to zero velocity
+function easeOutQuint(t) {
+    var t1 = t - 1;
+    return 1 + t1 * t1 * t1 * t1 * t1;
+}
+
+// Acceleration until halfway, then deceleration
+function easeInOutQuint(t) {
+    var t1 = t - 1;
+    return t < 0.5 ? 16 * t * t * t * t * t : 1 + 16 * t1 * t1 * t1 * t1 * t1;
+}
+
+// Accelerate exponentially until finish
+function easeInExpo(t) {
+
+    if (t === 0) {
+        return 0;
+    }
+
+    return Math.pow(2, 10 * (t - 1));
+}
+
+// Initial exponential acceleration slowing to stop
+function easeOutExpo(t) {
+
+    if (t === 1) {
+        return 1;
+    }
+
+    return -Math.pow(2, -10 * t) + 1;
+}
+
+// Exponential acceleration and deceleration
+function easeInOutExpo(t) {
+
+    if (t === 0 || t === 1) {
+        return t;
+    }
+
+    var scaledTime = t * 2;
+    var scaledTime1 = scaledTime - 1;
+
+    if (scaledTime < 1) {
+        return 0.5 * Math.pow(2, 10 * scaledTime1);
+    }
+
+    return 0.5 * (-Math.pow(2, -10 * scaledTime1) + 2);
+}
+
+// Increasing velocity until stop
+function easeInCirc(t) {
+
+    var scaledTime = t / 1;
+    return -1 * (Math.sqrt(1 - scaledTime * t) - 1);
+}
+
+// Start fast, decreasing velocity until stop
+function easeOutCirc(t) {
+
+    var t1 = t - 1;
+    return Math.sqrt(1 - t1 * t1);
+}
+
+// Fast increase in velocity, fast decrease in velocity
+function easeInOutCirc(t) {
+
+    var scaledTime = t * 2;
+    var scaledTime1 = scaledTime - 2;
+
+    if (scaledTime < 1) {
+        return -0.5 * (Math.sqrt(1 - scaledTime * scaledTime) - 1);
+    }
+
+    return 0.5 * (Math.sqrt(1 - scaledTime1 * scaledTime1) + 1);
+}
+
+// Slow movement backwards then fast snap to finish
+function easeInBack(t) {
+    var magnitude = arguments.length <= 1 || arguments[1] === undefined ? 1.70158 : arguments[1];
+
+
+    var scaledTime = t / 1;
+    return scaledTime * scaledTime * ((magnitude + 1) * scaledTime - magnitude);
+}
+
+// Fast snap to backwards point then slow resolve to finish
+function easeOutBack(t) {
+    var magnitude = arguments.length <= 1 || arguments[1] === undefined ? 1.70158 : arguments[1];
+
+
+    var scaledTime = t / 1 - 1;
+
+    return scaledTime * scaledTime * ((magnitude + 1) * scaledTime + magnitude) + 1;
+}
+
+// Slow movement backwards, fast snap to past finish, slow resolve to finish
+function easeInOutBack(t) {
+    var magnitude = arguments.length <= 1 || arguments[1] === undefined ? 1.70158 : arguments[1];
+
+
+    var scaledTime = t * 2;
+    var scaledTime2 = scaledTime - 2;
+
+    var s = magnitude * 1.525;
+
+    if (scaledTime < 1) {
+
+        return 0.5 * scaledTime * scaledTime * ((s + 1) * scaledTime - s);
+    }
+
+    return 0.5 * (scaledTime2 * scaledTime2 * ((s + 1) * scaledTime2 + s) + 2);
+}
+// Bounces slowly then quickly to finish
+function easeInElastic(t) {
+    var magnitude = arguments.length <= 1 || arguments[1] === undefined ? 0.7 : arguments[1];
+
+
+    if (t === 0 || t === 1) {
+        return t;
+    }
+
+    var scaledTime = t / 1;
+    var scaledTime1 = scaledTime - 1;
+
+    var p = 1 - magnitude;
+    var s = p / (2 * Math.PI) * Math.asin(1);
+
+    return -(Math.pow(2, 10 * scaledTime1) * Math.sin((scaledTime1 - s) * (2 * Math.PI) / p));
+}
+
+// Fast acceleration, bounces to zero
+function easeOutElastic(t) {
+    var magnitude = arguments.length <= 1 || arguments[1] === undefined ? 0.7 : arguments[1];
+
+
+    var p = 1 - magnitude;
+    var scaledTime = t * 2;
+
+    if (t === 0 || t === 1) {
+        return t;
+    }
+
+    var s = p / (2 * Math.PI) * Math.asin(1);
+    return Math.pow(2, -10 * scaledTime) * Math.sin((scaledTime - s) * (2 * Math.PI) / p) + 1;
+}
+
+// Slow start and end, two bounces sandwich a fast motion
+function easeInOutElastic(t) {
+    var magnitude = arguments.length <= 1 || arguments[1] === undefined ? 0.65 : arguments[1];
+
+
+    var p = 1 - magnitude;
+
+    if (t === 0 || t === 1) {
+        return t;
+    }
+
+    var scaledTime = t * 2;
+    var scaledTime1 = scaledTime - 1;
+
+    var s = p / (2 * Math.PI) * Math.asin(1);
+
+    if (scaledTime < 1) {
+        return -0.5 * (Math.pow(2, 10 * scaledTime1) * Math.sin((scaledTime1 - s) * (2 * Math.PI) / p));
+    }
+
+    return Math.pow(2, -10 * scaledTime1) * Math.sin((scaledTime1 - s) * (2 * Math.PI) / p) * 0.5 + 1;
+}
+
+// Bounce to completion
+function easeOutBounce(t) {
+
+    var scaledTime = t / 1;
+
+    if (scaledTime < 1 / 2.75) {
+
+        return 7.5625 * scaledTime * scaledTime;
+    } else if (scaledTime < 2 / 2.75) {
+
+        var scaledTime2 = scaledTime - 1.5 / 2.75;
+        return 7.5625 * scaledTime2 * scaledTime2 + 0.75;
+    } else if (scaledTime < 2.5 / 2.75) {
+
+        var _scaledTime = scaledTime - 2.25 / 2.75;
+        return 7.5625 * _scaledTime * _scaledTime + 0.9375;
+    } else {
+
+        var _scaledTime2 = scaledTime - 2.625 / 2.75;
+        return 7.5625 * _scaledTime2 * _scaledTime2 + 0.984375;
+    }
+}
+
+// Bounce increasing in velocity until completion
+function easeInBounce(t) {
+    return 1 - easeOutBounce(1 - t);
+}
+
+// Bounce in and bounce out
+function easeInOutBounce(t) {
+
+    if (t < 0.5) {
+
+        return easeInBounce(t * 2) * 0.5;
+    }
+
+    return easeOutBounce(t * 2 - 1) * 0.5 + 0.5;
+}
+
+},{}],38:[function(require,module,exports){
 module.exports = fullscreen
 fullscreen.available = available
 fullscreen.enabled = enabled
@@ -6600,7 +6920,7 @@ function shim(el) {
     el.msRequestFullscreen);
 }
 
-},{"add-event-listener":27,"events":6}],38:[function(require,module,exports){
+},{"add-event-listener":27,"events":6}],39:[function(require,module,exports){
 // Uses Node, AMD or browser globals to create a module.
 
 // If you want something that will work in other stricter CommonJS environments,
@@ -15934,7 +16254,7 @@ return jQuery;
 
 })( window ); }));
 
-},{}],39:[function(require,module,exports){
+},{}],40:[function(require,module,exports){
 /*!
  * jQuery Mousewheel 3.1.13
  *
@@ -16157,7 +16477,7 @@ return jQuery;
 
 }));
 
-},{}],40:[function(require,module,exports){
+},{}],41:[function(require,module,exports){
 module.exports = pointer
 
 pointer.available = available
@@ -16366,14 +16686,14 @@ function shim(el) {
     null
 }
 
-},{"events":6,"stream":23}],41:[function(require,module,exports){
+},{"events":6,"stream":23}],42:[function(require,module,exports){
 // stats.js - http://github.com/mrdoob/stats.js
 var Stats=function(){function h(a){c.appendChild(a.dom);return a}function k(a){for(var d=0;d<c.children.length;d++)c.children[d].style.display=d===a?"block":"none";l=a}var l=0,c=document.createElement("div");c.style.cssText="position:fixed;top:0;left:0;cursor:pointer;opacity:0.9;z-index:10000";c.addEventListener("click",function(a){a.preventDefault();k(++l%c.children.length)},!1);var g=(performance||Date).now(),e=g,a=0,r=h(new Stats.Panel("FPS","#0ff","#002")),f=h(new Stats.Panel("MS","#0f0","#020"));
 if(self.performance&&self.performance.memory)var t=h(new Stats.Panel("MB","#f08","#201"));k(0);return{REVISION:16,dom:c,addPanel:h,showPanel:k,begin:function(){g=(performance||Date).now()},end:function(){a++;var c=(performance||Date).now();f.update(c-g,200);if(c>e+1E3&&(r.update(1E3*a/(c-e),100),e=c,a=0,t)){var d=performance.memory;t.update(d.usedJSHeapSize/1048576,d.jsHeapSizeLimit/1048576)}return c},update:function(){g=this.end()},domElement:c,setMode:k}};
 Stats.Panel=function(h,k,l){var c=Infinity,g=0,e=Math.round,a=e(window.devicePixelRatio||1),r=80*a,f=48*a,t=3*a,u=2*a,d=3*a,m=15*a,n=74*a,p=30*a,q=document.createElement("canvas");q.width=r;q.height=f;q.style.cssText="width:80px;height:48px";var b=q.getContext("2d");b.font="bold "+9*a+"px Helvetica,Arial,sans-serif";b.textBaseline="top";b.fillStyle=l;b.fillRect(0,0,r,f);b.fillStyle=k;b.fillText(h,t,u);b.fillRect(d,m,n,p);b.fillStyle=l;b.globalAlpha=.9;b.fillRect(d,m,n,p);return{dom:q,update:function(f,
 v){c=Math.min(c,f);g=Math.max(g,f);b.fillStyle=l;b.globalAlpha=1;b.fillRect(0,0,r,m);b.fillStyle=k;b.fillText(e(f)+" "+h+" ("+e(c)+"-"+e(g)+")",t,u);b.drawImage(q,d+a,m,n-a,p,d,m,n-a,p);b.fillRect(d+n-a,m,a,p);b.fillStyle=l;b.globalAlpha=.9;b.fillRect(d+n-a,m,a,e((1-f/v)*p))}}};"object"===typeof module&&(module.exports=Stats);
 
-},{}],42:[function(require,module,exports){
+},{}],43:[function(require,module,exports){
 (function (global,Buffer){
 'use strict'
 
@@ -16590,7 +16910,7 @@ exports.clearCache = function clearCache() {
   }
 }
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer)
-},{"bit-twiddle":28,"buffer":3,"dup":36}],43:[function(require,module,exports){
+},{"bit-twiddle":28,"buffer":3,"dup":36}],44:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -16952,7 +17272,7 @@ function map_range(value, low1, high1, low2, high2) {
     return low2 + (high2 - low2) * (value - low1) / (high1 - low1);
 }
 
-},{"../util/improved_noise":57,"../util/texture_animator":58}],44:[function(require,module,exports){
+},{"../util/improved_noise":60,"../util/texture_animator":61}],45:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -17040,7 +17360,7 @@ var Character = function (_THREE$Object3D) {
 
 exports.default = Character;
 
-},{"./util/video_rgbd":60}],45:[function(require,module,exports){
+},{"./util/video_rgbd":63}],46:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -17119,7 +17439,7 @@ var Clouds = function () {
 
 exports.default = Clouds;
 
-},{"./util/video360":59}],46:[function(require,module,exports){
+},{"./util/video360":62}],47:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -17253,7 +17573,7 @@ var CollisionManager = function () {
 
 exports.default = CollisionManager;
 
-},{"box-intersect":29}],47:[function(require,module,exports){
+},{"box-intersect":29}],48:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -17261,10 +17581,12 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = {
     controls: "locked",
-    basalHeight: 10
+    basalHeight: 10,
+    fps: 30,
+    enableFlying: true
 };
 
-},{}],48:[function(require,module,exports){
+},{}],49:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -17365,7 +17687,131 @@ var Flood = function (_THREE$Object3D) {
 
 exports.default = Flood;
 
-},{}],49:[function(require,module,exports){
+},{}],50:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _createClass = function () {
+    function defineProperties(target, props) {
+        for (var i = 0; i < props.length; i++) {
+            var descriptor = props[i];descriptor.enumerable = descriptor.enumerable || false;descriptor.configurable = true;if ("value" in descriptor) descriptor.writable = true;Object.defineProperty(target, descriptor.key, descriptor);
+        }
+    }return function (Constructor, protoProps, staticProps) {
+        if (protoProps) defineProperties(Constructor.prototype, protoProps);if (staticProps) defineProperties(Constructor, staticProps);return Constructor;
+    };
+}();
+
+function _classCallCheck(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+        throw new TypeError("Cannot call a class as a function");
+    }
+}
+
+function _possibleConstructorReturn(self, call) {
+    if (!self) {
+        throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
+    }return call && (typeof call === "object" || typeof call === "function") ? call : self;
+}
+
+function _inherits(subClass, superClass) {
+    if (typeof superClass !== "function" && superClass !== null) {
+        throw new TypeError("Super expression must either be null or a function, not " + typeof superClass);
+    }subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } });if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass;
+}
+
+var Fountain = function (_THREE$Object3D) {
+    _inherits(Fountain, _THREE$Object3D);
+
+    function Fountain() {
+        _classCallCheck(this, Fountain);
+
+        var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(Fountain).call(this));
+
+        _this.BASE_PATH = '/assets/fountain/';
+        console.log("Fountain constructed!");
+
+        return _this;
+    }
+
+    _createClass(Fountain, [{
+        key: 'init',
+        value: function init(loadingManager) {
+            this.particleGroup = new SPE.Group({
+                texture: {
+                    //value: new THREE.TextureLoader(loadingManager).load(this.BASE_PATH + 'water_splash.png')
+                    value: new THREE.TextureLoader(loadingManager).load(this.BASE_PATH + 'smokeparticle.png')
+                },
+                maxParticleCount: 2400
+            });
+
+            // Create fountains
+            var angle = 30;
+            var radius = 9.5;
+            var position = new THREE.Vector3(0, 0, 0);
+            var rotation = 0;
+
+            for (var i = 0; i <= 360; i += angle) {
+                rotation = i * Math.PI / 180;
+                position.x = Math.cos(rotation) * radius;
+                position.z = Math.sin(rotation) * radius;
+                this.createTrickle(position, rotation);
+            }
+            //this.particleGroup.mesh.frustumCulled = false;
+            this.add(this.particleGroup.mesh);
+        }
+    }, {
+        key: 'update',
+        value: function update(dt) {
+            this.particleGroup.tick(dt);
+        }
+    }, {
+        key: 'createTrickle',
+        value: function createTrickle(position, rotation) {
+            // Get the velocity after rotation
+            var emitter = new SPE.Emitter({
+                maxAge: 5,
+                type: SPE.distributions.BOX,
+                position: {
+                    value: position
+                },
+                rotation: {
+                    axis: new THREE.Vector3(0, 1, 0),
+                    angle: rotation,
+                    static: true
+                },
+                acceleration: {
+                    value: new THREE.Vector3(0, -12, 0)
+                },
+                velocity: {
+                    value: new THREE.Vector3(2, 30, 0)
+                },
+                color: {
+                    value: new THREE.Color(0x87D9F5)
+                },
+                size: {
+                    value: [0, 2.0, 0]
+                },
+                particleCount: 200,
+                opacity: {
+                    value: [0.5, 1.0, 0.5]
+                },
+                transparent: true
+            });
+
+            this.particleGroup.addEmitter(emitter);
+        }
+    }]);
+
+    return Fountain;
+}(THREE.Object3D);
+
+exports.default = Fountain;
+
+},{}],51:[function(require,module,exports){
+(function (global){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -17387,6 +17833,10 @@ var _createClass = function () {
 var _events = require('events');
 
 var _events2 = _interopRequireDefault(_events);
+
+var _gui_manager = require('./gui_manager');
+
+var _gui_manager2 = _interopRequireDefault(_gui_manager);
 
 var _sky = require('./sky');
 
@@ -17475,6 +17925,10 @@ var Game = function () {
             }(_events2.default);
 
             this.emitter = new TzinaEmitter();
+            global.events = this.emitter;
+
+            this.gui = new _gui_manager2.default(this.emitter);
+            this.gui.init();
 
             this.renderer = new THREE.WebGLRenderer({ antialias: true });
             this.renderer.setClearColor(0, 1);
@@ -17608,6 +18062,7 @@ var Game = function () {
         key: 'start',
         value: function start() {
             this.started = true;
+            this.vrManager.setMode_(2);
             var element = this.renderer.domElement;
             this.container = document.getElementById('game');
             this.container.appendChild(element);
@@ -17647,6 +18102,7 @@ var Game = function () {
         value: function update(dt, et) {
             this.sky.update(dt);
             this.dirLight.position.copy(this.sky.getSunPosition());
+            this.square.update();
             if (this.keyboardController) {
                 this.keyboardController.update(dt);
                 this.zoomController.update(dt);
@@ -17684,7 +18140,61 @@ var Game = function () {
 
 exports.default = Game;
 
-},{"./animations/hannah":43,"./character":44,"./collision_manager":46,"./flood":48,"./keyboard_controller":51,"./post_shader":52,"./sky":53,"./square":54,"./tzina_vr_controls":56,"./zoom_controller":61,"events":6}],50:[function(require,module,exports){
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{"./animations/hannah":44,"./character":45,"./collision_manager":47,"./flood":49,"./gui_manager":52,"./keyboard_controller":54,"./post_shader":55,"./sky":56,"./square":57,"./tzina_vr_controls":59,"./zoom_controller":64,"events":6}],52:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _createClass = function () {
+    function defineProperties(target, props) {
+        for (var i = 0; i < props.length; i++) {
+            var descriptor = props[i];descriptor.enumerable = descriptor.enumerable || false;descriptor.configurable = true;if ("value" in descriptor) descriptor.writable = true;Object.defineProperty(target, descriptor.key, descriptor);
+        }
+    }return function (Constructor, protoProps, staticProps) {
+        if (protoProps) defineProperties(Constructor.prototype, protoProps);if (staticProps) defineProperties(Constructor, staticProps);return Constructor;
+    };
+}();
+
+function _classCallCheck(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+        throw new TypeError("Cannot call a class as a function");
+    }
+}
+
+var GuiManager = function () {
+    function GuiManager(emitter) {
+        _classCallCheck(this, GuiManager);
+
+        this.emitter = emitter;
+    }
+
+    _createClass(GuiManager, [{
+        key: "init",
+        value: function init() {
+            var _this = this;
+
+            this.gui = new dat.GUI();
+            this.gui.close();
+            this.emitter.on('add_gui', function () {
+                for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+                    args[_key] = arguments[_key];
+                }
+
+                console.log("ADD GUI", args);
+                _this.gui.add.apply(_this.gui, args);
+            });
+        }
+    }]);
+
+    return GuiManager;
+}();
+
+exports.default = GuiManager;
+
+},{}],53:[function(require,module,exports){
 'use strict';
 
 var Game = require('./game').default;
@@ -17700,7 +18210,7 @@ var lock = require('pointer-lock-chrome-tolerant');
 
 console.log("Touch? ", Modernizr.touchevents);
 
-var FPS = 30;
+var FPS = config.fps;
 var FPS_INTERVAL = 1000 / FPS;
 var elapsed = 0;
 var lastTimestamp = 0;
@@ -17715,7 +18225,7 @@ window.onload = function () {
     document.getElementById('start-button').addEventListener('click', function (event) {
         if (!Modernizr.touchevents && config.controls == "locked" && lock.available()) {
 
-            var pointer = lock(el);
+            var pointer = lock(document.getElementById('game'));
 
             pointer.on('attain', function () {
                 console.log("Pointer attained!");
@@ -17732,7 +18242,7 @@ window.onload = function () {
 
             fs.on('attain', function () {
                 console.log("Full screen attained!");
-                if (typeof pointer != 'undefined') {
+                if (typeof pointer != 'undefined' && !game.started) {
                     pointer.request();
                 } else {
                     if (!game.started) {
@@ -17783,7 +18293,7 @@ function resize() {
     game.resize();
 }
 
-},{"./config":47,"./game":49,"fullscreen":37,"pointer-lock-chrome-tolerant":40,"stats.js":41}],51:[function(require,module,exports){
+},{"./config":48,"./game":51,"fullscreen":38,"pointer-lock-chrome-tolerant":41,"stats.js":42}],54:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -17810,6 +18320,7 @@ var KeyboardController = function () {
     function KeyboardController(config, emitter, camera, square, collisionManager) {
         _classCallCheck(this, KeyboardController);
 
+        this.config = config;
         this.emitter = emitter;
 
         this.moveForward = false;
@@ -17829,6 +18340,8 @@ var KeyboardController = function () {
         this.height = config.basalHeight;
 
         this.active = true;
+
+        this.zAxis = new THREE.Vector3(0, 0, 1);
     }
 
     _createClass(KeyboardController, [{
@@ -17924,7 +18437,7 @@ var KeyboardController = function () {
                 this.velocity.x -= this.velocity.x * 10.0 * delta;
                 this.velocity.z -= this.velocity.z * 10.0 * delta;
 
-                this.velocity.y -= 9.8 * 100.0 * delta; // 100.0 = mass
+                //this.velocity.y -= 9.8 * 100.0 * delta; // 100.0 = mass
 
                 if (this.moveForward) this.velocity.z -= 100.0 * delta;
                 if (this.moveBackward) this.velocity.z += 100.0 * delta;
@@ -17932,9 +18445,10 @@ var KeyboardController = function () {
                 if (this.moveLeft) this.velocity.x -= 100.0 * delta;
                 if (this.moveRight) this.velocity.x += 100.0 * delta;
 
+                /*
                 if (this.collisionManager.isClimbingStairs() && this.velocity.z != 0) {
                     this.climbStairs();
-                }
+                    }*/
 
                 if (this.isOnObject === true) {
                     this.velocity.y = Math.max(0, this.velocity.y);
@@ -17944,19 +18458,23 @@ var KeyboardController = function () {
 
                 this.camera.translateX(this.velocity.x * delta);
                 this.camera.position.y += this.velocity.y * delta;
-                this.camera.translateZ(this.velocity.z * delta);
-
-                if (this.camera.position.y < this.height) {
-                    if (this.camera.position.y < this.height) {
-
-                        this.velocity.y = 0;
-                        this.camera.position.y = this.height;
-
-                        this.canJump = true;
-                    }
-
-                    this.canJump = true;
+                if (this.config.enableFlying) {
+                    this.camera.translateZ(this.velocity.z * delta);
+                } else {
+                    var zVector = new THREE.Vector3().copy(this.zAxis).applyQuaternion(this.camera.quaternion);
+                    zVector.y = 0;
+                    this.camera.position.add(zVector.multiplyScalar(this.velocity.z * delta));
                 }
+
+                /*
+                 if ( this.camera.position.y < this.height) {
+                        if ( this.camera.position.y < this.height) {
+                              this.velocity.y = 0;
+                             this.camera.position.y = this.height;
+                              this.canJump = true;
+                        }
+                       this.canJump = true;
+                     }*/
 
                 //console.log(this.camera.position);*/
             }
@@ -17981,7 +18499,7 @@ var KeyboardController = function () {
 
 exports.default = KeyboardController;
 
-},{}],52:[function(require,module,exports){
+},{}],55:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -17998,7 +18516,7 @@ exports.default = {
     fragmentShader: "#define GLSLIFY 1\nuniform sampler2D tDiffuse;\n\nvarying vec2 vUv;\n\nvoid main() {\n\n        vec4 color = texture2D( tDiffuse, vUv );\n\n        gl_FragColor = color;\n}\n"
 };
 
-},{}],53:[function(require,module,exports){
+},{}],56:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -18129,7 +18647,7 @@ var Sky = function () {
 
 exports.default = Sky;
 
-},{"./clouds":45}],54:[function(require,module,exports){
+},{"./clouds":46}],57:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -18149,6 +18667,10 @@ var _createClass = function () {
 var _trees = require("./trees");
 
 var _trees2 = _interopRequireDefault(_trees);
+
+var _fountain = require("./fountain");
+
+var _fountain2 = _interopRequireDefault(_fountain);
 
 function _interopRequireDefault(obj) {
     return obj && obj.__esModule ? obj : { default: obj };
@@ -18189,22 +18711,37 @@ var Square = function (_THREE$Object3D) {
     _createClass(Square, [{
         key: "init",
         value: function init(collisionManager, loadingManager) {
+            var _this2 = this;
+
             loadingManager.itemStart("Square");
             var trees = new _trees2.default();
-            Promise.all([this.loadSquare(loadingManager), trees.init(loadingManager)]).then(function (results) {
+            this.fountain = new _fountain2.default();
+            Promise.all([this.loadSquare(loadingManager), trees.init(loadingManager), this.fountain.init(loadingManager)]).then(function (results) {
                 console.log("Load results", results);
                 var obj = results[0];
                 obj.add(trees);
+                //obj.add(this.fountain);
+                obj.add(_this2.fountain);
+                _this2.fountain.position.set(0.5, 22, -1);
+                _this2.fountain.scale.set(0.25, 0.25, 0.25);
+                //this.fountain.scale.set(0.25, 0.25, 0.25);
                 loadingManager.itemEnd("Square");
+
+                /*
+                events.emit("add_gui", this.fountain.position, "x"); 
+                events.emit("add_gui", this.fountain.position, "z");
+                events.emit("add_gui", this.fountain.position, "y"); */
             });
         }
     }, {
         key: "update",
-        value: function update(dt) {}
+        value: function update(dt) {
+            this.fountain.update();
+        }
     }, {
         key: "loadSquare",
         value: function loadSquare(loadingManager) {
-            var _this2 = this;
+            var _this3 = this;
 
             return new Promise(function (resolve, reject) {
                 var loader = new THREE.ObjectLoader(loadingManager);
@@ -18216,21 +18753,21 @@ var Square = function (_THREE$Object3D) {
                     obj.position.x = 0;
                     obj.scale.set(4, 4, 4);
 
-                    _this2.add(obj);
+                    _this3.add(obj);
                     obj.updateMatrixWorld();
                     //collisionManager.addBoundingBoxes(obj,this);
 
-                    _this2.squareMiddle = obj.getObjectByName("MB_PS");
-                    if (_this2.squareMiddle) {
-                        _this2.squareCenter = new THREE.Vector3();
-                        _this2.squareCenter.setFromMatrixPosition(_this2.squareMiddle.matrixWorld);
-                        console.log("Square center", _this2.squareCenter);
+                    _this3.squareMiddle = obj.getObjectByName("basin");
+                    if (_this3.squareMiddle) {
+                        _this3.squareCenter = new THREE.Vector3();
+                        _this3.squareCenter.setFromMatrixPosition(_this3.squareMiddle.matrixWorld);
+                        console.log("Square center", _this3.squareCenter);
                     } else {
-                        _this2.squareCenter = new THREE.Vector3(0, 0, 0);
+                        _this3.squareCenter = new THREE.Vector3(0, 0, 0);
                     }
 
-                    _this2.sphereMesh = obj.getObjectByName("SkySphere").children[0];
-                    console.log("Sky sphere", _this2.sphereMesh);
+                    _this3.sphereMesh = obj.getObjectByName("SkySphere").children[0];
+                    console.log("Sky sphere", _this3.sphereMesh);
                     resolve(obj);
                 });
             });
@@ -18252,7 +18789,7 @@ var Square = function (_THREE$Object3D) {
 
 exports.default = Square;
 
-},{"./trees":55}],55:[function(require,module,exports){
+},{"./fountain":50,"./trees":58}],58:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -18353,7 +18890,7 @@ var Trees = function (_THREE$Object3D) {
 
 exports.default = Trees;
 
-},{"../assets/trees/trees_def":26}],56:[function(require,module,exports){
+},{"../assets/trees/trees_def":26}],59:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -18502,7 +19039,7 @@ exports.default = function (emitter, object, onError) {
    * @author avnerus / http://avner.js.org
    */
 
-},{}],57:[function(require,module,exports){
+},{}],60:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -18572,7 +19109,7 @@ function ImprovedNoise() {
     };
 }
 
-},{}],58:[function(require,module,exports){
+},{}],61:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -18641,7 +19178,7 @@ function TextureAnimator(texture, tilesHoriz, tilesVert, numTiles, tileDispDurat
     };
 }
 
-},{}],59:[function(require,module,exports){
+},{}],62:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -18710,7 +19247,7 @@ var Video360 = function () {
 
 exports.default = Video360;
 
-},{}],60:[function(require,module,exports){
+},{}],63:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -18866,7 +19403,7 @@ var VideoRGBD = function () {
 exports.default = VideoRGBD;
 ;
 
-},{}],61:[function(require,module,exports){
+},{}],64:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -18891,6 +19428,8 @@ var _jqueryMousewheel = require('jquery-mousewheel');
 
 var _jqueryMousewheel2 = _interopRequireDefault(_jqueryMousewheel);
 
+var _easingUtils = require('easing-utils');
+
 function _interopRequireDefault(obj) {
     return obj && obj.__esModule ? obj : { default: obj };
 }
@@ -18907,12 +19446,15 @@ var ZoomController = function () {
 
         this.camera = camera;
         this.square = square;
-        this.inZoomMode = false;
+        this.recalculateZoom = true;
         this.velocityZ = 0;
         this.emitter = emitter;
         this.zoomVector = new THREE.Vector3();
+        this.lastCameraOrientation = new THREE.Quaternion();
+        this.config = config;
 
-        this.MAX_DISTANCE = 100;
+        this.MAX_DISTANCE = 830;
+        this.DISTANCE_BEFORE_RISING = 100;
     }
 
     _createClass(ZoomController, [{
@@ -18940,23 +19482,44 @@ var ZoomController = function () {
         key: 'update',
         value: function update(dt) {
             if (this.velocityZ != 0) {
-                if (!this.inZoomMode) {
-                    this.inZoomMode = true;
-                    console.log("What?");
-                    this.zoomVector.copy(new THREE.Vector3(0, 0, 1)).applyQuaternion(this.camera.quaternion);
+                if (!this.camera.quaternion.equals(this.lastCameraOrientation)) {
+                    var quat = new THREE.Quaternion().copy(this.camera.quaternion);
 
-                    this.emitter.emit("start_zoom");
-                    this.startZ = this.camera.position.z;
-                    this.startY = this.camera.position.y;
+                    this.zoomVector.copy(new THREE.Vector3(0, 0, 1)).applyQuaternion(quat);
+                    this.zoomVector.y = 0;
 
-                    var zoomPosition = this.getZoomOutPosition();
+                    this.lastCameraOrientation.copy(this.camera.quaternion);
 
                     //TweenMax.to(this.camera.position, 1, {x:zoomPosition.x, y: zoomPosition.y, z:zoomPosition.z});
                 }
+                var scalar = 0;
+                var distanceToSquare = this.camera.position.distanceTo(this.square.getCenterPosition());
+                if (distanceToSquare > this.MAX_DISTANCE && this.velocityZ < 0) {
+                    scalar = 0;
+                } else if (distanceToSquare > this.DISTANCE_BEFORE_RISING) {
+                    var progress = (distanceToSquare - this.DISTANCE_BEFORE_RISING) / (this.MAX_DISTANCE + 30 - this.DISTANCE_BEFORE_RISING);
+                    var easedOutProgress = (0, _easingUtils.easeOutQuad)(progress);
+                    if (this.velocityZ > 0) {
+                        progress = 1 - progress;
+                    }
+                    scalar = this.velocityZ * -3.0 * dt * (2 - progress);
+                } else {
+                    scalar = this.velocityZ * -3.5 * dt;
+                }
+
+                //console.log(distanceToSquare);
+                /*
+                if (distanceToSquare > this.DISTANCE_BEFORE_RISING ) {
+                    this.camera.position.y = this.config.basalHeight + 0.1 * (distanceToSquare - this.DISTANCE_BEFORE_RISING);
+                } else {
+                    this.camera.position.y = this.config.basalHeight;
+                    }*/
+
                 var movement = new THREE.Vector3();
-                movement.copy(this.zoomVector).multiplyScalar(this.velocityZ * -3.5 * dt);
+                movement.copy(this.zoomVector).multiplyScalar(scalar);
                 this.camera.position.add(movement);
                 this.camera.updateProjectionMatrix();
+
                 if (this.velocityZ > 0) {
                     this.velocityZ = Math.max(0, this.velocityZ - 10 * dt);
                 } else {
@@ -18971,4 +19534,4 @@ var ZoomController = function () {
 
 exports.default = ZoomController;
 
-},{"jquery-browserify":38,"jquery-mousewheel":39}]},{},[50]);
+},{"easing-utils":37,"jquery-browserify":39,"jquery-mousewheel":40}]},{},[53]);
