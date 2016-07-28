@@ -17733,6 +17733,11 @@ var Fountain = function (_THREE$Object3D) {
         _this.BASE_PATH = 'assets/fountain/';
         console.log("Fountain constructed!");
 
+        _this.downVelocity = new THREE.Vector3(2, 10, 0);
+        _this.upVelocity = new THREE.Vector3(2, 20, 0);
+
+        _this.outerUp = true;
+
         return _this;
     }
 
@@ -17741,13 +17746,15 @@ var Fountain = function (_THREE$Object3D) {
         value: function init(loadingManager) {
             this.particleGroup = new SPE.Group({
                 texture: {
-                    //value: new THREE.TextureLoader(loadingManager).load(this.BASE_PATH + 'water_splash.png')
-                    value: new THREE.TextureLoader(loadingManager).load(this.BASE_PATH + 'smokeparticle.png')
+                    value: new THREE.TextureLoader(loadingManager).load(this.BASE_PATH + 'water_splash.png')
+                    //value: new THREE.TextureLoader(loadingManager).load(this.BASE_PATH + 'smokeparticle.png')
                 },
-                maxParticleCount: 2400
+                maxParticleCount: 6000
             });
 
             // Create fountains
+
+            // First circle
             var angle = 30;
             var radius = 9.5;
             var position = new THREE.Vector3(0, 0, 0);
@@ -17757,10 +17764,22 @@ var Fountain = function (_THREE$Object3D) {
                 rotation = i * Math.PI / 180;
                 position.x = Math.cos(rotation) * radius;
                 position.z = Math.sin(rotation) * radius;
-                this.createTrickle(position, rotation);
+                this.createTrickle(position, rotation, this.downVelocity);
             }
             //this.particleGroup.mesh.frustumCulled = false;
             this.add(this.particleGroup.mesh);
+
+            // Second
+            position.y = -2;
+            radius = 15;
+
+            for (var _i = 0; _i <= 360; _i += angle) {
+                rotation = _i * Math.PI / 180;
+                position.x = Math.cos(rotation) * radius;
+                position.z = Math.sin(rotation) * radius;
+                var backFace = (_i + 180) * Math.PI / 180;
+                this.createTrickle(position, backFace, this.upVelocity);
+            }
         }
     }, {
         key: 'update',
@@ -17768,8 +17787,25 @@ var Fountain = function (_THREE$Object3D) {
             this.particleGroup.tick(dt);
         }
     }, {
+        key: 'startCycle',
+        value: function startCycle() {
+            var _this2 = this;
+
+            setInterval(function () {
+                console.log("Fountain cycle!", _this2.particleGroup.emitters.length + " Emitters");
+                _this2.outerUp = !_this2.outerUp;
+                for (var i = 0; i < _this2.particleGroup.emitters.length; i++) {
+                    if (i < _this2.particleGroup.emitters.length / 2) {
+                        _this2.particleGroup.emitters[i].velocity.value = _this2.outerUp ? _this2.downVelocity : _this2.upVelocity;
+                    } else {
+                        _this2.particleGroup.emitters[i].velocity.value = _this2.outerUp ? _this2.upVelocity : _this2.downVelocity;
+                    }
+                }
+            }, 10000);
+        }
+    }, {
         key: 'createTrickle',
-        value: function createTrickle(position, rotation) {
+        value: function createTrickle(position, rotation, velocity) {
             // Get the velocity after rotation
             var emitter = new SPE.Emitter({
                 maxAge: 5,
@@ -17783,22 +17819,26 @@ var Fountain = function (_THREE$Object3D) {
                     static: true
                 },
                 acceleration: {
-                    value: new THREE.Vector3(0, -12, 0)
+                    value: new THREE.Vector3(0, -15, 0)
                 },
                 velocity: {
-                    value: new THREE.Vector3(2, 30, 0)
+                    value: velocity
                 },
                 color: {
-                    value: new THREE.Color(0x87D9F5)
+                    value: new THREE.Color(0x9CB3BA)
                 },
                 size: {
-                    value: [0, 2.0, 0]
+                    value: [1.0, 1.5, 0.0]
                 },
                 particleCount: 200,
                 opacity: {
-                    value: [0.5, 1.0, 0.5]
+                    value: [0.3, 0.8, 0.5]
                 },
-                transparent: true
+                transparent: true,
+                wiggle: {
+                    value: 3,
+                    spread: 3
+                }
             });
 
             this.particleGroup.addEmitter(emitter);
@@ -18086,6 +18126,8 @@ var Game = function () {
 
             this.collisionManager.setPlayer(this.camera);
             this.resize();
+
+            this.square.fountain.startCycle();
 
             setTimeout(function () {
                 //    this.testCharacter.play();
@@ -18723,15 +18765,14 @@ var Square = function (_THREE$Object3D) {
                 obj.add(trees);
                 //obj.add(this.fountain);
                 obj.add(_this2.fountain);
-                _this2.fountain.position.set(0.5, 22, -1);
+                _this2.fountain.position.set(0.7, 25.5, -0.8);
                 _this2.fountain.scale.set(0.25, 0.25, 0.25);
                 //this.fountain.scale.set(0.25, 0.25, 0.25);
                 loadingManager.itemEnd("Square");
 
-                /*
-                events.emit("add_gui", this.fountain.position, "x"); 
-                events.emit("add_gui", this.fountain.position, "z");
-                events.emit("add_gui", this.fountain.position, "y"); */
+                events.emit("add_gui", _this2.fountain.position, "x");
+                events.emit("add_gui", _this2.fountain.position, "z");
+                events.emit("add_gui", _this2.fountain.position, "y");
             });
         }
     }, {
