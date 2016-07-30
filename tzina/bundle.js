@@ -35115,7 +35115,7 @@ var Intro = function () {
         value: function rotateSquare() {
             var _this3 = this;
 
-            TweenMax.to(this.square.mesh.rotation, 35, { y: 183 * Math.PI / 180, ease: Linear.easeNone, onComplete: function onComplete() {
+            TweenMax.to(this.square.mesh.rotation, 35, { y: -176 * Math.PI / 180, ease: Sine.easeInOut, onComplete: function onComplete() {
                     setTimeout(function () {
                         _this3.zoomToSquare();
                     }, 2000);
@@ -35174,7 +35174,7 @@ var Intro = function () {
 
             var startPosition = void 0;
 
-            timeline.to(zoom, 10, { ease: Linear.easeNone, value: -1120, yValue: 10, onUpdate: function onUpdate() {
+            timeline.to(zoom, 14, { ease: Linear.easeNone, value: -1120, yValue: 10, onUpdate: function onUpdate() {
                     var zoomAdd = new THREE.Vector3().copy(zoomVector).multiplyScalar(zoom.value);
                     _this4.camera.position.copy(_this4.STARTING_POSITION).add(zoomAdd);
                     _this4.camera.position.y = zoom.yValue;
@@ -35182,8 +35182,8 @@ var Intro = function () {
                     zoomVector = new THREE.Vector3().copy(new THREE.Vector3(0, 0, 1)).applyQuaternion(_this4.camera.quaternion);
                     console.log("END POSITION", _this4.camera.position);
                 } }).to(this.camera.position, 2, {
-                bezier: [middlePosition, endPosition]
-            }).to(this.camera.rotation, 2, { x: targetRotation.x, y: targetRotation.y, z: targetRotation.z, ease: Linear.easeNone, onComplete: function onComplete() {
+                bezier: [middlePosition, endPosition],
+                ease: Linear.easeNone }).to(this.camera.rotation, 2, { x: targetRotation.x, y: targetRotation.y, z: targetRotation.z, ease: Linear.easeNone, onComplete: function onComplete() {
                     _this4.endIntro();
                 } }, "-=2");
         }
@@ -35488,7 +35488,7 @@ var HOURS_DEFINITION = {
     },
     17: {
         inclination: 0.09,
-        azimuth: 0.49
+        azimuth: 0.42
     }
 };
 
@@ -35889,7 +35889,6 @@ var Square = function (_THREE$Object3D) {
 
                 // INITIAL STATE
                 _this2.turnOffWindows();
-                _this2.mesh.rotation.y = 0 * Math.PI / 180;
 
                 //
                 events.emit("add_gui", _this2.fountain.position, "x");
