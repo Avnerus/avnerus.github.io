@@ -35035,17 +35035,18 @@ var Intro = function () {
         this.scene = scene;
 
         this.soundEvents = [{
-            time: 6.8,
+            time: 10.283,
             action: function action() {
                 _this.showTitle();
             }
         }, {
-            time: 17.3,
+            time: 21.3,
             action: function action() {
                 _this.rotateSquare();
+                _this.hideTitle();
             }
         }, {
-            time: 30.3,
+            time: 34.3,
             action: function action() {
                 _this.bringUpSun();
             }
@@ -35084,14 +35085,12 @@ var Intro = function () {
             this.soundManager.loadSound(this.INTRO_SOUND).then(function (sound) {
                 console.log("Sound ", sound);
                 _this2.sound = sound;
-            });
 
-            setTimeout(function () {
-                _this2.turnOnWindows();
                 setTimeout(function () {
+                    _this2.turnOnWindows();
                     _this2.playSound();
-                }, 4000);
-            }, 3000);
+                }, 3000);
+            });
         }
     }, {
         key: 'bringUpSun',
@@ -35111,12 +35110,18 @@ var Intro = function () {
             this.scene.add(this.titlePlane);
         }
     }, {
+        key: 'hideTitle',
+        value: function hideTitle() {
+            this.scene.remove(this.titlePlane);
+        }
+    }, {
         key: 'rotateSquare',
         value: function rotateSquare() {
             var _this3 = this;
 
-            TweenMax.to(this.square.mesh.rotation, 35, { y: -176 * Math.PI / 180, ease: Sine.easeInOut, onComplete: function onComplete() {
+            TweenMax.to(this.square.mesh.rotation, 34, { y: -176 * Math.PI / 180, ease: Sine.easeInOut, onComplete: function onComplete() {
                     setTimeout(function () {
+                        _this3.turnOffWindows();
                         _this3.zoomToSquare();
                     }, 2000);
                 } });
@@ -35130,13 +35135,30 @@ var Intro = function () {
                 value: 0
             };
             var lastIndex = 0;
-            TweenMax.to(index, 60, { value: Math.floor(shuffledWindows.length - 1 / 3), ease: Circ.easeIn, onUpdate: function onUpdate(val) {
+            TweenMax.to(index, 50, { value: Math.floor((shuffledWindows.length - 1) / 3), ease: Circ.easeIn, onUpdate: function onUpdate(val) {
                     var currentIndex = Math.ceil(index.value);
                     for (var i = lastIndex + 1; i <= currentIndex; i++) {
                         shuffledWindows[i].visible = true;
                     }
                     lastIndex = currentIndex;
-                }, onComplete: function onComplete() {} });
+                } });
+        }
+    }, {
+        key: 'turnOffWindows',
+        value: function turnOffWindows() {
+            var litWindows = _lodash2.default.filter(this.square.windows.children, _lodash2.default.matchesProperty('visible', true));
+            console.log("INTRO: TURN OFF " + litWindows.length + "  WINDOWS");
+            var index = {
+                value: 0
+            };
+            var lastIndex = 0;
+            TweenMax.to(index, 6, { value: litWindows.length - 1, ease: Circ.easeIn, onUpdate: function onUpdate(val) {
+                    var currentIndex = Math.ceil(index.value);
+                    for (var i = lastIndex + 1; i <= currentIndex; i++) {
+                        litWindows[i].visible = false;
+                    }
+                    lastIndex = currentIndex;
+                } });
         }
     }, {
         key: 'zoomToSquare',
@@ -35181,11 +35203,11 @@ var Intro = function () {
                 }, onComplete: function onComplete() {
                     zoomVector = new THREE.Vector3().copy(new THREE.Vector3(0, 0, 1)).applyQuaternion(_this4.camera.quaternion);
                     console.log("END POSITION", _this4.camera.position);
-                } }).to(this.camera.position, 2, {
+                } }).to(this.camera.position, 5, {
                 bezier: [middlePosition, endPosition],
-                ease: Linear.easeNone }).to(this.camera.rotation, 2, { x: targetRotation.x, y: targetRotation.y, z: targetRotation.z, ease: Linear.easeNone, onComplete: function onComplete() {
+                ease: Linear.easeNone }).to(this.camera.rotation, 5, { x: targetRotation.x, y: targetRotation.y, z: targetRotation.z, ease: Linear.easeNone, onComplete: function onComplete() {
                     _this4.endIntro();
-                } }, "-=2");
+                } }, "-=5");
         }
     }, {
         key: 'endIntro',
@@ -35545,9 +35567,23 @@ var Sky = function () {
                 //this.clouds.startTransition();
             }, 0);
 
-            this.state = States.STATIC;
+            this.setState(States.STATIC);
 
             this.updateSunPosition();
+        }
+    }, {
+        key: "fadeSpin",
+        value: function fadeSpin() {
+            TweenMax.to(this, 15, { spinFactor: 0.01 });
+        }
+    }, {
+        key: "setState",
+        value: function setState(state) {
+            if (state == States.STATIC) {
+                this.spinFactor = 0.01;
+            } else {
+                this.spinFactor = 0.5;
+            }
         }
     }, {
         key: "transitionTo",
@@ -35555,13 +35591,13 @@ var Sky = function () {
             var _this2 = this;
 
             console.log("SKY: Transition to " + time + " in " + inSeconds + " seconds");
-            this.state = States.TRANSITON;
+            this.setState(States.TRANSITON);
 
             var tl = new TimelineMax({ onUpdate: function onUpdate() {
                     _this2.updateSunPosition();
                     _this2.updateHemiLght();
                 }, onComplete: function onComplete() {
-                    _this2.state = States.STATIC;
+                    _this2.fadeSpin();
                 } });
             tl.to(this, inSeconds / 2, Object.assign(HOURS_DEFINITION[10], { ease: Linear.easeNone })).to(this, inSeconds / 2, Object.assign(HOURS_DEFINITION[time], { ease: Linear.easeNone }));
 
@@ -35572,11 +35608,7 @@ var Sky = function () {
     }, {
         key: "update",
         value: function update(dt) {
-            if (this.state == States.STATIC) {
-                this.geo.rotateY(0.01 * Math.PI / 180);
-            } else {
-                this.geo.rotateY(0.5 * Math.PI / 180);
-            }
+            this.geo.rotateY(this.spinFactor * Math.PI / 180);
             this.clouds.update(dt);
         }
     }, {
