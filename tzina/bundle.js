@@ -35100,7 +35100,7 @@ exports.default = {
     controls: "locked",
     basalHeight: 10,
     fps: 30,
-    enableFlying: true,
+    enableFlying: false,
     skipIntro: false,
     movementSpeed: 10
 };
@@ -36248,7 +36248,7 @@ var Intro = function () {
 exports.default = Intro;
 
 },{"lodash":41}],58:[function(require,module,exports){
-"use strict";
+'use strict';
 
 Object.defineProperty(exports, "__esModule", {
     value: true
@@ -36263,6 +36263,14 @@ var _createClass = function () {
         if (protoProps) defineProperties(Constructor.prototype, protoProps);if (staticProps) defineProperties(Constructor, staticProps);return Constructor;
     };
 }();
+
+var _pointerLockChromeTolerant = require('pointer-lock-chrome-tolerant');
+
+var _pointerLockChromeTolerant2 = _interopRequireDefault(_pointerLockChromeTolerant);
+
+function _interopRequireDefault(obj) {
+    return obj && obj.__esModule ? obj : { default: obj };
+}
 
 function _classCallCheck(instance, Constructor) {
     if (!(instance instanceof Constructor)) {
@@ -36292,17 +36300,18 @@ var KeyboardController = function () {
 
         this.height = config.basalHeight;
 
-        this.active = true;
+        this.active = false;
 
         this.zAxis = new THREE.Vector3(0, 0, 1);
     }
 
     _createClass(KeyboardController, [{
-        key: "init",
+        key: 'init',
         value: function init() {
             var _this = this;
 
             console.log("Keyboard controller init");
+            this.pointer = (0, _pointerLockChromeTolerant2.default)(document.getElementById('game'));
 
             events.on("start_zoom", function () {
                 _this.active = false;
@@ -36314,6 +36323,16 @@ var KeyboardController = function () {
 
             events.on("intro_end", function () {
                 _this.active = true;
+            });
+
+            events.on("control_threshold", function (passed) {
+                if (passed) {
+                    _this.active = true;
+                    _this.pointer.request();
+                } else {
+                    _this.active = false;
+                    _this.pointer.release();
+                }
             });
 
             document.addEventListener('keydown', function (event) {
@@ -36391,7 +36410,7 @@ var KeyboardController = function () {
             }, false);
         }
     }, {
-        key: "update",
+        key: 'update',
         value: function update(delta) {
             if (this.active && delta < 0.1) {
                 this.velocity.x -= this.velocity.x * 10.0 * delta;
@@ -36440,14 +36459,14 @@ var KeyboardController = function () {
             }
         }
     }, {
-        key: "climbStairs",
+        key: 'climbStairs',
         value: function climbStairs() {
             var distanceToCenter = this.camera.position.distanceTo(this.square.getCenterPosition());
             var distanceInStairs = Math.max(0, 260 - distanceToCenter);
             this.height = Math.max(Math.min(30, distanceInStairs), this.config.basalHeight);
         }
     }, {
-        key: "setPosition",
+        key: 'setPosition',
         value: function setPosition(x, y, z) {
             this.height = y;
             this.camera.position.set(x, y, z);
@@ -36459,7 +36478,7 @@ var KeyboardController = function () {
 
 exports.default = KeyboardController;
 
-},{}],59:[function(require,module,exports){
+},{"pointer-lock-chrome-tolerant":42}],59:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -36971,7 +36990,7 @@ var Square = function (_THREE$Object3D) {
             endPosition: [15, 22, 14]
         }, {
             hour: 17,
-            startPosition: [-1, 20, 43],
+            startPosition: [-3, 20, 43],
             endPosition: [-3.5, 22, 18]
         }];
         return _this;
@@ -37184,16 +37203,38 @@ var TimeController = function () {
             this.currentRotation = rotationY * 180 / Math.PI;
             //            console.log(this.currentRotation + " :: " + this.currentRotation / 15);
             this.sky.setTime(this.currentRotation / 15);
+
+            var closestAngle = _math2.default.closestValue(this.angles, this.currentRotation);
+            var closestHour = this.getHour(closestAngle);
+            if (closestHour != this.currentHour) {
+                this.currentHour = closestHour;
+                this.showChapterTitle();
+            }
         }
     }, {
         key: 'updateSquare',
         value: function updateSquare() {
-            var rotationY = this.currentRotation;
-            if (rotationY > 180) {
-                rotationY -= 360;
+            if (this.square.mesh) {
+                var rotationY = this.currentRotation;
+                if (rotationY > 180) {
+                    rotationY -= 360;
+                }
+                this.square.mesh.rotation.y = rotationY * Math.PI / 180;
+                this.sky.setTime(this.currentRotation / 15);
             }
-            this.square.mesh.rotation.y = rotationY * Math.PI / 180;
-            this.sky.setTime(this.currentRotation / 15);
+        }
+    }, {
+        key: 'getHour',
+        value: function getHour(angle) {
+            var hour = void 0;
+
+            if (angle == 360) {
+                hour = 0;
+            } else {
+                hour = angle / 15;
+            }
+
+            return hour;
         }
     }, {
         key: 'handleMouseMove',
@@ -37211,15 +37252,9 @@ var TimeController = function () {
             } else {
                 if (this.rotateVelocity != 0) {
                     // We stopped
-                    var closestAngle = _math2.default.closestValue(this.angles, this.currentRotation);
-                    var closestHour = void 0;
 
-                    if (closestAngle == 360) {
-                        closestHour = 0;
-                    } else {
-                        closestHour = closestAngle / 15;
-                    }
-                    console.log("Closest hour: ", closestHour, "Angle: ", closestAngle);
+                    var closestAngle = _math2.default.closestValue(this.angles, this.currentRotation);
+                    var closestHour = this.getHour(closestAngle);
 
                     this.stickToAngle(closestAngle);
                     this.currentHour = closestHour;
@@ -37431,6 +37466,14 @@ exports.default = function (emitter, object, onError) {
 	events.on('intro_end', function () {
 		console.log("Intro starting - disabling vr control");
 		_this.active = true;
+	});
+
+	events.on("control_threshold", function (passed) {
+		if (passed) {
+			_this.active = true;
+		} else {
+			_this.active = false;
+		}
 	});
 
 	this.update = function () {
@@ -38108,11 +38151,13 @@ var ZoomController = function () {
 
         this.STARTING_POSITION = new THREE.Vector3(0, 50, 1400);
 
-        this.CHAPTER_THRESHOLD = 0.56;
+        this.CHAPTER_THRESHOLD = 0.45;
         this.CONTROL_THRESHOLD = 1;
 
         this.passedChapterThreshold = false;
         this.passedControlThreshold = false;
+
+        this.basePosition = true;
     }
 
     _createClass(ZoomController, [{
@@ -38156,6 +38201,7 @@ var ZoomController = function () {
                 var entryPoint = _lodash2.default.find(_this.square.ENTRY_POINTS, { hour: hour });
                 if (entryPoint) {
                     _this.calculateZoomCurve(entryPoint);
+                    _this.lastEntryPoint = entryPoint;
                 } else {
                     _this.calculateZoomVector();
                     _this.zoomCurve = null;
@@ -38181,25 +38227,36 @@ var ZoomController = function () {
     }, {
         key: 'calculateZoomCurve',
         value: function calculateZoomCurve(entryPoint) {
-            this.square.mesh.updateMatrixWorld();
             this.calculateZoomVector();
-            var startPoint = new THREE.Vector3().fromArray(entryPoint.startPosition).applyMatrix4(this.square.mesh.matrixWorld);
-            console.log("START POINT ", startPoint);
-            var endPoint = new THREE.Vector3().fromArray(entryPoint.endPosition).applyMatrix4(this.square.mesh.matrixWorld);
-            if (this.camera.position.equals(this.STARTING_POSITION)) {
-                console.log("Zoom curve from camera in starting position", this.STARTING_POSITION);
+            if (!entryPoint && this.passedControlThreshold) {
+                // Zooming back out
+                console.log("Zoom curve from camera in control position", this.camera.position);
                 var movement = new THREE.Vector3();
-                movement.copy(this.zoomVector).multiplyScalar(-100);
-                var midPoint = new THREE.Vector3().copy(this.camera.position);
-                midPoint.z = 700;
-                midPoint.y = startPoint.y + 0.5 * (this.camera.position.y - startPoint.y);
-                console.log("Creating curv. Points: ", this.camera.position, midPoint, startPoint, endPoint);
-                this.zoomCurve = new THREE.CatmullRomCurve3([new THREE.Vector3().copy(this.camera.position), midPoint, startPoint, endPoint]);
+                movement.copy(this.zoomVector).multiplyScalar(200);
+                var midPoint = new THREE.Vector3().copy(this.camera.position).add(movement);
+                midPoint.y = this.camera.position.y + 0.5 * (this.STARTING_POSITION.y - this.camera.position.y);
+
+                this.zoomCurve = new THREE.CatmullRomCurve3([new THREE.Vector3().copy(this.STARTING_POSITION), midPoint, new THREE.Vector3().copy(this.camera.position)]);
+                this.distanceOnCurve = 1;
             } else {
-                console.log("Zoom curve includes starting position");
-                this.zoomCurve = new THREE.CatmullRomCurve3([new THREE.Vector3().copy(this.STARTING_POSITION), new THREE.Vector3().copy(this.camera.position), startPoint, endPoint]);
-                // http://stackoverflow.com/questions/16650360/distance-of-a-specific-point-along-a-splinecurve3-tubegeometry-in-three-js
-                this.distanceOnCurve = 1 / 3;
+                this.square.mesh.updateMatrixWorld();
+                var startPoint = new THREE.Vector3().fromArray(entryPoint.startPosition).applyMatrix4(this.square.mesh.matrixWorld);
+                console.log("START POINT ", startPoint);
+                var endPoint = new THREE.Vector3().fromArray(entryPoint.endPosition).applyMatrix4(this.square.mesh.matrixWorld);
+
+                if (this.camera.position.equals(this.STARTING_POSITION)) {
+                    console.log("Zoom curve from camera in starting position", this.STARTING_POSITION);
+                    var _midPoint = new THREE.Vector3().copy(this.camera.position);
+                    _midPoint.z = 700;
+                    _midPoint.y = startPoint.y + 0.5 * (this.camera.position.y - startPoint.y);
+                    console.log("Creating curv. Points: ", this.camera.position, _midPoint, startPoint, endPoint);
+                    this.zoomCurve = new THREE.CatmullRomCurve3([new THREE.Vector3().copy(this.camera.position), _midPoint, startPoint, endPoint]);
+                } else {
+                    console.log("Zoom curve includes starting position");
+                    this.zoomCurve = new THREE.CatmullRomCurve3([new THREE.Vector3().copy(this.STARTING_POSITION), new THREE.Vector3().copy(this.camera.position), startPoint, endPoint]);
+                    // http://stackoverflow.com/questions/16650360/distance-of-a-specific-point-along-a-splinecurve3-tubegeometry-in-three-js
+                    this.distanceOnCurve = 1 / 3;
+                }
             }
             console.log(this.zoomCurve);
             this.scene.add(_debug2.default.drawCurve(this.zoomCurve, 0x0000ff));
@@ -38213,10 +38270,16 @@ var ZoomController = function () {
                     this.lastCameraOrientation.copy(this.camera.quaternion);
                     this.calculateZoomVector();
                     }*/
+
+                if (this.velocityZ < 0 && this.passedControlThreshold) {
+                    this.calculateZoomCurve();
+                }
                 this.distanceOnCurve = Math.max(0, Math.min(1, this.distanceOnCurve + this.velocityZ * dt * 0.001));
-                console.log(this.distanceOnCurve);
+                //console.log(this.distanceOnCurve);
                 this.camera.position.copy(this.zoomCurve.getPoint(this.distanceOnCurve));
-                this.camera.lookAt(this.zoomCurve.getPoint(this.distanceOnCurve + 0.01));
+                if (this.distanceOnCurve <= 0.95) {
+                    this.camera.lookAt(this.zoomCurve.getPoint(this.distanceOnCurve + 0.01));
+                }
 
                 if (!this.passedChapterThreshold && this.distanceOnCurve > this.CHAPTER_THRESHOLD) {
                     this.passedChapterThreshold = true;
@@ -38226,13 +38289,24 @@ var ZoomController = function () {
                     events.emit("chapter_threshold", this.passedChapterThreshold);
                 }
 
-                if (!this.passedControlThreshold && this.distanceOnCurve > this.CONTROL_THRESHOLD) {
+                if (!this.passedControlThreshold && this.distanceOnCurve >= this.CONTROL_THRESHOLD) {
                     this.passedControlThreshold = true;
+                    this.velocityZ = 0;
                     events.emit("control_threshold", this.passedControlThreshold);
                 } else if (this.passedControlThreshold && this.distanceOnCurve <= this.CONTROL_THRESHOLD) {
                     this.passedControlThreshold = false;
                     events.emit("control_threshold", this.passedControlThreshold);
                 }
+
+                if (!this.basePosition && this.distanceOnCurve == 0) {
+                    console.log("Reset camera rotation");
+                    this.basePosition = true;
+                    this.velocityZ = 0;
+                    this.calculateZoomCurve(this.lastEntryPoint);
+                    //this.camera.rotation.set(0,0,0);
+                } else if (this.basePosition && this.distanceOnCurve > 0) {
+                        this.basePosition = false;
+                    }
 
                 if (this.velocityZ > 0) {
                     this.velocityZ = Math.max(0, this.velocityZ - 0.01 * dt);
