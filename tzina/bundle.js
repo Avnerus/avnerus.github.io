@@ -38150,6 +38150,7 @@ var ZoomController = function () {
         this.distanceOnCurve = 0;
 
         this.STARTING_POSITION = new THREE.Vector3(0, 50, 1400);
+        this.MID_ZOOM = new THREE.Vector3(0, 30, 900);
 
         this.CHAPTER_THRESHOLD = 0.45;
         this.CONTROL_THRESHOLD = 1;
@@ -38204,6 +38205,7 @@ var ZoomController = function () {
                     _this.lastEntryPoint = entryPoint;
                 } else {
                     _this.calculateZoomVector();
+                    _this.velocityZ = null;
                     _this.zoomCurve = null;
                 }
             });
@@ -38243,11 +38245,11 @@ var ZoomController = function () {
                 // Zooming back out
                 console.log("Zoom curve from camera in control position", this.camera.position);
                 var movement = new THREE.Vector3();
-                movement.copy(this.zoomVector).multiplyScalar(200);
+                movement.copy(this.zoomVector).multiplyScalar(100);
                 var midPoint = new THREE.Vector3().copy(this.camera.position).add(movement);
                 midPoint.y = this.camera.position.y + 0.5 * (this.STARTING_POSITION.y - this.camera.position.y);
 
-                this.zoomCurve = new THREE.CatmullRomCurve3([new THREE.Vector3().copy(this.STARTING_POSITION), midPoint, new THREE.Vector3().copy(this.camera.position)]);
+                this.zoomCurve = new THREE.CatmullRomCurve3([new THREE.Vector3().copy(this.STARTING_POSITION), this.MID_ZOOM, midPoint, new THREE.Vector3().copy(this.camera.position)]);
                 this.distanceOnCurve = 1;
                 this.calculateEaseQuaternion();
             } else {
@@ -38255,25 +38257,18 @@ var ZoomController = function () {
                 this.easeQuaternionSource = null;
                 this.easeQuaternionTarget = null;
                 var startPoint = new THREE.Vector3().fromArray(entryPoint.startPosition).applyMatrix4(this.square.mesh.matrixWorld);
-                console.log("START POINT ", startPoint);
                 var endPoint = new THREE.Vector3().fromArray(entryPoint.endPosition).applyMatrix4(this.square.mesh.matrixWorld);
 
                 if (this.camera.position.equals(this.STARTING_POSITION)) {
-                    console.log("Zoom curve from camera in starting position", this.STARTING_POSITION);
-                    var _midPoint = new THREE.Vector3().copy(this.camera.position);
-                    _midPoint.z = 700;
-                    _midPoint.y = startPoint.y + 0.5 * (this.camera.position.y - startPoint.y);
-                    console.log("Creating curv. Points: ", this.camera.position, _midPoint, startPoint, endPoint);
-                    this.zoomCurve = new THREE.CatmullRomCurve3([new THREE.Vector3().copy(this.camera.position), _midPoint, startPoint, endPoint]);
+                    this.zoomCurve = new THREE.CatmullRomCurve3([new THREE.Vector3().copy(this.camera.position), this.MID_ZOOM, startPoint, endPoint]);
                 } else {
-                    console.log("Zoom curve includes starting position");
                     this.zoomCurve = new THREE.CatmullRomCurve3([new THREE.Vector3().copy(this.STARTING_POSITION), new THREE.Vector3().copy(this.camera.position), startPoint, endPoint]);
                     // http://stackoverflow.com/questions/16650360/distance-of-a-specific-point-along-a-splinecurve3-tubegeometry-in-three-js
                     this.distanceOnCurve = 1 / 3;
                 }
             }
             console.log(this.zoomCurve);
-            this.scene.add(_debug2.default.drawCurve(this.zoomCurve, 0x0000ff));
+            //this.scene.add(DebugUtil.drawCurve(this.zoomCurve, 0x0000ff));
         }
     }, {
         key: 'update',
@@ -38293,7 +38288,6 @@ var ZoomController = function () {
                 this.camera.position.copy(this.zoomCurve.getPoint(this.distanceOnCurve));
                 if (this.easeQuaternionTarget && this.distanceOnCurve >= 0.95) {
                     var easePercent = (1 - this.distanceOnCurve) / 0.05;
-                    console.log("EASE Quaternion ", easePercent);
                     THREE.Quaternion.slerp(this.easeQuaternionSource, this.easeQuaternionTarget, this.camera.quaternion, easePercent);
                 } else if (this.distanceOnCurve <= 0.99) {
                     this.camera.lookAt(this.zoomCurve.getPoint(this.distanceOnCurve + 0.01));
@@ -38317,7 +38311,6 @@ var ZoomController = function () {
                 }
 
                 if (!this.basePosition && this.distanceOnCurve == 0) {
-                    console.log("Reset camera rotation");
                     this.basePosition = true;
                     this.velocityZ = 0;
                     this.calculateZoomCurve(this.lastEntryPoint);
