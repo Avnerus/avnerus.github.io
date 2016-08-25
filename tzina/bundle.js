@@ -38225,6 +38225,17 @@ var ZoomController = function () {
             this.zoomVector.y = 0;
         }
     }, {
+        key: 'calculateEaseQuaternion',
+        value: function calculateEaseQuaternion() {
+            // To east the camera rotation into the curve
+            var cameraClone = this.camera.clone();
+            this.easeQuaternionSource = new THREE.Quaternion().copy(cameraClone.quaternion);
+            cameraClone.position.copy(this.zoomCurve.getPoint(0.95));
+            cameraClone.lookAt(this.zoomCurve.getPoint(0.951));
+            this.easeQuaternionTarget = new THREE.Quaternion().copy(cameraClone.quaternion);
+            //console.log("Ease quaternion Source ", this.easeQuaternionSource, " Target: ", this.easeQuaternionTarget);
+        }
+    }, {
         key: 'calculateZoomCurve',
         value: function calculateZoomCurve(entryPoint) {
             this.calculateZoomVector();
@@ -38238,8 +38249,11 @@ var ZoomController = function () {
 
                 this.zoomCurve = new THREE.CatmullRomCurve3([new THREE.Vector3().copy(this.STARTING_POSITION), midPoint, new THREE.Vector3().copy(this.camera.position)]);
                 this.distanceOnCurve = 1;
+                this.calculateEaseQuaternion();
             } else {
                 this.square.mesh.updateMatrixWorld();
+                this.easeQuaternionSource = null;
+                this.easeQuaternionTarget = null;
                 var startPoint = new THREE.Vector3().fromArray(entryPoint.startPosition).applyMatrix4(this.square.mesh.matrixWorld);
                 console.log("START POINT ", startPoint);
                 var endPoint = new THREE.Vector3().fromArray(entryPoint.endPosition).applyMatrix4(this.square.mesh.matrixWorld);
@@ -38277,7 +38291,11 @@ var ZoomController = function () {
                 this.distanceOnCurve = Math.max(0, Math.min(1, this.distanceOnCurve + this.velocityZ * dt * 0.001));
                 //console.log(this.distanceOnCurve);
                 this.camera.position.copy(this.zoomCurve.getPoint(this.distanceOnCurve));
-                if (this.distanceOnCurve <= 0.95) {
+                if (this.easeQuaternionTarget && this.distanceOnCurve >= 0.95) {
+                    var easePercent = (1 - this.distanceOnCurve) / 0.05;
+                    console.log("EASE Quaternion ", easePercent);
+                    THREE.Quaternion.slerp(this.easeQuaternionSource, this.easeQuaternionTarget, this.camera.quaternion, easePercent);
+                } else if (this.distanceOnCurve <= 0.99) {
                     this.camera.lookAt(this.zoomCurve.getPoint(this.distanceOnCurve + 0.01));
                 }
 
