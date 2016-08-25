@@ -12,7 +12,7 @@ body {
     bottom: 0;
 }
 
-#splash {
+.splash {
     display: flex;
     align-items: center;
     height: 100%;
@@ -24,17 +24,50 @@ body {
     display: flex;
     align-items: center;
     margin: auto;
-    height: 100px;
-    width: 200px;
     color: white;
     font-size: 36px;
 }
 #start-container {
-    border: 1px solid white;
     display:none;
 }
 
 #start-button {
     color: white;
     margin: auto;
+}
+
+#loading-image {
+    margin: auto;
+}
+
+#title-label {
+    margin: auto;
+}
+
+#title-container {
+    display: flex;
+    align-items: center;
+    margin: auto;
+    color: white;
+    font-size: 36px;
+    position: relative;
+    bottom: 30%
+}
+.subtitles {
+  position: absolute;
+  width: 100%;
+  left: 0; bottom: 0;
+  z-index: 4000;
+  //height:0px;
+  //overflow:visible;
+  pointer-events:none;
+}
+#chapter-title {
+    display: inline-flex;
+    align-items: center;
+    margin: auto;
+    color: white;
+    font-size: 36px;
+    position: relative;
+    bottom: 300px;
 }
