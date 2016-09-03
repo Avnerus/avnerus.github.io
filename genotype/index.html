@@ -24,9 +24,11 @@
             main {
                 text-align: center;
                 font-family: "genotype";
+                position: absolute;
                 top: 0;
                 height: 3000px;
-                position: absolute;
+                width: 100%;
+                
             }
             
             #logo {
@@ -35,8 +37,8 @@
                 margin-right: auto;
                 left: 0;
                 right: 0;
-                margin-top: 100px;
-                height: 50%;
+                margin-top: 50px;
+                height: 40%;
             }
 
             .bgvid { 
@@ -53,30 +55,28 @@
                 background-size: cover; 
             }
 
+            #content-wrapper {
+                height: 1200px;
+            }
+
+            #test-wrapper {
+                padding-top: 15%;
+                position: relative;
+                top: 20%;
+            }
+
             #test-font {
                 width: 60%;
-                font-size: 40px;
+                font-size: 36px;
                 color: white;
                 background-color:rgba(0, 0, 0, 0.5);
                 font-variant-ligatures: common-ligatures;
                 -webkit-font-feature-settings: "liga" 1, "dlig" 1;
                 -moz-font-feature-settings: "liga" 1, "dlig" 1;
                 -ms-font-feature-settings: "liga" 1, "dlig" 1;
-                left: 0;
                 margin-left: auto;
                 margin-right: auto;
-                position: absolute;
-                right: 0;
-                top: 850px;
-                height: 300px;
-            }
-            @media screen and (min-width: 800px) {
-                #test-font {
-                    top: 750px;
-                }
-                main {
-                    position: relative;
-                }
+                padding-bottom: 15%;
             }
 
             #description {
@@ -135,25 +135,25 @@
     <main class="container-fluid">
         <div class="row">
             <div class="col-md-12">
-                <section class="center-block">
+                <section id="content-wrapper" class="center-block">
                     <article>
                         <img class="img-responsive" src="logo.png" id="logo">
                     </article>
+                    <article id="test-wrapper">
+                        <textarea placeholder="Try it out..." id="test-font"  style="overflow: hidden; resize: none; word-wrap: break-word;"></textarea>
+                    </article>
+                    <article class="center-block" id="description">
+                        <div class="center-block" id="description-text">
+                            The notion of gender is continuously evolving, and what started as a clear product of our biological sex is now considered to be constructed by society and defined by discourse. 
+        Genotype is a digital font that instantly replaces any words that are associated with gender with clear biological definitions, these are our genetic definitions of sex – The X and Y chromosomes.
+        With Genotype, anyone can apply the font on his computer and experience the genderless web. 
+                        </div>
+                        <a href="fonts/Genotype.ttf"><img id="download-button" src="download.png"></img></a>
+                    </article>
+                
                 </section>
             </div>
         </div>
-            <article>
-                <textarea placeholder="Try it out..." id="test-font"  style="overflow: hidden; resize: none; word-wrap: break-word;"></textarea>
-            </article>
-            <article class="center-block" id="description">
-                <div class="center-block" id="description-text">
-                    The notion of gender is continuously evolving, and what started as a clear product of our biological sex is now considered to be constructed by society and defined by discourse. 
-Genotype is a digital font that instantly replaces any words that are associated with gender with clear biological definitions, these are our genetic definitions of sex – The X and Y chromosomes.
-With Genotype, anyone can apply the font on his computer and experience the genderless web. 
-                </div>
-                <a href="fonts/Genotype.ttf"><img id="download-button" src="download.png"></img></a>
-            </article>
-        
     </main>
     <script>
 
