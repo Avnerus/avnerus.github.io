@@ -6,7 +6,7 @@ body {
   -webkit-transform: translate3d(0, 0, 0);
     
 }
-
+2
 video {
     -webkit-transform-style: preserve-3d;
 }
@@ -170,7 +170,7 @@ video {
 
 #work-content {
     background-color: rgba(100, 0, 160, 0.7);
-    box-shadow: 0 0 30px white;
+ //   box-shadow: 0 0 30px white;
     border: 2px solid white;
     color: white;
     height: 90%;
@@ -406,4 +406,8 @@ canvas {
 #nav-row {
     bottom: 10px;
     height: 0;
+}
+
+.dg.ac {
+    z-index: 2 !important;
 }
