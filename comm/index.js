@@ -1,6 +1,6 @@
 var fetch = require('node-fetch');
 console.log("Update account balance!");
-fetch('https://dl.dropboxusercontent.com/s/qawpeqy0v44agrz/balance.json?dl=1')
+fetch('https://cloud.avner.us/index.php/s/kidGLOyro0YTh7Q/download',{compress: false})
 .then(function(res) {
     return res.json(); 
 })
