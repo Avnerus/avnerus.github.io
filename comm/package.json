@@ -19,6 +19,6 @@
   "homepage": "https://github.com/Avnerus/comm#readme",
   "dependencies": {
     "browserify": "^13.0.0",
-    "node-fetch": "^1.4.0"
+    "node-fetch": "^2.6.1"
   }
 }
